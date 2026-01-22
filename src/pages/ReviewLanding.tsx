@@ -25,9 +25,9 @@ const ReviewLanding = () => {
   const [selectedTone, setSelectedTone] = useState<string>('Professional');
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
-  // New State for Sentiment Flow
-  const [step, setStep] = useState<'rating' | 'positive' | 'negative' | 'submitted'>('rating');
-  const [userRating, setUserRating] = useState<number>(0);
+  // New State for Sentiment Flow - Skip Rating, go straight to Suggestions
+  const [step, setStep] = useState<'rating' | 'positive' | 'negative' | 'submitted'>('positive');
+  const [userRating, setUserRating] = useState<number>(5);
   const [feedbackText, setFeedbackText] = useState('');
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
@@ -106,15 +106,34 @@ const ReviewLanding = () => {
         console.log('Campaign loaded:', campaignData);
         setCampaign(campaignData);
 
+        // Fetch detailed business profile for deeper AI context
+        let businessContext = campaignData.category || 'Professional Services';
+        try {
+          if (campaignData.owner_id) {
+            const { data: profileData } = await (supabase as any)
+              .from('profiles')
+              .select('business_description, business_name')
+              .eq('id', campaignData.owner_id)
+              .single();
+
+            if (profileData?.business_description) {
+              businessContext = `Business: ${profileData.business_name || campaignData.name}. Category: ${campaignData.category}. Description: ${profileData.business_description}`;
+              console.log("Enriched AI Context:", businessContext);
+            }
+          }
+        } catch (err) {
+          console.warn("Could not fetch profile description", err);
+        }
+
         let fetchedSuggestions: string[] = [];
 
-        // Try to generate AI suggestions first
+        // Try to generate AI suggestions first (Verified Priority: AI -> Static)
         try {
           const aiSuggestions = await generateReviewSuggestions(
             campaignData.name || 'Our Business',
             5,
             'en',
-            campaignData.category
+            businessContext // Passing enriched context
           );
           if (aiSuggestions && aiSuggestions.length > 0) {
             fetchedSuggestions = aiSuggestions.map(s => s.text);
@@ -538,11 +557,7 @@ const ReviewLanding = () => {
               )}
             </Button>
 
-            <div className="text-center">
-              <button onClick={() => setStep('rating')} className="text-sm text-gray-400 hover:text-gray-600 underline">
-                Start Over
-              </button>
-            </div>
+            {/* Rating step removed, so no Start Over */}
 
           </div>
         )}

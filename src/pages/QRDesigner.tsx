@@ -7,106 +7,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { QRTemplate, FrameStyle } from '@/types/database.types';
 import { QRCodeCanvas } from 'qrcode.react';
-import { Download, Upload, Save, Palette } from 'lucide-react';
-import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Download, Upload, Save, Palette } from 'lucide-react';
 
 export default function QRDesigner() {
-  const [template, setTemplate] = useState<Partial<QRTemplate>>({
-    name: 'My QR Template',
-    primary_color: '#000000',
-    secondary_color: '#ffffff',
-    frame_style: 'square',
-    cta_text: 'Scan to Review',
-  });
-  const [logoUrl, setLogoUrl] = useState<string>('');
-  const [previewUrl, setPreviewUrl] = useState('https://example.com/review');
-  const qrRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  // ... (keep state)
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Please log in to upload logos');
-        return;
-      }
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Math.random()}.${fileExt}`;
-      const { data, error } = await supabase.storage
-        .from('qr-logos')
-        .upload(fileName, file);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('qr-logos')
-        .getPublicUrl(fileName);
-
-      setLogoUrl(publicUrl);
-      setTemplate({ ...template, logo_url: publicUrl });
-      toast.success('Logo uploaded successfully');
-    } catch (error) {
-      console.error('Logo upload error:', error);
-      toast.error('Failed to upload logo');
-    }
-  };
-
-  const handleSaveTemplate = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Please log in to save templates');
-        return;
-      }
-
-      const { error } = await supabase
-        .from('qr_templates')
-        .insert({
-          user_id: user.id,
-          name: template.name || 'Untitled Template',
-          primary_color: template.primary_color || '#000000',
-          secondary_color: template.secondary_color || '#ffffff',
-          frame_style: template.frame_style || 'square',
-          logo_url: template.logo_url || null,
-          cta_text: template.cta_text || null,
-          is_default: false,
-        });
-
-      if (error) throw error;
-      toast.success('Template saved successfully');
-    } catch (error) {
-      console.error('Save template error:', error);
-      toast.error('Failed to save template');
-    }
-  };
-
-  const downloadQR = async (format: 'png' | 'svg' | 'pdf') => {
-    try {
-      const canvas = qrRef.current?.querySelector('canvas');
-      if (!canvas) return;
-
-      if (format === 'png') {
-        const url = canvas.toDataURL('image/png', 1.0);
-        const link = document.createElement('a');
-        link.download = `qr-code-${Date.now()}.png`;
-        link.href = url;
-        link.click();
-        toast.success('QR code downloaded as PNG');
-      }
-    } catch (error) {
-      console.error('Download error:', error);
-      toast.error('Failed to download QR code');
-    }
-  };
+  // ... (keep handleLogoUpload, handleSaveTemplate, downloadQR)
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">QR Code Designer</h1>
-        <p className="text-muted-foreground">Create branded QR codes with custom colors and logos</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-2 p-0 hover:bg-transparent justify-start">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h1 className="text-3xl font-bold">QR Code Designer</h1>
+          <p className="text-muted-foreground">Create branded QR codes with custom colors and logos</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -233,7 +153,7 @@ export default function QRDesigner() {
                 backgroundColor: template.secondary_color,
                 borderRadius: template.frame_style === 'rounded' ? '12px' : template.frame_style === 'circle' ? '50%' : '0',
               }}>
-                <QRCodeCanvas                  value={previewUrl}
+                <QRCodeCanvas value={previewUrl}
                   size={256}
                   fgColor={template.primary_color}
                   bgColor={template.secondary_color}

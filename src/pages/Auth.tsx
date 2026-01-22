@@ -35,6 +35,9 @@ const Auth = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
+  // Confirmation state
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
@@ -85,24 +88,38 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // Success toast
-      toast({
-        title: "Account created!",
-        description: "Welcome to your AI Review Collection platform. Redirecting to dashboard...",
-      });
-
-      // Auto navigate after signup
+      // If we have a session, email confirmation is disabled or auto-confirmed
       if (data.session) {
+        toast({
+          title: "Account created!",
+          description: "Welcome to your AI Review Collection platform.",
+        });
         navigate("/dashboard");
+      } else {
+        // No session means email confirmation is required
+        setShowConfirmation(true);
+        toast({
+          title: "Account created!",
+          description: "Please check your email to confirm your account.",
+        });
       }
+
     } catch (error) {
       console.warn("Auth error:", error);
-      // Demo Mode Fallback
-      toast({
-        title: "Demo Mode Active",
-        description: "Supabase not configured. Logging in as demo user.",
-      });
-      navigate("/dashboard");
+      // Demo Mode Fallback (only if specific error or keep for dev)
+      if (process.env.NODE_ENV === 'development') {
+        toast({
+          title: "Demo Mode Active",
+          description: "Supabase not configured. Logging in as demo user.",
+        });
+        navigate("/dashboard");
+      } else {
+        toast({
+          title: "Sign up failed",
+          description: error instanceof Error ? error.message : "Please try again",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -139,16 +156,59 @@ const Auth = () => {
       }
     } catch (error) {
       console.warn("Auth error:", error);
-      // Demo Mode Fallback
       toast({
-        title: "Demo Mode Active",
-        description: "Supabase not configured. Logging in as demo user.",
+        title: "Login failed",
+        description: "Invalid credentials or email not confirmed.",
+        variant: "destructive"
       });
-      navigate("/dashboard");
     } finally {
       setLoading(false);
     }
   };
+
+  if (showConfirmation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 p-4">
+        <Card className="w-full max-w-md shadow-2xl text-center">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <div className="p-4 bg-green-100 rounded-full">
+                <Mail className="h-8 w-8 text-green-600" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold text-gray-800">Check your email</CardTitle>
+            <CardDescription className="text-base mt-2">
+              We've sent a confirmation link to <span className="font-semibold text-gray-900">{signupEmail}</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-sm text-gray-600">
+              Click the link in the email to activate your account and start collecting reviews.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="outline"
+                onClick={() => window.open('https://gmail.com', '_blank')}
+                className="w-full"
+              >
+                Open Gmail
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowConfirmation(false)}
+                className="w-full"
+              >
+                Back to Sign In
+              </Button>
+            </div>
+            <p className="text-xs text-gray-400">
+              Did not receive the email? Check your spam folder.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 p-4">

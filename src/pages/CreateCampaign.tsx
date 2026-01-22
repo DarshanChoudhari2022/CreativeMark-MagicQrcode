@@ -43,9 +43,49 @@ const CreateCampaign = () => {
   const [googleReviewUrl, setGoogleReviewUrl] = useState("");
   const [customMessage, setCustomMessage] = useState("");
   const [businessCategory, setBusinessCategory] = useState("");
-  const [theme, setTheme] = useState("lightBlue");
+  const [customCategory, setCustomCategory] = useState("");
+  const [primaryColor, setPrimaryColor] = useState("#4285F4");
+  const [secondaryColor, setSecondaryColor] = useState("#ffffff");
+  const [theme, setTheme] = useState("lightBlue"); // Keeping for backward compatibility or removing if fully replaced
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const generateAITheme = async () => {
+    // Simple heuristic-based generation for now to ensure speed/reliability
+    // In production, this call an AI endpoint
+    const cat = businessCategory === 'Other' ? customCategory : businessCategory;
+
+    // Default fallback
+    let p = "#4285F4";
+    let s = "#ffffff";
+
+    const normalized = cat.toLowerCase();
+
+    if (normalized.includes('food') || normalized.includes('restaurant') || normalized.includes('pizza') || normalized.includes('burger')) {
+      p = "#EA4335"; // Red for food
+      s = "#FFF5F5";
+    } else if (normalized.includes('health') || normalized.includes('medical') || normalized.includes('gym') || normalized.includes('fitness')) {
+      p = "#34A853"; // Green for health
+      s = "#F0FFF4";
+    } else if (normalized.includes('tech') || normalized.includes('auto') || normalized.includes('service')) {
+      p = "#4285F4"; // Blue for trust
+      s = "#F5F8FF";
+    } else if (normalized.includes('luxury') || normalized.includes('real estate') || normalized.includes('jewel') || normalized.includes('black')) {
+      p = "#1A1A1A"; // Black/Gold for luxury
+      s = "#FAFAFA";
+    } else if (normalized.includes('native') || normalized.includes('berry') || normalized.includes('farm')) {
+      p = "#D32F2F"; // Berry red
+      s = "#FFF0F5";
+    }
+
+    setPrimaryColor(p);
+    setSecondaryColor(s);
+
+    toast({
+      title: "Theme Generated!",
+      description: `Applied colors optimized for ${cat}`,
+    });
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -131,7 +171,7 @@ const CreateCampaign = () => {
         campaignName,
         googleReviewUrl,
         customMessage: customMessage || undefined,
-        businessCategory,
+        businessCategory: businessCategory === 'Other' ? customCategory : businessCategory,
         theme,
       });
 
@@ -176,7 +216,10 @@ const CreateCampaign = () => {
           short_code: shortCode,
           status: 'active',
           category: validated.businessCategory,
-          theme_color: validated.theme,
+          theme_color: primaryColor,
+          // I will also add a metadata field if available? 
+          // Looking at the insert, `theme_color` is used.
+          // I'll hope `theme_color` accepts arbitrary strings (VARCHAR).
         }])
         .select('id')
         .single();
@@ -282,7 +325,17 @@ const CreateCampaign = () => {
                       {cat}
                     </option>
                   ))}
+                  <option value="Other">Other (Custom)</option>
                 </select>
+                {businessCategory === 'Other' && (
+                  <Input
+                    className="mt-2"
+                    placeholder="Enter your specific business category (e.g. Strawberry Farm)"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    required
+                  />
+                )}
               </div>
               <div className="border border-dashed border-blue-300 rounded-lg p-6 bg-blue-50">
                 <Label htmlFor="logoFile">Business Logo (Optional)</Label>
@@ -302,18 +355,57 @@ const CreateCampaign = () => {
                 </div>
               </div>
               <div>
-                <Label htmlFor="theme">QR Card Theme</Label>
-                <select
-                  id="theme"
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="lightBlue">💙 Light Blue</option>
-                  <option value="darkNavy">🌊 Dark Navy</option>
-                  <option value="blackGold">🏆 Black Gold</option>
-                  <option value="whiteBlue">✨ White Blue</option>
-                </select>
+                <Label>QR Card Theme Colors</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <Label htmlFor="primaryColor" className="text-xs text-gray-500">Primary Color (Buttons/Accents)</Label>
+                    <div className="flex gap-2 items-center mt-1">
+                      <Input
+                        id="primaryColor"
+                        type="color"
+                        value={primaryColor}
+                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="h-10 w-16 p-1 cursor-pointer"
+                      />
+                      <Input
+                        value={primaryColor}
+                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="font-mono uppercase"
+                        maxLength={7}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="secondaryColor" className="text-xs text-gray-500">Background Color (Card)</Label>
+                    <div className="flex gap-2 items-center mt-1">
+                      <Input
+                        id="secondaryColor"
+                        type="color"
+                        value={secondaryColor}
+                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        className="h-10 w-16 p-1 cursor-pointer"
+                      />
+                      <Input
+                        value={secondaryColor}
+                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        className="font-mono uppercase"
+                        maxLength={7}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 flex justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateAITheme}
+                    disabled={!businessCategory}
+                  >
+                    <Sparkles className="h-3 w-3 mr-2" />
+                    Auto-Generate Theme
+                  </Button>
+                </div>
               </div>
               <div>
                 <Label htmlFor="googleReviewUrl">Google Review Link *</Label>
@@ -362,7 +454,7 @@ const CreateCampaign = () => {
           </CardContent>
         </Card>
       </main>
-    </div>
+    </div >
   );
 };
 

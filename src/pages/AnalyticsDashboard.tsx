@@ -7,11 +7,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { DateRange } from 'react-day-picker';
 import { format, subDays } from 'date-fns';
-import { TrendingUp, TrendingDown, Users, Star, Clock, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { TrendingUp, TrendingDown, Users, Star, Clock, Filter, ArrowLeft } from 'lucide-react';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+const COLORS = ['#0088FE', '#00C499', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function AnalyticsDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<AnalyticsStats | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -61,7 +63,7 @@ export default function AnalyticsDashboard() {
       const totalReviews = reviewsData?.length || 0;
       const qrReviews = reviewsData?.filter(r => r.source === 'qr').length || 0;
       const nfcReviews = reviewsData?.filter(r => r.source === 'nfc').length || 0;
-      
+
       // Get conversion rate from database function
       const { data: conversionData } = await supabase
         .rpc('get_conversion_rate', { p_campaign_id: campaignIds[0] });
@@ -72,9 +74,9 @@ export default function AnalyticsDashboard() {
 
       const avgTimeToReview = reviewsData && reviewsData.length > 0
         ? reviewsData
-            .filter(r => r.time_to_review_seconds)
-            .reduce((sum, r) => sum + (r.time_to_review_seconds || 0), 0) / 
-          reviewsData.filter(r => r.time_to_review_seconds).length
+          .filter(r => r.time_to_review_seconds)
+          .reduce((sum, r) => sum + (r.time_to_review_seconds || 0), 0) /
+        reviewsData.filter(r => r.time_to_review_seconds).length
         : 0;
 
       // Calculate drop-off stages
@@ -128,8 +130,12 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
+          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-2 p-0 hover:bg-transparent justify-start">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
           <h1 className="text-3xl font-bold">Enhanced Analytics</h1>
           <p className="text-muted-foreground">Track your review performance and insights</p>
         </div>

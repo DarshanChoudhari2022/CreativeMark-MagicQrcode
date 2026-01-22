@@ -78,7 +78,8 @@ const CampaignDetails = () => {
     loadCampaignData();
   }, [campaignId, toast]);
 
-  const reviewUrl = `${window.location.origin}/review/${campaignId}`;
+  const baseUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+  const reviewUrl = `${baseUrl}/review/${campaignId}`;
 
   if (loading) {
     return (
@@ -180,7 +181,8 @@ const CampaignDetails = () => {
                   value={reviewUrl}
                   businessName={businessName}
                   logoUrl={logoUrl}
-                  theme={campaign?.theme_color || 'lightBlue'}
+                  primaryColor="#4285F4"
+                  secondaryColor="#ffffff"
                   size={250}
                 />
                 <Button onClick={() => window.open(reviewUrl, '_blank')} variant="outline"
