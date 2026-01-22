@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
-import { Download, Star } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface BrandedQRCardProps {
@@ -8,134 +8,165 @@ interface BrandedQRCardProps {
   businessName: string;
   logoUrl?: string;
   primaryColor?: string;
-  secondaryColor?: string; // Background or accent
+  secondaryColor?: string; // Background color
   size?: number;
 }
+
+// Google Star Rating Component (Maps Style)
+const GoogleStars = () => (
+  <div className="flex items-center gap-0.5">
+    {[1, 2, 3, 4, 5].map((i) => (
+      <svg key={i} className="w-6 h-6 text-[#F9AB00]" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+      </svg>
+    ))}
+  </div>
+);
+
+// Google Logo Icon
+const GoogleG = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.21.81-.63z" fill="#FBBC05" />
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335" />
+  </svg>
+);
 
 export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
   value,
   businessName,
   logoUrl,
-  primaryColor = '#4285F4', // Default Google Blue
+  primaryColor = '#4285F4',
   secondaryColor = '#ffffff',
-  size = 250
+  size = 280
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [logoLoaded, setLogoLoaded] = useState(false);
 
-  // Preload logo to ensure it renders in the canvas
   useEffect(() => {
     if (logoUrl) {
+      console.log("Preloading logo:", logoUrl);
       const img = new Image();
-      img.crossOrigin = 'anonymous'; // Critical for canvas export
+      img.crossOrigin = 'anonymous'; // Important for canvas
       img.src = logoUrl;
-      img.onload = () => setLogoLoaded(true);
-      img.onerror = () => setLogoLoaded(false);
+      img.onload = () => {
+        console.log("Logo loaded successfully");
+        setLogoLoaded(true);
+      };
+      img.onerror = (e) => {
+        console.error("Logo failed to load:", e);
+        setLogoLoaded(false);
+      };
     }
   }, [logoUrl]);
 
   const downloadQRCard = () => {
     if (!canvasRef.current) return;
 
-    // Dynamically import html2canvas to avoid build issues
     import('html2canvas').then((module) => {
       const html2canvas = (module.default || module) as any;
       html2canvas(canvasRef.current!, {
-        scale: 3, // Higher resolution
+        scale: 4, // High resolution for printing
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         backgroundColor: secondaryColor,
-        scrollY: -window.scrollY, // Fix potential capture offsets
+        logging: false,
       }).then((canvas: HTMLCanvasElement) => {
         const link = document.createElement('a');
-        link.download = `${businessName.replace(/\s+/g, '-')}-review-card.png`;
+        link.download = `${businessName.replace(/\s+/g, '-')}-google-review-card.png`;
         link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
       });
     });
   };
 
-  // Google Brand Colors for accents if needed
-  // Blue: #4285F4, Red: #EA4335, Yellow: #FBBC05, Green: #34A853
-
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col items-center gap-6">
       {/* The Printable Card Area */}
       <div
         ref={canvasRef}
-        className="relative overflow-hidden rounded-xl shadow-2xl mx-auto flex flex-col items-center justify-center p-8 transition-transform hover:scale-[1.02] duration-300"
+        className="relative overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-white flex flex-col items-center p-10 select-none"
         style={{
-          width: '380px',
+          width: '400px',
           backgroundColor: secondaryColor,
-          fontFamily: "'Inter', 'Roboto', sans-serif"
+          fontFamily: "'Outfit', 'Inter', sans-serif"
         }}
       >
-        {/* Top Decoration Bar */}
-        <div className="absolute top-0 left-0 w-full h-2 flex">
+        {/* Modern Google Accent Bar */}
+        <div className="absolute top-0 left-0 w-full h-1.5 flex shadow-sm">
           <div className="h-full w-1/4 bg-[#4285F4]"></div>
           <div className="h-full w-1/4 bg-[#EA4335]"></div>
           <div className="h-full w-1/4 bg-[#FBBC05]"></div>
           <div className="h-full w-1/4 bg-[#34A853]"></div>
         </div>
 
-        {/* Header Section */}
-        <div className="mt-4 text-center space-y-2 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 tracking-tight" style={{ color: primaryColor === '#ffffff' ? '#333' : '#333' }}>
-            {businessName}
-          </h2>
-          <div className="flex items-center justify-center gap-1">
-            <div className="flex text-[#FBBC05]">
-              {[1, 2, 3, 4, 5].map(i => (
-                <Star key={i} className="w-5 h-5 fill-current" />
-              ))}
+        {/* Brand Header */}
+        <div className="mt-6 flex flex-col items-center text-center space-y-4 w-full">
+          <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-50 mb-2">
+            <GoogleG />
+          </div>
+
+          <div className="space-y-1 px-4">
+            <h2 className="text-2xl font-extrabold text-[#202124] leading-tight">
+              {businessName}
+            </h2>
+            <div className="flex flex-col items-center gap-2">
+              <GoogleStars />
+              <p className="text-[#5F6368] font-bold text-sm tracking-widest uppercase mt-1">
+                Review Us On Google
+              </p>
             </div>
           </div>
-          <p className="text-gray-500 font-medium text-sm uppercase tracking-wide">
-            Review us on Google
+        </div>
+
+        {/* QR Code Section */}
+        <div className="relative mt-8 group">
+          {/* Subtle Glow Background */}
+          <div className="absolute -inset-4 bg-gradient-to-tr from-[#4285F410] to-[#EA433510] rounded-[2rem] blur-xl opacity-50"></div>
+
+          <div className="relative bg-white p-6 rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-gray-100">
+            <QRCodeCanvas
+              value={value}
+              size={size}
+              level="H"
+              fgColor={primaryColor === '#ffffff' ? '#202124' : primaryColor}
+              bgColor="#ffffff"
+              includeMargin={false}
+              imageSettings={logoUrl && logoLoaded ? {
+                src: logoUrl,
+                height: Math.floor(size * 0.22),
+                width: Math.floor(size * 0.22),
+                excavate: true,
+              } : undefined}
+            />
+          </div>
+        </div>
+
+        {/* Footer CTA */}
+        <div className="mt-8 flex flex-col items-center space-y-4">
+          <div className="bg-[#202124] text-white px-8 py-3 rounded-2xl font-bold tracking-widest text-sm shadow-xl flex items-center gap-3">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            SCAN TO REVIEW
+          </div>
+
+          <p className="text-[10px] text-[#70757A] font-medium flex items-center gap-1.5 opacity-60 uppercase tracking-tighter">
+            <span>Powered by Google Maps technology</span>
           </p>
-        </div>
-
-        {/* QR Code Container */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
-          <QRCodeCanvas
-            value={value}
-            size={size}
-            level="H" // High error correction level for logos
-            fgColor={primaryColor === '#ffffff' ? '#000000' : primaryColor} // Ensure contrast
-            bgColor="#ffffff" // Always white background for QR readability
-            includeMargin={true}
-            imageSettings={logoUrl && logoLoaded ? {
-              src: logoUrl,
-              height: size * 0.2, // 20% of QR size
-              width: size * 0.2,
-              excavate: true, // Digs a hole for the logo so it doesn't overlap dots
-            } : undefined}
-          />
-        </div>
-
-        {/* CTA Section */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center gap-2 bg-gray-100 px-4 py-2 rounded-full mb-2">
-            <span className="text-2xl">📱</span>
-            <span className="text-sm font-bold text-gray-700">SCAN ME</span>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 mt-4 opacity-80">
-            <span className="text-xs text-gray-400 font-medium">Powered by Google Reviews</span>
-          </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center">
-        <Button
-          onClick={downloadQRCard}
-          className="bg-gray-900 hover:bg-gray-800 text-white font-medium px-8 py-2 rounded-full shadow-lg hover:shadow-xl transition-all"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Download Printable Card
-        </Button>
-      </div>
+      <Button
+        onClick={downloadQRCard}
+        className="w-full max-w-sm bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 gap-3 text-lg"
+      >
+        <Download className="h-6 w-6" />
+        Download Printable Card
+      </Button>
     </div>
   );
 };
+
