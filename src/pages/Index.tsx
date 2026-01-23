@@ -92,7 +92,10 @@ const Index = () => {
                   {t(`nav.${section}`)}
                 </button>
               ))}
-              <Button onClick={() => navigate("/request-service")} className="w-full mt-4 bg-red-600 text-white h-12 rounded-xl font-bold uppercase tracking-widest">
+              <Button onClick={() => navigate("/auth")} variant="ghost" className="w-full text-gray-900 font-bold uppercase tracking-widest hover:text-red-600">
+                {t('nav.signin')}
+              </Button>
+              <Button onClick={() => navigate("/request-service")} className="w-full mt-2 bg-red-600 text-white h-12 rounded-xl font-bold uppercase tracking-widest">
                 {t('nav.get_started')}
               </Button>
             </nav>
@@ -113,19 +116,19 @@ const Index = () => {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight text-gray-900 tracking-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-slate-900 tracking-tight">
               {t('landing.hero_title')} 🚀
             </h1>
 
             {/* Subheadline */}
-            <p className="text-lg md:text-xl text-gray-500 mb-10 max-w-3xl mx-auto leading-relaxed">
-              <strong className="text-gray-900 block mb-2">{t('landing.hero_subtitle_bold')}</strong>
+            <p className="text-lg md:text-xl text-slate-500 mb-10 max-w-3xl mx-auto leading-relaxed">
+              <strong className="text-slate-900 block mb-2 font-semibold tracking-wide uppercase text-sm">{t('landing.hero_subtitle_bold')}</strong>
               {t('landing.hero_subtitle')}
             </p>
 
             {/* Price Badge */}
             <div className="flex justify-center mb-10">
-              <span className="bg-gray-900 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+              <span className="bg-slate-900 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg uppercase tracking-widest">
                 {t('landing.price_badge')}
               </span>
             </div>
@@ -170,9 +173,11 @@ const Index = () => {
       {/* Logic Sequence / Process Section */}
       <section id="how_it_works" className="py-24 bg-white border-y border-gray-100">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.how_it_works_title')}</h2>
-            <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-gray-900">{t('landing.reviewboost_desc').split('.')[0] + '.'}</h3>
+          <div className="text-center mb-16 px-4">
+            <h2 className="text-[10px] font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.how_it_works_title')}</h2>
+            <h3 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-tight">
+              {t('landing.reviewboost_desc').split('.')[0] + '.'}
+            </h3>
           </div>
 
           <div className="max-w-5xl mx-auto relative">
@@ -192,7 +197,7 @@ const Index = () => {
                       {flow.label}
                     </div>
                   </div>
-                  <h4 className="text-xl font-black uppercase tracking-tight mb-4 text-gray-900">{flow.text}</h4>
+                  <h4 className="text-lg font-bold tracking-tight mb-3 text-slate-900">{flow.text}</h4>
                   <p className="text-sm text-gray-500 font-medium leading-relaxed max-w-xs">
                     {flow.desc}
                   </p>
@@ -208,7 +213,7 @@ const Index = () => {
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.overview_title')}</h2>
-            <h3 className="text-3xl md:text-5xl font-black mb-6 uppercase tracking-tight italic text-gray-900">{t('landing.what_is_reviewboost')}</h3>
+            <h3 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight text-slate-900">{t('landing.what_is_reviewboost')}</h3>
             <p className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed max-w-3xl mx-auto">
               {t('landing.reviewboost_desc')}
             </p>
@@ -221,7 +226,7 @@ const Index = () => {
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-16">
             <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.comparison_title')}</h2>
-            <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tight italic text-gray-900">{t('landing.before_after_title')}</h3>
+            <h3 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">{t('landing.before_after_title')}</h3>
           </div>
 
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 items-stretch">
@@ -335,8 +340,8 @@ const Index = () => {
       <section id="pricing" className="py-20 md:py-32 bg-white relative">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-16">
-            <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('pricing.title')}</h2>
-            <h3 className="text-3xl md:text-6xl font-black uppercase tracking-tight italic text-gray-900">{t('pricing.choose_plan')}</h3>
+            <h2 className="text-[10px] font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('pricing.title')}</h2>
+            <h3 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">{t('pricing.choose_plan')}</h3>
           </div>
 
           <div className="max-w-2xl mx-auto">

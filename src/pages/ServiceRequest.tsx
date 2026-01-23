@@ -20,14 +20,32 @@ const ServiceRequest = () => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const formData = new FormData(e.currentTarget);
+        const data = {
+            name: formData.get('fullName'),
+            business: formData.get('businessName'),
+            whatsapp: formData.get('whatsapp'),
+            email: formData.get('email'),
+            gmb: formData.get('gmbLink'),
+            notes: formData.get('notes')
+        };
+
+        const message = `🚀 *New ReviewBoost Service Request*%0a%0a` +
+            `*Name:* ${data.name}%0a` +
+            `*Business:* ${data.business}%0a` +
+            `*Phone:* ${data.whatsapp}%0a` +
+            `*Email:* ${data.email}%0a` +
+            `*GMB:* ${data.gmb}%0a%0a` +
+            `*Notes:* ${data.notes}`;
+
+        // Open WhatsApp
+        window.open(`https://wa.me/917447332829?text=${message}`, '_blank');
 
         setIsSubmitting(false);
         setSubmitted(true);
         toast({
-            title: "Request Sent Successfully!",
-            description: "Our admin will review your details and contact you soon.",
+            title: "Request Sent!",
+            description: "Redirecting to WhatsApp to send your details...",
         });
     };
 
@@ -42,7 +60,7 @@ const ServiceRequest = () => {
                         Request Received!
                     </h1>
                     <p className="text-gray-500 mb-8 font-medium">
-                        Thank you for choosing ReviewBoost. Our team will verify your business and get back to you within 24 hours with your login credentials.
+                        We have opened WhatsApp to send your details. Please hit 'Send' in WhatsApp to complete the process. Our admin will verify and contact you shortly.
                     </p>
                     <Button
                         onClick={() => navigate("/")}
@@ -58,13 +76,21 @@ const ServiceRequest = () => {
     return (
         <div className="min-h-screen bg-gray-50/50 py-12 md:py-20 px-4">
             <div className="max-w-4xl mx-auto">
-                <button
-                    onClick={() => navigate("/")}
-                    className="flex items-center gap-2 text-gray-400 hover:text-red-600 font-bold uppercase tracking-widest text-xs mb-8 transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Home
-                </button>
+                <div className="flex justify-between items-center mb-8">
+                    <button
+                        onClick={() => navigate("/")}
+                        className="flex items-center gap-2 text-gray-400 hover:text-red-600 font-bold uppercase tracking-widest text-xs transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Home
+                    </button>
+                    <button
+                        onClick={() => navigate("/auth")}
+                        className="text-red-600 hover:text-black font-bold uppercase tracking-widest text-xs transition-colors"
+                    >
+                        Already a member? Sign In
+                    </button>
+                </div>
 
                 <div className="grid md:grid-cols-5 gap-12">
                     {/* Info Side */}
@@ -97,7 +123,7 @@ const ServiceRequest = () => {
                         <div className="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
                             <p className="text-xs font-bold text-red-600 uppercase tracking-widest mb-2">Process</p>
                             <p className="text-sm text-gray-500 font-medium">
-                                Submit this form → Admin Approval → Payment Confirmation → Account Activation.
+                                Submit this form → Open WhatsApp → Send Details → Admin Approval → Account Activation.
                             </p>
                         </div>
                     </div>
@@ -116,13 +142,13 @@ const ServiceRequest = () => {
                                             <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                                                 <User className="w-3 h-3 text-red-600" /> Full Name
                                             </Label>
-                                            <Input required placeholder="John Doe" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
+                                            <Input name="fullName" required placeholder="John Doe" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                                                 <Building2 className="w-3 h-3 text-red-600" /> Business Name
                                             </Label>
-                                            <Input required placeholder="My Business" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
+                                            <Input name="businessName" required placeholder="My Business" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
                                         </div>
                                     </div>
 
@@ -131,13 +157,13 @@ const ServiceRequest = () => {
                                             <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                                                 <Phone className="w-3 h-3 text-red-600" /> WhatsApp Number
                                             </Label>
-                                            <Input required type="tel" placeholder="+91 00000 00000" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
+                                            <Input name="whatsapp" required type="tel" placeholder="+91 00000 00000" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                                                 <Mail className="w-3 h-3 text-red-600" /> Email Address
                                             </Label>
-                                            <Input required type="email" placeholder="john@example.com" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
+                                            <Input name="email" required type="email" placeholder="john@example.com" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
                                         </div>
                                     </div>
 
@@ -145,7 +171,7 @@ const ServiceRequest = () => {
                                         <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                                             <MapPin className="w-3 h-3 text-red-600" /> GMB Link / Address
                                         </Label>
-                                        <Input required placeholder="https://maps.app.goo.gl/..." className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
+                                        <Input name="gmbLink" required placeholder="https://maps.app.goo.gl/..." className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
                                     </div>
 
                                     <div className="space-y-2">
@@ -153,6 +179,7 @@ const ServiceRequest = () => {
                                             Requirement Notes
                                         </Label>
                                         <Textarea
+                                            name="notes"
                                             placeholder="Tell us about your business goals..."
                                             className="min-h-[120px] rounded-2xl bg-gray-50 border-gray-100 focus:bg-white transition-all resize-none"
                                         />
@@ -163,7 +190,7 @@ const ServiceRequest = () => {
                                         disabled={isSubmitting}
                                         className="w-full bg-red-600 hover:bg-black text-white h-16 text-lg font-black uppercase tracking-widest shadow-xl rounded-2xl transition-all hover:scale-[1.02] active:scale-95"
                                     >
-                                        {isSubmitting ? "Submitting..." : "Send Request 🚀"}
+                                        {isSubmitting ? "Opening WhatsApp..." : "Send Request 🚀"}
                                     </Button>
                                 </form>
                             </CardContent>

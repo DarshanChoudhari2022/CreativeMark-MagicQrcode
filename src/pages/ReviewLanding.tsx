@@ -218,63 +218,62 @@ const ReviewLanding = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white font-inter pb-32 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 font-inter pb-20 relative overflow-hidden">
       {/* Immersive Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-[60%] bg-gradient-to-b from-red-50 to-white z-0 opacity-50"></div>
-      <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-red-100 rounded-full blur-[200px] opacity-10"></div>
+      <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-red-50 to-transparent z-0"></div>
+      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-100/30 rounded-full blur-[120px] -z-10"></div>
 
-      <div className="relative z-10 max-w-2xl mx-auto px-6 pt-16">
-        {/* Header Branding - Large Logo */}
-        <div className="text-center mb-10 animate-in fade-in slide-in-from-top-10 duration-1000">
-          <div className="bg-white p-6 rounded-[2.5rem] inline-block shadow-[0_40px_100px_-30px_rgba(0,0,0,0.1)] mb-8 border border-gray-50 overflow-hidden w-32 h-32 md:w-40 md:h-40 transform hover:scale-105 transition-all duration-700">
+      <div className="relative z-10 max-w-xl mx-auto px-4 pt-12 md:pt-20">
+        {/* Header Branding - Clean & Focused */}
+        <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <div className="bg-white p-4 rounded-3xl inline-block shadow-xl mb-6 border border-slate-100 overflow-hidden w-28 h-28 md:w-32 md:h-32 transform transition-all duration-500 hover:shadow-2xl">
             {location?.logo_url ? (
               <img
                 src={location.logo_url}
                 alt={location.name}
-                className="w-full h-full object-contain rounded-2xl"
+                className="w-full h-full object-contain rounded-xl"
               />
             ) : (
-              <Award className="w-full h-full text-red-600 drop-shadow-2xl" />
+              <Award className="w-full h-full text-red-500" />
             )}
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-950 tracking-tight uppercase leading-none mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-tight mb-3">
             {location?.name || campaign?.name || t('review.we_love_to_hear')}
           </h1>
-          <div className="inline-block relative">
-            <p className="text-red-600 font-bold uppercase tracking-widest text-xs opacity-90 px-6 py-2 bg-white shadow-xl shadow-red-200/20 rounded-full border border-red-50">
+          <div className="inline-block">
+            <p className="text-red-600 font-bold uppercase tracking-wider text-[10px] px-5 py-2 bg-white shadow-sm rounded-full border border-red-50">
               {campaign?.headline || t('review.how_was_experience')}
             </p>
           </div>
         </div>
 
-        <main className="animate-in fade-in slide-in-from-bottom-12 duration-1000">
-
+        <main className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
           {/* Main Suggestions Card */}
-          <Card className="border-0 shadow-2xl rounded-[3rem] bg-white overflow-hidden">
-            <CardContent className="p-8 md:p-12 text-center">
-              <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-inner">
-                <Sparkles className="h-10 w-10 text-red-600" />
+          <Card className="border-0 shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
+            <CardContent className="p-6 md:p-10 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <Sparkles className="h-8 w-8 text-red-500" />
               </div>
-              <h2 className="text-3xl font-bold mb-4 text-gray-900 tracking-tight uppercase leading-none">Copy a review you love</h2>
-              <p className="text-gray-400 font-bold mb-10 uppercase tracking-widest text-[10px] leading-none">Press any button below to copy & review</p>
+              <h2 className="text-xl md:text-2xl font-bold mb-2 text-slate-900 tracking-tight">Select a review to copy</h2>
+              <p className="text-slate-400 font-bold mb-8 uppercase tracking-widest text-[10px]">Tapping a card will copy & redirect you</p>
 
-              {/* AI Review Language Toggle - Red Only */}
-              <div className="flex justify-center mb-10">
-                <div className="bg-gray-50 p-1.5 rounded-[1.5rem] flex gap-2 border border-gray-100 shadow-inner">
+              {/* AI Review Language Toggle */}
+              <div className="flex justify-center mb-8">
+                <div className="bg-slate-50 p-1 rounded-2xl flex gap-1 border border-slate-100">
                   <button
                     onClick={() => setSuggestionLanguage('en')}
-                    className={`px-8 py-3 rounded-[1rem] text-xs font-bold uppercase tracking-widest transition-all ${suggestionLanguage === 'en'
-                      ? 'bg-white text-red-600 shadow-md transform scale-105'
-                      : 'text-gray-400 hover:text-gray-600'
+                    className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${suggestionLanguage === 'en'
+                      ? 'bg-white text-red-600 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-600'
                       }`}
                   >
                     English
                   </button>
                   <button
                     onClick={() => setSuggestionLanguage('mr')}
-                    className={`px-8 py-3 rounded-[1rem] text-xs font-bold uppercase tracking-widest transition-all ${suggestionLanguage === 'mr'
-                      ? 'bg-white text-red-600 shadow-md transform scale-105'
-                      : 'text-gray-400 hover:text-gray-600'
+                    className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${suggestionLanguage === 'mr'
+                      ? 'bg-white text-red-600 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-600'
                       }`}
                   >
                     मराठी
@@ -283,72 +282,76 @@ const ReviewLanding = () => {
               </div>
 
               {loadingSuggestions ? (
-                <div className="py-24">
-                  <Loader2 className="h-16 w-16 animate-spin text-red-600 mx-auto mb-6" />
-                  <p className="text-red-950 font-bold text-xs uppercase tracking-widest animate-pulse">Generating Reviews...</p>
+                <div className="py-20">
+                  <Loader2 className="h-10 w-10 animate-spin text-red-500 mx-auto mb-4" />
+                  <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest animate-pulse">Crafting reviews...</p>
                 </div>
               ) : (
-                <div className="space-y-6 mb-12 px-2">
+                <div className="space-y-4 mb-8">
                   {suggestions.map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleCopyAndPost(suggestion)}
-                      className={`w-full p-6 text-left rounded-[2rem] border-2 transition-all group relative overflow-hidden active:scale-[0.98] ${selectedSuggestion === suggestion
-                          ? 'bg-red-600 border-red-600 text-white shadow-xl scale-[1.02]'
-                          : 'bg-white hover:bg-gray-50 border-gray-100 hover:border-red-200'
+                      className={`w-full p-6 text-left rounded-2xl border transition-all group relative overflow-hidden active:scale-[0.98] ${selectedSuggestion === suggestion
+                        ? 'bg-red-600 border-red-600 text-white shadow-lg'
+                        : 'bg-white hover:bg-slate-50 border-slate-100 hover:border-red-200 shadow-sm'
                         }`}
                     >
-                      <div className={`absolute top-0 right-0 p-6 transition-opacity ${selectedSuggestion === suggestion ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                      <div className={`absolute top-4 right-4 transition-opacity ${selectedSuggestion === suggestion ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                         }`}>
                         {selectedSuggestion === suggestion ? (
-                          <CheckCircle2 className="h-6 w-6 text-white animate-bounce" />
+                          <CheckCircle2 className="h-5 w-5 text-white animate-bounce" />
                         ) : (
-                          <Copy className="h-6 w-6 text-red-400" />
+                          <Copy className="h-4 w-4 text-red-400" />
                         )}
                       </div>
-                      <p className={`font-bold leading-tight text-lg md:text-xl pr-10 ${selectedSuggestion === suggestion ? 'text-white' : 'text-gray-800'
+                      <p className={`font-semibold leading-relaxed text-base md:text-lg pr-8 ${selectedSuggestion === suggestion ? 'text-white' : 'text-slate-800'
                         }`}>"{suggestion}"</p>
                       {selectedSuggestion === suggestion && (
-                        <p className="text-[10px] uppercase tracking-widest mt-2 text-white/80 animate-pulse font-bold">Copied! Redirecting...</p>
+                        <p className="text-[10px] uppercase tracking-widest mt-2 text-white/80 font-bold">Copied! Opening Google Reviews...</p>
                       )}
                     </button>
                   ))}
                 </div>
               )}
 
-              <div className="pt-8 border-t border-gray-100">
+              {/* Enhanced Backup Redirect Button */}
+              <div className="pt-8 border-t border-slate-50 space-y-4">
                 <Button
                   onClick={handleManualRedirect}
-                  variant="outline"
-                  className="w-full py-8 rounded-[2rem] border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-600 font-bold uppercase tracking-widest text-xs flex gap-2 items-center justify-center transition-all"
+                  className="w-full py-7 rounded-2xl bg-slate-900 border-0 hover:bg-slate-950 text-white font-bold uppercase tracking-widest text-[10px] flex gap-3 items-center justify-center transition-all shadow-lg hover:shadow-slate-200"
                 >
-                  Skip & Write My Own Review
                   <ExternalLink className="h-4 w-4" />
+                  Leave a Review on Google Maps
                 </Button>
+
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                  Use the black button above if redirect fails
+                </p>
               </div>
             </CardContent>
           </Card>
         </main>
 
-        <footer className="mt-16 text-center pb-24">
-          <div className="flex flex-col items-center justify-center gap-8">
-            <img src="/logo.jpg" alt="Creative Mark" className="h-16 w-auto object-contain rounded-[1.5rem] shadow-xl grayscale opacity-30 hover:opacity-100 hover:grayscale-0 transition-all duration-1000" />
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="flex items-center gap-3 text-red-600 font-bold uppercase tracking-widest text-[10px]">
-                <CheckCircle2 className="h-4 w-4" />
+        <footer className="mt-12 text-center pb-12">
+          <div className="flex flex-col items-center gap-6">
+            <img src="/logo.jpg" alt="Creative Mark" className="h-10 w-auto object-contain rounded-xl shadow-md grayscale opacity-40 hover:opacity-100 hover:grayscale-0 transition-all duration-500" />
+            <div className="space-y-2">
+              <div className="flex items-center justify-center gap-2 text-red-600 font-bold uppercase tracking-widest text-[9px]">
+                <CheckCircle2 className="h-3 w-3" />
                 {t('common.powered_by')}
               </div>
-              <p className="text-gray-300 text-[10px] font-bold uppercase tracking-widest leading-none opacity-50">
-                &copy; {new Date().getFullYear()} Creative Mark AI Corps
+              <p className="text-slate-300 text-[9px] font-bold uppercase tracking-widest">
+                &copy; {new Date().getFullYear()} Creative Mark AI Systems
               </p>
             </div>
           </div>
         </footer>
       </div>
 
-      {/* Language Toggle Fixed Bottom Right */}
-      <div className="fixed bottom-10 right-10 z-[100] transform hover:scale-110 transition-transform">
-        <div className="bg-white/80 backdrop-blur-xl border border-gray-100 p-2 rounded-full shadow-[0_40px_80px_rgba(220,38,38,0.25)]">
+      {/* Language Toggle Fixed */}
+      <div className="fixed bottom-6 right-6 z-[100] transform hover:scale-110 transition-transform">
+        <div className="bg-white/80 backdrop-blur-xl border border-slate-100 p-2 rounded-full shadow-2xl">
           <LanguageToggle />
         </div>
       </div>
