@@ -15,9 +15,9 @@ interface BrandedQRCardProps {
 
 // Custom Premium Stars
 const RedStars = () => (
-  <div className="flex items-center gap-1">
+  <div className="flex items-center gap-1.5">
     {[1, 2, 3, 4, 5].map((i) => (
-      <Star key={i} className="w-5 h-5 text-red-600 fill-red-600" />
+      <Star key={i} className="w-6 h-6 text-red-600 fill-red-600 drop-shadow-sm" />
     ))}
   </div>
 );
@@ -64,38 +64,38 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-10">
       {/* The Printable Card Area - High Fidelity Red & White */}
       <div
         ref={canvasRef}
-        className="relative overflow-hidden rounded-[3rem] shadow-[0_40px_80px_-20px_rgba(220,38,38,0.15)] bg-white flex flex-col items-center p-12 select-none w-full max-w-[420px] border border-gray-100"
+        className="relative overflow-hidden rounded-[4rem] shadow-[0_60px_120px_-30px_rgba(220,38,38,0.2)] bg-white flex flex-col items-center p-14 select-none w-full max-w-[480px] border border-gray-100 transition-all duration-700 hover:scale-[1.02]"
         style={{
           fontFamily: "'Inter', sans-serif"
         }}
       >
         {/* Professional Red Accent */}
-        <div className="absolute top-0 left-0 w-full h-3 bg-red-600 shadow-sm"></div>
+        <div className="absolute top-0 left-0 w-full h-4 bg-red-600 shadow-lg"></div>
 
         {/* Brand Identity */}
-        <div className="mt-8 flex flex-col items-center text-center space-y-4 w-full">
+        <div className="mt-10 flex flex-col items-center text-center space-y-6 w-full">
           {logoUrl && logoLoaded ? (
-            <div className="w-20 h-20 bg-white rounded-2xl shadow-xl border border-gray-50 p-2 overflow-hidden mb-2">
+            <div className="w-24 h-24 bg-white rounded-3xl shadow-2xl border border-gray-50 p-3 overflow-hidden mb-2 transition-transform hover:rotate-3">
               <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
             </div>
           ) : (
-            <div className="w-20 h-20 bg-red-600 rounded-2xl shadow-xl flex items-center justify-center mb-2">
-              <Star className="text-white h-10 w-10 fill-white" />
+            <div className="w-24 h-24 bg-red-600 rounded-3xl shadow-2xl flex items-center justify-center mb-2 transition-transform hover:rotate-3">
+              <Star className="text-white h-12 w-12 fill-white italic" />
             </div>
           )}
 
-          <div className="space-y-2 px-4">
-            <h2 className="text-3xl font-black text-gray-900 leading-none uppercase tracking-tighter">
+          <div className="space-y-3 px-6">
+            <h2 className="text-4xl font-black text-gray-900 leading-none uppercase tracking-tighter italic">
               {businessName}
             </h2>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{category} Specialist</p>
-            <div className="flex flex-col items-center gap-3 pt-2">
+            <p className="text-xs font-black text-gray-400 uppercase tracking-[0.4em] mt-2 italic">{category} Specialist</p>
+            <div className="flex flex-col items-center gap-4 pt-4">
               <RedStars />
-              <p className="text-red-600 font-black text-xs tracking-[0.2em] uppercase mt-1">
+              <p className="text-red-600 font-extrabold text-sm tracking-[0.3em] uppercase mt-1 italic">
                 Official Feedback Partner
               </p>
             </div>
@@ -103,9 +103,9 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
         </div>
 
         {/* QR Core */}
-        <div className="relative mt-8 group">
-          <div className="absolute -inset-6 bg-red-500/5 rounded-[3rem] blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-          <div className="relative bg-white p-8 rounded-[2.5rem] shadow-[0_20px_40px_rgba(0,0,0,0.05)] border border-gray-50 transition-all group-hover:scale-105">
+        <div className="relative mt-12 group">
+          <div className="absolute -inset-8 bg-red-500/10 rounded-[4rem] blur-2xl opacity-60 group-hover:opacity-100 transition-opacity"></div>
+          <div className="relative bg-white p-10 rounded-[3.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.08)] border border-gray-50 transition-all group-hover:scale-105 duration-500">
             <QRCodeCanvas
               value={value}
               size={size}
@@ -124,15 +124,15 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
         </div>
 
         {/* Action Call */}
-        <div className="mt-10 flex flex-col items-center space-y-6 w-full">
-          <div className="bg-gray-900 text-white w-full py-5 rounded-[1.5rem] font-black tracking-[0.2em] text-xs shadow-2xl flex items-center justify-center gap-3">
-            <QrCode className="w-4 h-4 text-red-600" />
+        <div className="mt-14 flex flex-col items-center space-y-8 w-full">
+          <div className="bg-gray-950 text-white w-full py-6 rounded-[2.5rem] font-black tracking-[0.4em] text-sm shadow-2xl flex items-center justify-center gap-4 transition-all hover:bg-red-600">
+            <QrCode className="w-5 h-5 text-red-600 group-hover:text-white" />
             SCAN TO ACCELERATE
           </div>
 
-          <div className="flex items-center gap-2 pt-2 grayscale opacity-40">
-            <img src="/logo.jpg" alt="Creative Mark" className="h-5 w-auto" />
-            <p className="text-[10px] text-gray-900 font-black uppercase tracking-widest">
+          <div className="flex items-center gap-4 pt-4 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all cursor-crosshair">
+            <img src="/logo.jpg" alt="Creative Mark" className="h-8 w-auto rounded-lg" />
+            <p className="text-xs text-gray-900 font-black uppercase tracking-[0.3em] italic">
               Precision AI Systems
             </p>
           </div>
@@ -141,9 +141,9 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
 
       <Button
         onClick={downloadQRCard}
-        className="w-full max-w-sm bg-red-600 hover:bg-black text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-red-100 transition-all duration-300 gap-3 text-xs"
+        className="w-full max-w-md bg-red-600 hover:bg-black text-white font-black uppercase tracking-[0.4em] h-20 rounded-[2rem] shadow-2xl shadow-red-200 transition-all duration-500 gap-4 text-sm active:scale-95"
       >
-        <Download className="h-4 w-4" />
+        <Download className="h-6 w-6" />
         Export Production Assets
       </Button>
     </div>

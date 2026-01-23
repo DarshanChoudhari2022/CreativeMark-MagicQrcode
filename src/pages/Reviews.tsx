@@ -105,7 +105,7 @@ export default function ReviewManagement() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
-                <Loader2 className="h-10 w-10 animate-spin text-red-600" />
+                <Loader2 className="h-12 w-12 animate-spin text-red-600" />
             </div>
         );
     }
@@ -114,129 +114,129 @@ export default function ReviewManagement() {
         <div className="min-h-screen bg-white font-inter">
             {/* Premium Header */}
             <header className="bg-white/95 backdrop-blur-md border-b sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" onClick={() => navigate("/dashboard")} className="text-gray-400 hover:text-red-600 rounded-full h-10 px-6 font-black uppercase tracking-widest text-[10px]">
+                <div className="container mx-auto px-6 py-6 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                        <Button variant="ghost" onClick={() => navigate("/dashboard")} className="text-gray-400 hover:text-red-600 rounded-full h-12 px-8 font-black uppercase tracking-widest text-xs">
                             <ArrowLeft className="h-4 w-4 mr-2" />
                             Exit Hub
                         </Button>
-                        <div className="flex items-center gap-2">
-                            <div className="bg-red-600 p-2.5 rounded-xl shadow-lg shadow-red-200">
-                                <Bot className="h-5 w-5 text-white" />
+                        <div className="flex items-center gap-3">
+                            <div className="bg-red-600 p-3 rounded-[1.2rem] shadow-2xl shadow-red-200">
+                                <Bot className="h-6 w-6 text-white" />
                             </div>
-                            <h1 className="text-xl font-black text-gray-900 tracking-tighter uppercase">AI Auto-Reply HUB</h1>
+                            <h1 className="text-2xl font-black text-gray-900 tracking-tighter uppercase italic">AI Auto-Reply HUB</h1>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-6">
                         <LanguageToggle />
-                        <div className="h-8 w-px bg-gray-100 mx-2"></div>
-                        <img src="/logo.jpg" alt="Logo" className="h-10 w-auto object-contain hidden sm:block rounded-md shadow-sm" />
+                        <div className="h-10 w-px bg-gray-100 mx-2"></div>
+                        <img src="/logo.jpg" alt="Logo" className="h-12 w-auto object-contain hidden sm:block rounded-xl shadow-sm" />
                     </div>
                 </div>
             </header>
 
-            <main className="container mx-auto px-4 py-12 max-w-6xl">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <main className="container mx-auto px-6 py-20 max-w-7xl">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10 mb-16">
                     <div>
-                        <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter">Response Center</h2>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Autonomous Reputation Agent Management</p>
+                        <h2 className="text-5xl font-black text-gray-900 uppercase tracking-tighter italic font-bold leading-none">Response Center</h2>
+                        <p className="text-sm font-black text-gray-400 uppercase tracking-widest mt-2 italic">Autonomous Reputation Agent Management Cluster</p>
                     </div>
-                    <div className="flex items-center gap-4 w-full md:w-auto">
-                        <Button variant="outline" onClick={fetchReviews} className="flex-1 md:flex-none border-gray-200 h-14 rounded-2xl px-10 font-black uppercase tracking-widest text-[10px] hover:bg-red-50 hover:text-red-600 transition-all">
-                            <HistoryIcon className="h-4 w-4 mr-2" />
+                    <div className="flex items-center gap-6 w-full md:w-auto">
+                        <Button variant="outline" onClick={fetchReviews} className="flex-1 md:flex-none border-2 border-red-50 h-16 rounded-[1.5rem] px-12 font-black uppercase tracking-widest text-xs hover:bg-red-50 hover:text-red-600 transition-all shadow-xl shadow-red-50">
+                            <HistoryIcon className="h-5 w-5 mr-3" />
                             Sync Activity
                         </Button>
                     </div>
                 </div>
 
-                <div className="space-y-10">
+                <div className="space-y-12">
                     {reviews.length === 0 ? (
-                        <div className="py-40 text-center bg-gray-50/50 rounded-[4rem] border-4 border-dashed border-gray-100">
-                            <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                                <MessageSquare className="h-10 w-10 text-red-100" />
+                        <div className="py-48 text-center bg-gray-50/30 rounded-[5rem] border-4 border-dashed border-gray-100 group transition-all hover:bg-red-50/10 hover:border-red-100">
+                            <div className="w-32 h-32 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner group-hover:scale-110 transition-transform">
+                                <MessageSquare className="h-12 w-12 text-red-200" />
                             </div>
-                            <h3 className="text-xl font-black text-gray-400 uppercase tracking-widest">No Intelligence Logs</h3>
-                            <p className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em] mt-2">Activity will appear once customers scan your QR cards</p>
+                            <h3 className="text-3xl font-black text-gray-400 uppercase tracking-widest italic">No Intelligence Logs</h3>
+                            <p className="text-xs font-black text-gray-300 uppercase tracking-[0.3em] mt-4 italic max-w-md mx-auto leading-loose">Activity will appear automatically once customers engage with your QR or NFC infrastructure.</p>
                         </div>
                     ) : (
                         reviews.map((review) => (
-                            <Card key={review.id} className="border-0 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.05)] rounded-[3rem] overflow-hidden bg-white hover:scale-[1.01] transition-all group">
-                                <div className="h-2 bg-red-600 w-full"></div>
-                                <CardContent className="p-10 md:p-12">
-                                    <div className="flex flex-col lg:flex-row gap-12">
+                            <Card key={review.id} className="border-0 shadow-[0_80px_160px_-40px_rgba(0,0,0,0.08)] rounded-[4rem] overflow-hidden bg-white hover:scale-[1.01] transition-all duration-500 group">
+                                <div className="h-3 bg-red-600 w-full"></div>
+                                <CardContent className="p-12 md:p-16">
+                                    <div className="flex flex-col lg:flex-row gap-16">
                                         {/* Left: Intent Audit */}
-                                        <div className="flex-1 space-y-6">
-                                            <div className="flex items-center justify-between border-b border-gray-50 pb-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-gray-900 text-white rounded-2xl flex items-center justify-center font-black text-xl">
-                                                        C
+                                        <div className="flex-1 space-y-10">
+                                            <div className="flex items-center justify-between border-b border-gray-50 pb-8">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="w-16 h-16 bg-gray-950 text-white rounded-[1.5rem] flex items-center justify-center font-black text-2xl shadow-2xl">
+                                                        {review.customer_name?.charAt(0) || 'C'}
                                                     </div>
                                                     <div>
-                                                        <p className="font-black text-gray-900 uppercase tracking-tight text-sm">Verified External Scan</p>
-                                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">{new Date(review.created_at).toLocaleDateString()}</p>
+                                                        <p className="font-black text-gray-900 uppercase tracking-tight text-xl">Verified System Scan</p>
+                                                        <p className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] leading-none mt-2 italic">{new Date(review.created_at).toLocaleDateString()}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex bg-red-50 px-4 py-2 rounded-full gap-1 border border-red-100">
+                                                <div className="flex bg-red-50 px-6 py-3 rounded-full gap-2 border border-red-100 shadow-sm">
                                                     {[...Array(review.rating)].map((_, i) => (
-                                                        <Star key={i} className="h-3.5 w-3.5 fill-red-600 text-red-600" />
+                                                        <Star key={i} className="h-5 w-5 fill-red-600 text-red-600" />
                                                     ))}
                                                 </div>
                                             </div>
 
-                                            <div className="bg-gray-50 p-8 rounded-[2rem] relative group-hover:bg-red-50/20 transition-colors">
-                                                <Target className="absolute -top-4 -right-4 h-12 w-12 text-red-600/5 group-hover:text-red-600/10" />
-                                                <p className="text-gray-900 font-bold leading-relaxed text-lg">
+                                            <div className="bg-gray-50/50 p-10 rounded-[3rem] relative group-hover:bg-red-50/30 transition-all border border-transparent group-hover:border-red-50">
+                                                <Target className="absolute -top-6 -right-6 h-16 w-16 text-red-600/5 group-hover:text-red-600/10 transition-all" />
+                                                <p className="text-gray-900 font-bold leading-relaxed text-2xl italic">
                                                     "{review.review_text}"
                                                 </p>
                                             </div>
 
-                                            <div className="flex items-center gap-3">
-                                                <div className="bg-gray-900 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg">NFC VERIFIED</div>
-                                                <div className="bg-red-600 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg">AI ASSISTED</div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="bg-gray-900 text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl border border-white/10">ID VERIFIED</div>
+                                                <div className="bg-red-600 text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl border border-red-500">AI ASSISTED</div>
                                             </div>
                                         </div>
 
                                         {/* Right: Response Logic */}
-                                        <div className="flex-1 space-y-6 border-t lg:border-t-0 lg:border-l border-gray-100 pt-12 lg:pt-0 lg:pl-12">
+                                        <div className="flex-1 space-y-10 border-t lg:border-t-0 lg:border-l border-gray-50 pt-16 lg:pt-0 lg:pl-16">
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <Sparkles className="h-4 w-4 text-red-600" />
-                                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Strategy Formulation</h4>
+                                                <div className="flex items-center gap-4">
+                                                    <Sparkles className="h-6 w-6 text-red-600" />
+                                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] italic">Strategy Matrix</h4>
                                                 </div>
                                                 {review.auto_reply_text && (
-                                                    <Button variant="ghost" size="sm" onClick={() => handleCopy(review.auto_reply_text!)} className="h-10 px-6 bg-red-50 text-red-600 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition-all">
-                                                        <Copy className="h-3 w-3 mr-2" /> Copy Export
+                                                    <Button variant="ghost" onClick={() => handleCopy(review.auto_reply_text!)} className="h-12 px-8 bg-red-50 text-red-600 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-red-600 hover:text-white transition-all shadow-lg shadow-red-50">
+                                                        <Copy className="h-4 w-4 mr-2" /> Export Protocol
                                                     </Button>
                                                 )}
                                             </div>
 
                                             {review.auto_reply_text ? (
-                                                <div className="bg-white border-4 border-red-50 p-8 rounded-[2.5rem] relative shadow-inner group-hover:border-red-100 transition-colors">
-                                                    <p className="text-gray-900 font-black leading-relaxed italic text-lg">
+                                                <div className="bg-white border-[6px] border-red-50 p-10 rounded-[3.5rem] relative shadow-2xl group-hover:border-red-100 transition-colors">
+                                                    <p className="text-gray-900 font-black leading-relaxed italic text-2xl">
                                                         "{review.auto_reply_text}"
                                                     </p>
                                                 </div>
                                             ) : (
-                                                <div className="h-48 bg-gray-50/50 border-2 border-dashed border-gray-100 rounded-[2.5rem] flex flex-col items-center justify-center p-8 text-center group-hover:bg-red-50/10 transition-colors">
-                                                    <Languages className="h-10 w-10 text-gray-100 mb-4" />
+                                                <div className="h-64 bg-gray-50/30 border-4 border-dashed border-gray-100 rounded-[3.5rem] flex flex-col items-center justify-center p-12 text-center group-hover:bg-red-50/10 transition-colors">
+                                                    <Languages className="h-12 w-12 text-gray-200 mb-6 group-hover:text-red-600 transition-colors" />
                                                     <Button
                                                         onClick={() => handleGenerateReply(review)}
-                                                        className="bg-gray-900 hover:bg-red-600 text-white h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all"
+                                                        className="bg-black hover:bg-red-600 text-white h-20 px-16 rounded-[2rem] font-black uppercase tracking-[0.3em] shadow-2xl active:scale-[0.97] transition-all text-sm"
                                                         disabled={generatingFor === review.id}
                                                     >
-                                                        {generatingFor === review.id ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Formulate Response'}
+                                                        {generatingFor === review.id ? <Loader2 className="h-8 w-8 animate-spin" /> : 'Execute AI Formulation'}
                                                     </Button>
                                                 </div>
                                             )}
 
                                             {review.auto_reply_text && (
-                                                <div className="flex justify-end pt-2">
+                                                <div className="flex justify-end pt-4">
                                                     <Button
                                                         onClick={() => handleGenerateReply(review)}
                                                         variant="ghost"
-                                                        className="text-gray-400 font-black text-[10px] uppercase tracking-widest rounded-xl hover:text-red-600 hover:bg-red-50 transition-all px-6 py-4"
+                                                        className="text-gray-400 font-black text-[11px] uppercase tracking-widest rounded-2xl hover:text-red-600 hover:bg-red-50 transition-all px-8 py-6"
                                                     >
-                                                        <HistoryIcon className="h-4 w-4 mr-2" /> Re-formulate Strategy
+                                                        <HistoryIcon className="h-5 w-5 mr-3" /> Re-formulate Growth Strategy
                                                     </Button>
                                                 </div>
                                             )}
@@ -250,23 +250,23 @@ export default function ReviewManagement() {
             </main>
 
             {/* System Status Strip */}
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-950 p-1 rounded-full shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] z-50">
-                <div className="flex items-center gap-6 px-10 py-3">
-                    <div className="flex items-center gap-3">
-                        <div className="w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.8)]"></div>
-                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Agent Hub: Operational</span>
+            <div className="fixed bottom-12 left-1/2 -translate-x-1/2 bg-gray-950 p-2 rounded-full shadow-[0_40px_80px_-20px_rgba(0,0,0,0.4)] z-50 border border-white/5">
+                <div className="flex items-center gap-10 px-12 py-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse shadow-[0_0_20px_rgba(220,38,38,1)]"></div>
+                        <span className="text-xs font-black text-white uppercase tracking-[0.3em] leading-none mb-1">Global Node: Active</span>
                     </div>
-                    <div className="w-px h-4 bg-white/10"></div>
-                    <div className="flex items-center gap-2">
-                        <ShieldCheck className="h-3.5 w-3.5 text-red-600" />
-                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Precision AI Systems</span>
+                    <div className="w-px h-6 bg-white/10"></div>
+                    <div className="flex items-center gap-3">
+                        <ShieldCheck className="h-5 w-5 text-red-600" />
+                        <span className="text-xs font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Creative Mark Precision Intelligence</span>
                     </div>
                 </div>
             </div>
 
-            <footer className="py-20 text-center border-t border-gray-50 mt-20">
-                <img src="/logo.jpg" alt="Logo" className="h-10 w-auto mx-auto mb-4 opacity-30" />
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">© 2026 Creative Mark AI Technologies</p>
+            <footer className="py-24 text-center border-t border-gray-50 mt-32 bg-gray-50/20">
+                <img src="/logo.jpg" alt="Logo" className="h-16 w-auto mx-auto mb-8 opacity-40 grayscale rounded-xl shadow-sm" />
+                <p className="text-xs font-black text-gray-400 uppercase tracking-[0.4em] italic font-medium leading-none">© 2026 Creative Mark AI Systems Division</p>
             </footer>
         </div>
     );

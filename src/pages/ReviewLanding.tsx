@@ -189,25 +189,6 @@ const ReviewLanding = () => {
     }
   };
 
-  const handlePrivateFeedback = async (feedback: string) => {
-    try {
-      await (supabase as any)
-        .from('analytics_logs')
-        .insert({
-          campaign_id: campaignId,
-          event_type: 'private_feedback',
-          metadata: {
-            feedback,
-            rating: selectedRating
-          }
-        });
-
-      setStep('redirect');
-    } catch (error) {
-      console.error('Feedback error:', error);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -216,47 +197,45 @@ const ReviewLanding = () => {
     );
   }
 
-  const primaryColor = campaign?.theme_color || '#dc2626';
-
   return (
     <div className="min-h-screen bg-white font-inter">
       {/* Premium Header */}
-      <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 px-4 py-4">
+      <header className="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 px-6 py-6 transition-all">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-5">
             {location?.logo_url ? (
-              <img src={location.logo_url} alt="Logo" className="h-10 w-auto rounded-lg shadow-sm" />
+              <img src={location.logo_url} alt="Logo" className="h-14 w-auto rounded-xl shadow-md border border-gray-50 bg-white" />
             ) : (
-              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-200">
-                <Star className="text-white h-5 w-5 fill-white" />
+              <div className="w-14 h-14 bg-red-600 rounded-xl flex items-center justify-center shadow-xl shadow-red-200 transition-transform hover:scale-105">
+                <Star className="text-white h-7 w-7 fill-white" />
               </div>
             )}
             <div>
-              <h1 className="text-sm font-black text-gray-900 uppercase tracking-tight leading-none">{location?.name || campaign?.name}</h1>
-              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Managed Review System</p>
+              <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter leading-none">{location?.name || campaign?.name}</h1>
+              <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-2">Verified Feedback Portal</p>
             </div>
           </div>
           <LanguageToggle />
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-xl">
-        <div className="space-y-8">
+      <main className="container mx-auto px-6 py-20 max-w-2xl">
+        <div className="space-y-12">
 
           {/* Step 1: Rating */}
           {step === 'rating' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="text-center mb-10">
-                <div className="inline-block bg-red-50 px-4 py-1.5 rounded-full mb-6">
-                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Feedback Portal</p>
+            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <div className="text-center mb-16">
+                <div className="inline-block bg-red-600 text-white px-6 py-2 rounded-full mb-10 shadow-xl shadow-red-200">
+                  <p className="text-xs font-black uppercase tracking-widest">Growth Engine Active</p>
                 </div>
-                <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-4 leading-none">{t('review.how_was_experience')}</h2>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] px-8">{t('review.tap_stars')}</p>
+                <h2 className="text-5xl md:text-6xl font-black text-gray-900 uppercase tracking-tighter mb-6 leading-none italic">{t('review.how_was_experience')}</h2>
+                <p className="text-gray-400 font-black uppercase tracking-widest text-sm px-12">{t('review.tap_stars')}</p>
               </div>
 
-              <Card className="border-0 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.08)] rounded-[2.5rem] bg-white overflow-hidden">
-                <CardContent className="p-12 text-center">
-                  <div className="flex justify-center gap-2 mb-10">
+              <Card className="border-0 shadow-[0_80px_160px_-40px_rgba(0,0,0,0.1)] rounded-[3.5rem] bg-white overflow-hidden transition-all hover:scale-[1.01]">
+                <CardContent className="p-16 text-center">
+                  <div className="flex justify-center gap-4 mb-14">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
@@ -268,9 +247,9 @@ const ReviewLanding = () => {
                         className="transition-all transform hover:scale-125"
                       >
                         <Star
-                          className={`h-12 w-12 ${star <= selectedRating
-                              ? "fill-red-600 text-red-600"
-                              : "text-gray-100"
+                          className={`h-16 w-16 transition-all ${star <= selectedRating
+                            ? "fill-red-600 text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.4)]"
+                            : "text-gray-100"
                             }`}
                         />
                       </button>
@@ -279,10 +258,10 @@ const ReviewLanding = () => {
 
                   <Button
                     onClick={handleRatingSubmit}
-                    className="w-full h-16 bg-red-600 hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200"
+                    className="w-full h-20 bg-red-600 hover:bg-black text-white font-black uppercase tracking-widest text-lg rounded-3xl shadow-2xl shadow-red-300 active:scale-[0.98] transition-all"
                   >
                     {t('common.continue')}
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-3 h-6 w-6" />
                   </Button>
                 </CardContent>
               </Card>
@@ -291,29 +270,29 @@ const ReviewLanding = () => {
 
           {/* Step 2: Category */}
           {step === 'category' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="text-center mb-10">
-                <div className="inline-block bg-red-50 px-4 py-1.5 rounded-full mb-6">
-                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Service Breakdown</p>
+            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <div className="text-center mb-16">
+                <div className="inline-block bg-white border border-red-100 px-6 py-2 rounded-full mb-10 shadow-sm">
+                  <p className="text-xs font-black text-red-600 uppercase tracking-widest">Precision Audit</p>
                 </div>
-                <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-3 leading-none">{t('review.select_what_stood_out')}</h2>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">{t('review.pick_category')}</p>
+                <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter mb-6 leading-none italic">{t('review.select_what_stood_out')}</h2>
+                <p className="text-gray-400 font-black uppercase tracking-widest text-sm italic">{t('review.pick_category')}</p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-6">
                 {reviewCategories.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => handleCategorySelect(cat.id)}
-                    className="p-6 bg-white hover:bg-red-600 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex items-center justify-between group"
+                    className="p-10 bg-white hover:bg-red-600 rounded-[3rem] border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-between group overflow-hidden relative"
                   >
-                    <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-white transition-colors">
+                    <div className="flex items-center gap-8 relative z-10">
+                      <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-white transition-all shadow-inner">
                         {cat.emoji}
                       </div>
-                      <span className="font-black text-gray-900 group-hover:text-white text-lg uppercase tracking-tight">{cat.name}</span>
+                      <span className="font-black text-gray-900 group-hover:text-white text-2xl uppercase tracking-tight transition-colors">{cat.name}</span>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-gray-300 group-hover:text-white" />
+                    <ArrowRight className="h-8 w-8 text-red-600 group-hover:text-white transition-all transform group-hover:translate-x-2 relative z-10" />
                   </button>
                 ))}
               </div>
@@ -322,31 +301,30 @@ const ReviewLanding = () => {
 
           {/* Step 3: Suggestion */}
           {step === 'suggestion' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="text-center mb-8">
-                <div className="inline-block bg-red-50 px-4 py-1.5 rounded-full mb-6">
-                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">AI Content Generation</p>
+            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <div className="text-center mb-12">
+                <div className="inline-block bg-red-600 text-white px-6 py-2 rounded-full mb-10 shadow-xl shadow-red-100">
+                  <p className="text-xs font-black uppercase tracking-widest">AI Intelligence Link</p>
                 </div>
-                <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-3 leading-none">{t('review.choose_review_line')}</h2>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8">{t('review.select_and_post')}</p>
+                <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter mb-6 leading-none italic">{t('review.choose_review_line')}</h2>
+                <p className="text-gray-400 font-black uppercase tracking-widest text-sm mb-12 italic">{t('review.select_and_post')}</p>
 
-                {/* AI Review Language Toggle - Professional Style */}
-                <div className="flex justify-center mb-8">
-                  <div className="bg-gray-100 p-1 rounded-2xl flex gap-1">
+                <div className="flex justify-center mb-12">
+                  <div className="bg-gray-100 p-2 rounded-3xl flex gap-1 shadow-inner">
                     <button
                       onClick={() => setSuggestionLanguage('en')}
-                      className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'en'
-                          ? 'bg-red-600 text-white shadow-xl'
-                          : 'text-gray-400 hover:text-gray-600'
+                      className={`px-10 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'en'
+                        ? 'bg-red-600 text-white shadow-2xl'
+                        : 'text-gray-400 hover:text-gray-600'
                         }`}
                     >
                       ENG
                     </button>
                     <button
                       onClick={() => setSuggestionLanguage('mr')}
-                      className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'mr'
-                          ? 'bg-red-600 text-white shadow-xl'
-                          : 'text-gray-400 hover:text-gray-600'
+                      className={`px-10 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'mr'
+                        ? 'bg-red-600 text-white shadow-2xl'
+                        : 'text-gray-400 hover:text-gray-600'
                         }`}
                     >
                       मराठी
@@ -356,36 +334,36 @@ const ReviewLanding = () => {
               </div>
 
               {loadingSuggestions ? (
-                <div className="py-24 text-center">
-                  <div className="relative inline-block">
-                    <div className="absolute -inset-4 bg-red-600/10 rounded-full blur-xl animate-pulse"></div>
-                    <Loader2 className="h-12 w-12 animate-spin text-red-600 mx-auto mb-6 relative z-10" />
+                <div className="py-32 text-center">
+                  <div className="relative inline-block mb-10">
+                    <div className="absolute -inset-8 bg-red-600/10 rounded-full blur-2xl animate-pulse"></div>
+                    <Loader2 className="h-20 w-20 animate-spin text-red-600 mx-auto relative z-10" />
                   </div>
-                  <p className="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em] animate-pulse">{t('review.ai_crafting')}</p>
+                  <p className="text-red-600 font-black text-sm uppercase tracking-[0.4em] animate-pulse italic">{t('review.ai_crafting')}</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {suggestions.map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleCopyAndPost(suggestion)}
-                      className="w-full p-8 text-left bg-white hover:bg-gray-50 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden"
+                      className="w-full p-12 text-left bg-white hover:bg-gray-50 rounded-[3.5rem] border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden active:scale-[0.98]"
                     >
-                      <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="bg-red-600 p-2 rounded-xl shadow-lg shadow-red-200">
-                          <ThumbsUp className="h-4 w-4 text-white" />
+                      <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
+                        <div className="bg-red-600 p-3 rounded-2xl shadow-2xl shadow-red-200">
+                          <ThumbsUp className="h-6 w-6 text-white" />
                         </div>
                       </div>
-                      <p className="text-gray-900 font-bold leading-relaxed pr-8">
+                      <p className="text-gray-900 font-bold text-xl md:text-2xl leading-relaxed pr-12 italic">
                         "{suggestion}"
                       </p>
                     </button>
                   ))}
 
-                  <div className="pt-8 text-center">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
-                      <ShieldCheck className="h-3 w-3 text-red-600" />
-                      AI Verified Professional Review Content
+                  <div className="pt-12 text-center">
+                    <p className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center justify-center gap-3 italic">
+                      <ShieldCheck className="h-5 w-5 text-red-600" />
+                      AI Verified Professional Content
                     </p>
                   </div>
                 </div>
@@ -395,17 +373,17 @@ const ReviewLanding = () => {
 
           {/* Simple Thank You / Redirect */}
           {step === 'redirect' && (
-            <div className="animate-in fade-in zoom-in duration-500 text-center py-20">
-              <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-10 shadow-xl shadow-red-200/50">
-                <CheckCircle2 className="h-12 w-12 text-red-600" />
+            <div className="animate-in fade-in zoom-in duration-700 text-center py-32">
+              <div className="w-32 h-32 bg-red-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-12 shadow-2xl shadow-red-100/50">
+                <CheckCircle2 className="h-16 w-16 text-red-600" />
               </div>
-              <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-4 leading-none">{t('review.thank_you')}</h2>
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-12">
+              <h2 className="text-5xl font-black text-gray-900 uppercase tracking-tighter mb-8 leading-none italic">{t('review.thank_you')}</h2>
+              <p className="text-gray-400 font-black uppercase tracking-widest text-sm mb-16 italic font-medium max-w-sm mx-auto">
                 {selectedRating < 4 ? t('review.feedback_received') : t('review.redirecting')}
               </p>
               <Button
                 onClick={() => window.location.href = location?.google_review_url || '/'}
-                className="bg-red-600 hover:bg-black text-white h-14 px-10 rounded-full font-black uppercase tracking-widest shadow-xl shadow-red-100"
+                className="bg-red-600 hover:bg-black text-white h-20 px-16 rounded-full font-black uppercase tracking-widest text-lg shadow-2xl shadow-red-200"
               >
                 Return to Profile
               </Button>
@@ -414,16 +392,15 @@ const ReviewLanding = () => {
         </div>
       </main>
 
-      {/* Corporate Footer */}
-      <footer className="py-20 border-t border-gray-50 text-center bg-gray-50/50">
-        <div className="container mx-auto px-4 flex flex-col items-center gap-6">
-          <img src="/logo.jpg" alt="Creative Mark" className="h-10 w-auto object-contain grayscale opacity-50" />
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-[10px] font-black text-gray-900 uppercase tracking-[0.3em]">
-              Review Management Intelligence &bull; Creative Mark
+      <footer className="py-24 border-t border-gray-100 text-center bg-gray-50/30">
+        <div className="container mx-auto px-10 flex flex-col items-center gap-10">
+          <img src="/logo.jpg" alt="Creative Mark" className="h-14 w-auto object-contain grayscale opacity-60" />
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-xs font-black text-gray-900 uppercase tracking-[0.4em] italic leading-none">
+              Intelligence &bull; Creative Mark Systems
             </p>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest max-w-xs mx-auto leading-loose">
-              Automating reputation growth for businesses across Maharashtra through precision AI systems.
+            <p className="text-xs text-gray-400 font-black uppercase tracking-widest max-w-md mx-auto leading-loose italic">
+              Automating reputation growth for businesses across Maharashtra through precision AI strategies.
             </p>
           </div>
         </div>
