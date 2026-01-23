@@ -63,6 +63,7 @@ const ReviewLanding = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [suggestionLanguage, setSuggestionLanguage] = useState(i18n.language);
   const [step, setStep] = useState<'rating' | 'category' | 'suggestion' | 'redirect'>('rating');
 
   useEffect(() => {
@@ -126,17 +127,20 @@ const ReviewLanding = () => {
     }
   };
 
-  const handleCategorySelect = async (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    setStep('suggestion');
-    setLoadingSuggestions(true);
+  useEffect(() => {
+    if (step === 'suggestion' && selectedCategory) {
+      fetchAISuggestions(selectedCategory, suggestionLanguage);
+    }
+  }, [suggestionLanguage]);
 
+  const fetchAISuggestions = async (categoryId: string, lang: string) => {
+    setLoadingSuggestions(true);
     try {
       const categoryName = reviewCategories.find(c => c.id === categoryId)?.name || 'service';
       const aiSuggestions = await generateReviewSuggestions(
         location?.name || 'this business',
         selectedRating,
-        i18n.language,
+        lang,
         `${location?.category || 'service'} - focusing on ${categoryName}`
       );
       if (aiSuggestions && aiSuggestions.length > 0) {
@@ -147,6 +151,12 @@ const ReviewLanding = () => {
     } finally {
       setLoadingSuggestions(false);
     }
+  };
+
+  const handleCategorySelect = async (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setStep('suggestion');
+    await fetchAISuggestions(categoryId, suggestionLanguage);
   };
 
   const handleCopyAndPost = async (text: string) => {
@@ -332,7 +342,31 @@ const ReviewLanding = () => {
                   <Sparkles className="h-8 w-8 text-purple-600" />
                 </div>
                 <h2 className="text-2xl font-black mb-2 text-gray-900 tracking-tight">{t('review.choose_review_line')}</h2>
-                <p className="text-gray-500 font-medium mb-8 uppercase tracking-widest text-[10px]">{t('review.select_and_post')}</p>
+                <p className="text-gray-500 font-medium mb-6 uppercase tracking-widest text-[10px]">{t('review.select_and_post')}</p>
+
+                {/* AI Review Language Toggle */}
+                <div className="flex justify-center mb-6">
+                  <div className="bg-gray-100 p-1 rounded-xl flex gap-1">
+                    <button
+                      onClick={() => setSuggestionLanguage('en')}
+                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'en'
+                          ? 'bg-white text-red-600 shadow-sm'
+                          : 'text-gray-400 hover:text-gray-600'
+                        }`}
+                    >
+                      EN
+                    </button>
+                    <button
+                      onClick={() => setSuggestionLanguage('mr')}
+                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'mr'
+                          ? 'bg-white text-red-600 shadow-sm'
+                          : 'text-gray-400 hover:text-gray-600'
+                        }`}
+                    >
+                      मराठी
+                    </button>
+                  </div>
+                </div>
 
                 {loadingSuggestions ? (
                   <div className="py-20">
