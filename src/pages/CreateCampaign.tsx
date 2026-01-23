@@ -49,6 +49,9 @@ const CreateCampaign = () => {
   const [theme, setTheme] = useState("lightBlue"); // Keeping for backward compatibility or removing if fully replaced
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [targetUserId, setTargetUserId] = useState<string>("");
 
   const generateAITheme = async () => {
     // Simple heuristic-based generation for now to ensure speed/reliability
@@ -93,6 +96,36 @@ const CreateCampaign = () => {
         const { data: { user: currentUser } } = await supabase.auth.getUser();
         if (currentUser) {
           setUser(currentUser);
+          setTargetUserId(currentUser.id);
+
+          // Check admin access
+          const { data: adminData } = await (supabase as any)
+            .from('admin_users')
+            .select('role')
+            .eq('user_id', currentUser.id)
+            .single();
+
+          if (adminData?.role === 'super_admin' || adminData?.role === 'admin') {
+            setIsAdmin(true);
+            // Fetch potential target users and their profiles
+            const { data: usersData } = await (supabase as any)
+              .from('admin_users')
+              .select('user_id');
+
+            const { data: profilesData } = await (supabase as any)
+              .from('business_profiles')
+              .select('user_id, business_name, email');
+
+            const usersWithProfiles = (usersData || []).map((u: any) => {
+              const profile = (profilesData || []).find((p: any) => p.user_id === u.user_id);
+              return {
+                user_id: u.user_id,
+                name: profile?.business_name || profile?.email || `User: ${u.user_id.substring(0, 8)}...`
+              };
+            });
+
+            setAvailableUsers(usersWithProfiles);
+          }
         } else {
           navigate("/auth");
         }
@@ -194,7 +227,7 @@ const CreateCampaign = () => {
         .from('locations')
         .insert([{
           id: locationId,
-          owner_id: user.id,
+          owner_id: targetUserId,
           name: validated.campaignName,
           category: validated.businessCategory,
           google_review_url: validated.googleReviewUrl,
@@ -211,15 +244,12 @@ const CreateCampaign = () => {
         .from('campaigns')
         .insert([{
           location_id: locationId,
-          owner_id: user.id,
+          owner_id: targetUserId,
           name: validated.campaignName,
           short_code: shortCode,
           status: 'active',
           category: validated.businessCategory,
           theme_color: primaryColor,
-          // I will also add a metadata field if available? 
-          // Looking at the insert, `theme_color` is used.
-          // I'll hope `theme_color` accepts arbitrary strings (VARCHAR).
         }])
         .select('id')
         .single();
@@ -300,6 +330,25 @@ const CreateCampaign = () => {
           </CardHeader>
           <CardContent className="pt-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {isAdmin && (
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
+                  <Label htmlFor="targetUser" className="text-slate-900 font-bold uppercase tracking-widest text-[10px] mb-2 block">Assign to Account</Label>
+                  <select
+                    id="targetUser"
+                    value={targetUserId}
+                    onChange={(e) => setTargetUserId(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 font-medium"
+                    required
+                  >
+                    <option value={user?.id}>Personal Account ({user?.email})</option>
+                    {availableUsers.filter(u => u.user_id !== user?.id).map((u) => (
+                      <option key={u.user_id} value={u.user_id}>
+                        Client: {u.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <Label htmlFor="campaignName">Campaign Name</Label>
                 <Input

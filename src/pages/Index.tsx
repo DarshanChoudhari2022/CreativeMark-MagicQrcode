@@ -155,14 +155,14 @@ const Index = () => {
             <div className="flex flex-wrap justify-center gap-6 md:gap-12 opacity-80">
               {[
                 { icon: TrendingUp, text: t('landing.feature_rank'), color: 'text-red-600' },
-                { icon: Zap, text: t('landing.feature_speed'), color: 'text-gray-900' },
-                { icon: Users, text: t('landing.trusted_by'), color: 'text-gray-900' },
+                { icon: Zap, text: t('landing.feature_speed'), color: 'text-slate-900' },
+                { icon: Users, text: t('landing.trusted_by'), color: 'text-slate-900' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className={`p-2 bg-gray-50 rounded-lg`}>
+                  <div className={`p-2 bg-slate-50 rounded-lg`}>
                     <item.icon className={`h-5 w-5 md:h-6 md:w-6 ${item.color}`} />
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-600">{item.text}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{item.text}</span>
                 </div>
               ))}
             </div>
@@ -231,22 +231,22 @@ const Index = () => {
 
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 items-stretch">
             {/* Before Card */}
-            <Card className="bg-gray-100/50 border-2 border-dashed border-gray-200 shadow-none rounded-3xl overflow-hidden relative group hover:bg-gray-100 transition-colors">
+            <Card className="bg-slate-50 border-2 border-dashed border-slate-200 shadow-none rounded-3xl overflow-hidden relative group hover:bg-slate-100/50 transition-colors">
               <CardContent className="p-8 md:p-12 text-center h-full flex flex-col justify-center">
-                <div className="absolute top-0 left-0 bg-gray-200 text-gray-500 text-[10px] font-bold px-6 py-1.5 rounded-br-xl uppercase tracking-widest">
+                <div className="absolute top-0 left-0 bg-slate-200 text-slate-500 text-[10px] font-bold px-6 py-1.5 rounded-br-xl uppercase tracking-widest">
                   {t('landing.before_label')}
                 </div>
-                <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl grayscale">
+                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl grayscale opacity-70">
                   😕
                 </div>
-                <h4 className="text-xl font-black text-gray-500 mb-4 uppercase tracking-tight line-through decoration-red-500/50 decoration-2">
+                <h4 className="text-xl font-bold text-slate-400 mb-4 uppercase tracking-tight line-through decoration-red-500/30 decoration-2">
                   Traditional Way
                 </h4>
-                <p className="text-base text-gray-500 font-medium leading-relaxed mb-8">
+                <p className="text-sm text-slate-400 font-medium leading-relaxed mb-8">
                   {t('landing.before_desc')}
                 </p>
                 <div className="mt-auto">
-                  <span className="inline-block bg-white text-gray-400 border border-gray-200 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest">
+                  <span className="inline-block bg-white text-slate-400 border border-slate-100 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest">
                     {t('landing.before_result')}
                   </span>
                 </div>
@@ -289,12 +289,12 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
             {clients.map((client, index) => (
-              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all rounded-3xl bg-gray-50 hover:bg-white hover:-translate-y-1 group">
+              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all rounded-3xl bg-slate-50 hover:bg-white hover:-translate-y-1 group">
                 <div className="h-1 bg-red-600 w-0 group-hover:w-full transition-all duration-500 rounded-t-3xl"></div>
                 <CardContent className="p-6 text-center">
                   <h4 className="font-bold text-lg uppercase tracking-tight mb-2 italic">{client.name}</h4>
-                  <span className="bg-white text-red-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-gray-100 inline-block mb-4">{client.location}</span>
-                  <p className="text-gray-400 text-xs font-medium leading-relaxed">{client.description}</p>
+                  <span className="bg-white text-red-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-slate-100 inline-block mb-4">{client.location}</span>
+                  <p className="text-slate-400 text-xs font-medium leading-relaxed">{client.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -427,7 +427,7 @@ const Index = () => {
           <h2 className="text-4xl md:text-7xl font-black text-gray-900 mb-8 italic tracking-tighter uppercase">
             {t('landing.cta_footer_title')}
           </h2>
-          <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-bold uppercase tracking-widest">
+          <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto font-bold uppercase tracking-widest">
             {t('landing.cta_footer_subtitle')}
           </p>
           <div className="flex justify-center">

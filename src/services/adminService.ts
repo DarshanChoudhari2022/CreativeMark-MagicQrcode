@@ -305,6 +305,33 @@ export const getAllUsersWithAccess = async (adminUserId: string): Promise<AdminU
     }
 };
 
+// ADMIN ONLY: Get all business profiles
+export const getAllBusinessProfiles = async (adminUserId: string): Promise<BusinessProfile[] | null> => {
+    try {
+        const adminUser = await checkAdminAccess(adminUserId);
+
+        if (!adminUser || (adminUser.role !== 'super_admin' && adminUser.role !== 'admin')) {
+            console.log('Only admins can view business profiles');
+            return null;
+        }
+
+        const { data, error } = await (supabase as any)
+            .from('business_profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching business profiles:', error);
+            return null;
+        }
+
+        return data as BusinessProfile[];
+    } catch (error) {
+        console.error('Error in getAllBusinessProfiles:', error);
+        return null;
+    }
+};
+
 // Get subscription details
 export const getSubscriptionDetails = async (userId: string): Promise<{
     plan: string;

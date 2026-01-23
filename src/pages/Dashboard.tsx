@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [canCreate, setCanCreate] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [viewMode, setViewMode] = useState<'personal' | 'global'>('personal');
   const [subscription, setSubscription] = useState<{ plan: string; isActive: boolean; daysRemaining: number } | null>(null);
 
   // Dashboard Metrics State
@@ -45,7 +46,8 @@ const Dashboard = () => {
 
       // Check admin access
       const adminUser = await checkAdminAccess(session.user.id);
-      setIsAdmin(adminUser?.role === 'super_admin' || adminUser?.role === 'admin');
+      const isUserAdmin = adminUser?.role === 'super_admin' || adminUser?.role === 'admin';
+      setIsAdmin(isUserAdmin);
 
       // Check if can create campaigns
       const createAccess = await canCreateCampaign(session.user.id);
@@ -55,7 +57,7 @@ const Dashboard = () => {
       const subDetails = await getSubscriptionDetails(session.user.id);
       setSubscription(subDetails);
 
-      await loadCampaigns(session.user.id);
+      await loadData(session.user.id, viewMode);
     };
     checkAuth();
 
@@ -67,61 +69,57 @@ const Dashboard = () => {
       }
     });
     return () => authSub.unsubscribe();
-  }, [navigate]);
+  }, [navigate, viewMode]);
 
-  const loadCampaigns = async (userId: string) => {
+  const loadData = async (userId: string, mode: 'personal' | 'global') => {
+    setLoading(true);
     try {
-      const { data: campaignData, error } = await (supabase as any)
-        .from('campaigns')
-        .select('*')
-        .eq('owner_id', userId)
-        .order('created_at', { ascending: false });
+      let query = (supabase as any).from('campaigns').select('*').order('created_at', { ascending: false });
+
+      if (mode === 'personal') {
+        query = query.eq('owner_id', userId);
+      }
+
+      const { data: campaignData, error } = await query;
 
       if (error) {
         console.error('Error loading campaigns:', error);
       } else {
         setCampaigns(campaignData || []);
         if (campaignData && campaignData.length > 0) {
-          await loadDashboardMetrics(userId, campaignData.map(c => c.id));
+          await loadDashboardMetrics(userId, campaignData.map(c => c.id), mode);
+        } else {
+          setTotalScans(0);
+          setTotalReviews(0);
+          setPrivateFeedbackCount(0);
+          setRecentInteractions([]);
         }
       }
     } catch (error) {
-      console.error('Error in loadCampaigns:', error);
+      console.error('Error in loadData:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadDashboardMetrics = async (userId: string, campaignIds: string[]) => {
+  const loadDashboardMetrics = async (userId: string, campaignIds: string[], mode: 'personal' | 'global') => {
     try {
-      const { count: scansCount } = await (supabase as any)
-        .from('analytics_logs')
-        .select('*', { count: 'exact', head: true })
-        .in('campaign_id', campaignIds);
+      let scansQuery = (supabase as any).from('analytics_logs').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds);
+      let interactionsQuery = (supabase as any).from('analytics_logs').select('*').in('campaign_id', campaignIds).order('created_at', { ascending: false }).limit(10);
+      let reviewsQuery = (supabase as any).from('analytics_logs').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds).eq('event_type', 'review_click');
+      let feedbackQuery = (supabase as any).from('analytics_logs').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds).eq('event_type', 'private_feedback');
 
-      const { data: interactions } = await (supabase as any)
-        .from('analytics_logs')
-        .select('*')
-        .in('campaign_id', campaignIds)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      const [scansRes, interactionsRes, reviewsRes, feedbackRes] = await Promise.all([
+        scansQuery,
+        interactionsQuery,
+        reviewsQuery,
+        feedbackQuery
+      ]);
 
-      const { count: reviewsCount } = await (supabase as any)
-        .from('analytics_logs')
-        .select('*', { count: 'exact', head: true })
-        .in('campaign_id', campaignIds)
-        .eq('event_type', 'review_click');
-
-      const { count: feedbackCount } = await (supabase as any)
-        .from('analytics_logs')
-        .select('*', { count: 'exact', head: true })
-        .in('campaign_id', campaignIds)
-        .eq('event_type', 'private_feedback');
-
-      setTotalScans(scansCount || 0);
-      setTotalReviews(reviewsCount || 0);
-      setPrivateFeedbackCount(feedbackCount || 0);
-      setRecentInteractions(interactions || []);
+      setTotalScans(scansRes.count || 0);
+      setTotalReviews(reviewsRes.count || 0);
+      setPrivateFeedbackCount(feedbackRes.count || 0);
+      setRecentInteractions(interactionsRes.data || []);
       setAvgRating(4.8); // Mock for now
     } catch (error) {
       console.error('Error loading metrics:', error);
@@ -193,15 +191,36 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 md:px-8 py-8 md:py-16 max-w-7xl">
         <div className="mb-10 md:mb-16 flex flex-col md:flex-row md:items-center justify-between gap-6 border-l-4 border-red-600 pl-6 md:pl-10 py-2">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-950 tracking-tight leading-tight mb-2">Operations Center</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-950 tracking-tight leading-tight mb-2">
+              {viewMode === 'global' ? 'Global Command' : 'Operations Center'}
+            </h2>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest leading-none flex items-center gap-2">
               <Lock className="h-3 w-3 text-red-500" />
-              Account: <span className="text-slate-600 lowercase">{user?.email}</span>
+              {viewMode === 'global' ? 'Global Network View' : `Account: ${user?.email}`}
             </p>
           </div>
-          <div className="bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 self-start md:self-auto">
-            <Cpu className="h-4 w-4 text-red-500" />
-            <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">Protocol v2.6.4</span>
+
+          <div className="flex items-center gap-4">
+            {isAdmin && (
+              <div className="bg-white border border-slate-200 p-1.5 rounded-2xl flex gap-1 shadow-sm">
+                <button
+                  onClick={() => setViewMode('personal')}
+                  className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${viewMode === 'personal' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Personal
+                </button>
+                <button
+                  onClick={() => setViewMode('global')}
+                  className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${viewMode === 'global' ? 'bg-red-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Global
+                </button>
+              </div>
+            )}
+            <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 self-start md:self-auto">
+              <Cpu className="h-4 w-4 text-red-500" />
+              <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">v2.6.4</span>
+            </div>
           </div>
         </div>
 
