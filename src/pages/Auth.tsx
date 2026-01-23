@@ -383,9 +383,10 @@ const Auth = () => {
             </Tabs>
           </CardContent>
 
-          <div className="bg-white/5 border-t border-gray-800 py-4 px-8 text-center">
+          <div className="bg-white/5 border-t border-gray-800 py-6 px-8 text-center flex flex-col items-center gap-3">
+            <img src="/logo.jpg" alt="Creative Mark" className="h-8 w-auto object-contain rounded-md opacity-50 grayscale hover:grayscale-0 transition-all cursor-pointer" />
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">
-              Powered by reviewboost ai
+              Powered by reviewboost ai &bull; Creative Mark
             </p>
           </div>
         </Card>

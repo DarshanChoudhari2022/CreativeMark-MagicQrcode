@@ -391,14 +391,17 @@ const ReviewLanding = () => {
           )}
         </main>
 
-        <footer className="mt-12 text-center">
-          <div className="flex items-center justify-center gap-2 text-gray-400 font-bold uppercase tracking-widest text-[9px] mb-4">
-            <CheckCircle2 className="h-3 w-3" />
-            {t('common.powered_by')}
+        <footer className="mt-12 text-center pb-8">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <img src="/logo.jpg" alt="Creative Mark" className="h-10 w-auto object-contain rounded-lg opacity-80" />
+            <div className="flex items-center justify-center gap-2 text-gray-400 font-bold uppercase tracking-widest text-[9px]">
+              <CheckCircle2 className="h-3 w-3" />
+              {t('common.powered_by')}
+            </div>
+            <p className="text-gray-400 text-[10px] uppercase tracking-tighter">
+              &copy; {new Date().getFullYear()} ReviewBoost &bull; Creative Mark AI Systems
+            </p>
           </div>
-          <p className="text-gray-400 text-xs">
-            &copy; {new Date().getFullYear()} ReviewBoost AI
-          </p>
         </footer>
       </div>
     </div>

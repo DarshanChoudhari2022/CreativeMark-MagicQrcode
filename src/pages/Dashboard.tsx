@@ -382,10 +382,16 @@ const Dashboard = () => {
       </main>
 
       {/* Footer Branding */}
-      <footer className="py-8 text-center text-gray-400">
-        <p className="text-xs font-black uppercase tracking-[0.2em]">
-          ReviewBoost &bull; Creative Mark AI Systems
-        </p>
+      <footer className="py-12 border-t bg-white">
+        <div className="container mx-auto px-4 flex flex-col items-center gap-4">
+          <img src="/logo.jpg" alt="Creative Mark" className="h-12 w-auto object-contain rounded-lg shadow-sm" />
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-gray-400">
+            ReviewBoost &bull; Creative Mark AI Systems
+          </p>
+          <p className="text-[10px] text-gray-400">
+            &copy; {new Date().getFullYear()} All rights reserved.
+          </p>
+        </div>
       </footer>
     </div>
   );
