@@ -64,7 +64,7 @@ const Index = () => {
               {t('nav.signin')}
             </Button>
             <Button
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/request-service")}
               className="bg-red-600 hover:bg-black text-white text-xs font-bold uppercase tracking-widest px-6 h-10 rounded-full shadow-lg shadow-red-100 transition-all hover:scale-105 active:scale-95"
             >
               {t('nav.get_started')}
@@ -92,7 +92,7 @@ const Index = () => {
                   {t(`nav.${section}`)}
                 </button>
               ))}
-              <Button onClick={() => navigate("/auth")} className="w-full mt-4 bg-red-600 text-white h-12 rounded-xl font-bold uppercase tracking-widest">
+              <Button onClick={() => navigate("/request-service")} className="w-full mt-4 bg-red-600 text-white h-12 rounded-xl font-bold uppercase tracking-widest">
                 {t('nav.get_started')}
               </Button>
             </nav>
@@ -133,7 +133,7 @@ const Index = () => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Button
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/request-service")}
                 className="bg-red-600 hover:bg-red-700 text-white text-base font-bold px-8 h-12 rounded-full shadow-lg shadow-red-100 transition-all hover:-translate-y-1"
               >
                 {t('landing.cta_main')}
@@ -224,34 +224,49 @@ const Index = () => {
             <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tight italic text-gray-900">{t('landing.before_after_title')}</h3>
           </div>
 
-          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 items-stretch">
             {/* Before Card */}
-            <Card className="bg-white border text-gray-400 shadow-sm rounded-3xl overflow-hidden">
-              <CardContent className="p-8 md:p-12 text-center">
-                <div className="text-6xl mb-6 grayscale opacity-50">😕</div>
-                <h4 className="text-xl font-bold mb-4 uppercase tracking-widest">{t('landing.before_label')}</h4>
-                <p className="text-sm font-medium leading-relaxed mb-8">
+            <Card className="bg-gray-100/50 border-2 border-dashed border-gray-200 shadow-none rounded-3xl overflow-hidden relative group hover:bg-gray-100 transition-colors">
+              <CardContent className="p-8 md:p-12 text-center h-full flex flex-col justify-center">
+                <div className="absolute top-0 left-0 bg-gray-200 text-gray-500 text-[10px] font-bold px-6 py-1.5 rounded-br-xl uppercase tracking-widest">
+                  {t('landing.before_label')}
+                </div>
+                <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl grayscale">
+                  😕
+                </div>
+                <h4 className="text-xl font-black text-gray-500 mb-4 uppercase tracking-tight line-through decoration-red-500/50 decoration-2">
+                  Traditional Way
+                </h4>
+                <p className="text-base text-gray-500 font-medium leading-relaxed mb-8">
                   {t('landing.before_desc')}
                 </p>
-                <div className="bg-gray-100 text-gray-500 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest">
-                  {t('landing.before_result')}
+                <div className="mt-auto">
+                  <span className="inline-block bg-white text-gray-400 border border-gray-200 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest">
+                    {t('landing.before_result')}
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            {/* After Card */}
-            <Card className="bg-white border-4 border-red-50 shadow-2xl shadow-red-100 rounded-[2.5rem] relative overflow-hidden transform md:scale-110 z-10">
-              <div className="absolute top-0 right-0 bg-red-600 text-white text-[10px] font-bold px-6 py-1.5 rounded-bl-xl uppercase tracking-widest">
+            {/* After Card (ReviewBoost) */}
+            <Card className="bg-gradient-to-br from-red-600 to-red-700 text-white border-0 shadow-2xl shadow-red-200 rounded-3xl overflow-hidden relative transform md:-rotate-1 hover:rotate-0 transition-transform duration-300">
+              <div className="absolute top-0 right-0 bg-black/20 text-white text-[10px] font-bold px-6 py-1.5 rounded-bl-xl uppercase tracking-widest backdrop-blur-sm">
                 {t('common.recommended')}
               </div>
-              <CardContent className="p-8 md:p-12 text-center">
-                <div className="text-7xl mb-6 drop-shadow-md">🤩</div>
-                <h4 className="text-2xl font-black text-red-600 mb-4 uppercase tracking-tight italic">{t('landing.after_label')}</h4>
-                <p className="text-base text-gray-900 font-bold leading-relaxed mb-8">
+              <CardContent className="p-8 md:p-12 text-center h-full flex flex-col justify-center">
+                <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-6 text-5xl shadow-inner">
+                  🚀
+                </div>
+                <h4 className="text-3xl font-black mb-4 uppercase tracking-tight italic">
+                  With ReviewBoost
+                </h4>
+                <p className="text-lg text-red-100 font-medium leading-relaxed mb-8">
                   {t('landing.after_desc')}
                 </p>
-                <div className="bg-red-600 text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-red-200">
-                  {t('landing.after_result')}
+                <div className="mt-auto">
+                  <span className="inline-block bg-white text-red-600 px-8 py-3 rounded-full text-sm font-black uppercase tracking-widest shadow-lg">
+                    {t('landing.after_result')}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -357,7 +372,7 @@ const Index = () => {
                 </div>
 
                 <Button
-                  onClick={() => navigate("/auth")}
+                  onClick={() => navigate("/request-service")}
                   className="w-full bg-red-600 hover:bg-black text-white h-16 text-lg font-black uppercase tracking-widest shadow-xl rounded-2xl transition-all hover:scale-[1.02] active:scale-95"
                 >
                   {t('pricing.claim_button')}
@@ -412,7 +427,7 @@ const Index = () => {
           </p>
           <div className="flex justify-center">
             <Button
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/request-service")}
               className="bg-red-600 text-white hover:bg-black text-lg font-black uppercase tracking-widest px-12 h-20 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
             >
               Get ReviewBoost Now 🚀
