@@ -135,16 +135,16 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <Loader2 className="h-10 w-10 animate-spin text-red-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-white font-inter">
       {/* Header */}
-      <header className="border-b bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+      <header className="border-b bg-white/95 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -153,10 +153,10 @@ const Dashboard = () => {
             {subscription && (
               <Badge
                 variant={subscription.isActive ? "default" : "destructive"}
-                className={subscription.isActive ? "bg-green-100 text-green-700" : ""}
+                className={subscription.isActive ? "bg-red-50 text-red-600 border-red-100" : ""}
               >
                 {subscription.isActive ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <ShieldAlert className="h-3 w-3 mr-1" />}
-                {subscription.plan === 'yearly' ? 'ReviewBoost Pro' : 'Free Trial'}
+                {subscription.plan === 'yearly' ? 'PRO ACTIVE' : 'FREE TRIAL'}
               </Badge>
             )}
           </div>
@@ -167,40 +167,36 @@ const Dashboard = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => navigate("/admin")}
-                className="border-red-200 text-red-600 hover:bg-red-50"
+                className="border-red-600 text-red-600 hover:bg-red-50 rounded-full px-4 h-9 font-black uppercase tracking-widest text-[10px]"
               >
-                <Shield className="h-4 w-4 mr-2" />
+                <Shield className="h-3.5 w-3.5 mr-2" />
                 Admin Panel
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="hidden md:flex">
-              <Building2 className="h-4 w-4 mr-2" />
-              {t('nav.overview')}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-gray-600 hover:text-red-600">
-              <LogOut className="h-4 w-4 mr-2" />
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-gray-400 hover:text-red-600 rounded-full px-4 h-9 font-black uppercase tracking-widest text-[10px]">
+              <LogOut className="h-3.5 w-3.5 mr-2" />
               Sign Out
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl font-inter">
+      <main className="container mx-auto px-4 py-10 max-w-7xl">
 
-        {/* Top Feature Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        {/* Top Feature Bar - Strict Red & White */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           <Card
             onClick={() => navigate("/create-campaign")}
-            className="border-2 border-red-50 hover:border-red-200 bg-white shadow-xl shadow-red-500/5 group cursor-pointer transition-all hover:-translate-y-1"
+            className="border border-gray-100 hover:border-red-500 bg-white shadow-xl shadow-gray-100/50 group cursor-pointer transition-all hover:-translate-y-1 rounded-[2rem] overflow-hidden"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-5">
-                <div className="bg-red-600 p-4 rounded-2xl group-hover:rotate-12 transition-transform shadow-lg shadow-red-200">
-                  <Plus className="h-7 w-7 text-white" />
+            <CardContent className="p-8">
+              <div className="flex items-center gap-6">
+                <div className="bg-red-600 p-5 rounded-2xl group-hover:rotate-6 transition-transform shadow-xl shadow-red-200">
+                  <Plus className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">New Campaign</h3>
-                  <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">Start Growth</p>
+                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">New Campaign</h3>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 group-hover:text-red-600 transition-colors">Start Growth Engine</p>
                 </div>
               </div>
             </CardContent>
@@ -208,16 +204,16 @@ const Dashboard = () => {
 
           <Card
             onClick={() => navigate("/nfc-management")}
-            className="border-2 border-blue-50 hover:border-blue-200 bg-white shadow-xl shadow-blue-500/5 group cursor-pointer transition-all hover:-translate-y-1"
+            className="border border-gray-100 hover:border-red-500 bg-white shadow-xl shadow-gray-100/50 group cursor-pointer transition-all hover:-translate-y-1 rounded-[2rem] overflow-hidden"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-5">
-                <div className="bg-blue-600 p-4 rounded-2xl group-hover:rotate-12 transition-transform shadow-lg shadow-blue-200">
-                  <Smartphone className="h-7 w-7 text-white" />
+            <CardContent className="p-8">
+              <div className="flex items-center gap-6">
+                <div className="bg-white border-4 border-red-600 p-4 rounded-2xl group-hover:rotate-6 transition-transform shadow-xl shadow-gray-100">
+                  <Smartphone className="h-8 w-8 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">NFC Center</h3>
-                  <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">Manage Devices</p>
+                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">NFC Center</h3>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 group-hover:text-red-600 transition-colors">Manage Hardware</p>
                 </div>
               </div>
             </CardContent>
@@ -225,38 +221,38 @@ const Dashboard = () => {
 
           <Card
             onClick={() => navigate("/reviews")}
-            className="border-2 border-purple-50 hover:border-purple-200 bg-white shadow-xl shadow-purple-500/5 group cursor-pointer transition-all hover:-translate-y-1"
+            className="border border-gray-100 hover:border-red-500 bg-white shadow-xl shadow-gray-100/50 group cursor-pointer transition-all hover:-translate-y-1 rounded-[2rem] overflow-hidden"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-5">
-                <div className="bg-purple-600 p-4 rounded-2xl group-hover:rotate-12 transition-transform shadow-lg shadow-purple-200">
-                  <Bot className="h-7 w-7 text-white" />
+            <CardContent className="p-8">
+              <div className="flex items-center gap-6">
+                <div className="bg-red-50 p-5 rounded-2xl group-hover:rotate-6 transition-transform border border-red-100">
+                  <Bot className="h-8 w-8 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">AI Automation</h3>
-                  <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">Auto Replies</p>
+                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">AI Autopilot</h3>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 group-hover:text-red-600 transition-colors">Auto Response Hub</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {/* Stats Grid - High Contrast */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {[
             { label: t('dashboard.total_scans'), value: totalScans, icon: QrCode, color: "text-red-600", bg: "bg-red-50" },
-            { label: t('dashboard.total_reviews'), value: totalReviews, icon: Star, color: "text-amber-600", bg: "bg-amber-50" },
-            { label: t('dashboard.avg_rating'), value: avgRating.toFixed(1), icon: TrendingUp, color: "text-green-600", bg: "bg-green-50" },
-            { label: t('dashboard.private_feedback'), value: privateFeedbackCount, icon: MessageSquare, color: "text-indigo-600", bg: "bg-indigo-50" },
+            { label: t('dashboard.total_reviews'), value: totalReviews, icon: Star, color: "text-gray-900", bg: "bg-gray-100" },
+            { label: t('dashboard.avg_rating'), value: avgRating.toFixed(1), icon: TrendingUp, color: "text-red-600", bg: "bg-red-50" },
+            { label: t('dashboard.private_feedback'), value: privateFeedbackCount, icon: MessageSquare, color: "text-gray-900", bg: "bg-gray-100" },
           ].map((stat, i) => (
-            <Card key={i} className="border-0 shadow-sm hover:shadow-md transition-shadow group overflow-hidden bg-white">
-              <CardContent className="p-6">
+            <Card key={i} className="border-0 shadow-sm hover:shadow-xl transition-all group overflow-hidden bg-white rounded-3xl border-b-2 border-transparent hover:border-red-600">
+              <CardContent className="p-8">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
-                    <h3 className="text-4xl font-black text-gray-900 tracking-tighter">{stat.value}</h3>
+                    <h3 className="text-5xl font-black text-gray-900 tracking-tighter leading-none">{stat.value}</h3>
                   </div>
-                  <div className={`p-4 ${stat.bg} rounded-2xl group-hover:scale-110 transition-transform`}>
+                  <div className={`p-4 ${stat.bg} rounded-2xl group-hover:scale-110 transition-transform shadow-sm`}>
                     <stat.icon className={`h-6 w-6 ${stat.color}`} />
                   </div>
                 </div>
@@ -265,51 +261,51 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Active Campaigns */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-xl font-black text-gray-800 uppercase tracking-tight flex items-center gap-2">
-                <Zap className="h-5 w-5 text-red-600" />
+              <h3 className="text-2xl font-black text-gray-900 uppercase tracking-widest flex items-center gap-3">
+                <Zap className="h-6 w-6 text-red-600" />
                 {t('dashboard.active_campaigns')}
               </h3>
-              <Button variant="ghost" size="sm" className="text-red-600 font-black hover:bg-red-50 uppercase tracking-widest text-xs">
+              <Button variant="ghost" size="sm" className="text-red-600 font-black hover:bg-red-50 uppercase tracking-widest text-[10px]">
                 {t('dashboard.view_all')}
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {campaigns.length > 0 ? (
                 campaigns.map((campaign) => (
                   <Card
                     key={campaign.id}
-                    className="border-0 shadow-xl overflow-hidden group cursor-pointer bg-white"
+                    className="border border-gray-100 shadow-xl overflow-hidden group cursor-pointer bg-white rounded-[2.5rem] transition-all hover:scale-[1.02] hover:shadow-red-500/5 hover:border-red-100"
                     onClick={() => navigate(`/campaign/${campaign.id}`)}
                   >
-                    <div className="h-32 bg-gray-100 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-black/5 group-hover:scale-105 transition-transform"></div>
-                      <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md p-3 rounded-2xl group-hover:bg-white group-hover:rotate-12 transition-all">
-                        <QrCode className="h-6 w-6 text-gray-800" />
+                    <div className="h-40 bg-gray-50 relative overflow-hidden flex items-center justify-center">
+                      <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition-colors"></div>
+                      <div className="relative z-10 bg-white p-5 rounded-3xl shadow-xl group-hover:rotate-12 transition-transform border border-gray-100">
+                        <QrCode className="h-10 w-10 text-red-600" />
                       </div>
                     </div>
-                    <CardContent className="p-6">
-                      <h4 className="font-black text-xl text-gray-900 uppercase tracking-tight mb-2 truncate">{campaign.name}</h4>
-                      <div className="flex items-center justify-between">
-                        <p className="text-gray-400 text-xs font-black uppercase tracking-widest">{new Date(campaign.created_at).toLocaleDateString()}</p>
-                        <div className="flex items-center gap-1 text-red-600 font-black text-xs uppercase tracking-widest">
-                          Manage <ArrowRight className="h-3 w-3" />
+                    <CardContent className="p-8">
+                      <h4 className="font-black text-2xl text-gray-900 uppercase tracking-tighter mb-2 truncate leading-none">{campaign.name}</h4>
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-4">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Since {new Date(campaign.created_at).toLocaleDateString()}</p>
+                        <div className="flex items-center gap-1 text-red-600 font-extrabold text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                          Config <ArrowRight className="h-3 w-3" />
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))
               ) : (
-                <div className="col-span-2 py-16 text-center bg-white rounded-3xl border-2 border-dashed border-gray-200">
-                  <div className="p-6 bg-red-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                    <Zap className="h-10 w-10 text-red-600 opacity-20" />
+                <div className="col-span-2 py-24 text-center bg-white rounded-[3rem] border-2 border-dashed border-gray-100">
+                  <div className="p-8 bg-red-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-8">
+                    <Zap className="h-12 w-12 text-red-600/20" />
                   </div>
-                  <h4 className="text-lg font-black text-gray-400 uppercase tracking-widest">{t('dashboard.no_activity')}</h4>
-                  <Button variant="outline" className="mt-6 border-red-100 text-red-600 hover:bg-red-50 font-black uppercase tracking-widest" onClick={() => navigate("/create-campaign")}>
+                  <h4 className="text-lg font-black text-gray-400 uppercase tracking-widest mb-6">{t('dashboard.no_activity')}</h4>
+                  <Button variant="outline" className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white h-14 px-10 rounded-full font-black uppercase tracking-widest shadow-xl shadow-red-100 transition-all active:scale-95" onClick={() => navigate("/create-campaign")}>
                     Create Your First Campaign
                   </Button>
                 </div>
@@ -318,23 +314,23 @@ const Dashboard = () => {
           </div>
 
           {/* Recent Activity */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-black text-gray-800 uppercase tracking-tight flex items-center gap-2 px-2">
-              <HistoryIcon className="h-5 w-5 text-red-600" />
+          <div className="space-y-6">
+            <h3 className="text-2xl font-black text-gray-900 uppercase tracking-widest flex items-center gap-3 px-2">
+              <HistoryIcon className="h-6 w-6 text-red-600" />
               {t('dashboard.recent_activity')}
             </h3>
-            <Card className="border-0 shadow-xl overflow-hidden bg-white min-h-[500px]">
+            <Card className="border border-gray-100 shadow-xl overflow-hidden bg-white min-h-[500px] rounded-[2.5rem]">
               <CardContent className="p-0">
-                <div className="divide-y divide-gray-50 font-inter">
+                <div className="divide-y divide-gray-50">
                   {recentInteractions.length > 0 ? (
                     recentInteractions.map((interaction) => (
-                      <div key={interaction.id} className="p-5 hover:bg-gray-50/50 transition-colors flex items-center gap-4 group">
-                        <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${interaction.event_type === 'review_click' ? 'bg-amber-100' : interaction.event_type === 'scan' ? 'bg-red-100' : 'bg-indigo-100'}`}>
-                          {interaction.event_type === 'review_click' ? <Star className="h-5 w-5 text-amber-600" /> : <QrCode className="h-5 w-5 text-red-600" />}
+                      <div key={interaction.id} className="p-6 hover:bg-red-50/30 transition-colors flex items-center gap-5 group">
+                        <div className={`p-4 rounded-2xl transition-all group-hover:scale-110 shadow-sm ${interaction.event_type === 'review_click' ? 'bg-indigo-50 text-indigo-600' : 'bg-red-50 text-red-600'}`}>
+                          {interaction.event_type === 'review_click' ? <Star className="h-5 w-5" /> : <QrCode className="h-5 w-5" />}
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-black text-gray-900 uppercase tracking-tight">
-                            {interaction.event_type === 'review_click' ? 'Review Generated' : 'QR Scan Detected'}
+                          <p className="text-sm font-black text-gray-900 uppercase tracking-tighter">
+                            {interaction.event_type === 'review_click' ? 'AI Review Match' : 'New Scan Logged'}
                           </p>
                           <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">
                             {new Date(interaction.created_at).toLocaleString()}
@@ -344,9 +340,9 @@ const Dashboard = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="py-32 text-center">
-                      <Cpu className="h-16 w-16 text-gray-100 mx-auto mb-4" />
-                      <p className="text-gray-300 font-extrabold uppercase tracking-[0.2em] text-[10px]">{t('dashboard.no_activity')}</p>
+                    <div className="py-40 text-center">
+                      <Cpu className="h-20 w-20 text-gray-100 mx-auto mb-6" />
+                      <p className="text-gray-300 font-black uppercase tracking-[0.3em] text-[10px]">{t('dashboard.no_activity')}</p>
                     </div>
                   )}
                 </div>
@@ -357,15 +353,17 @@ const Dashboard = () => {
       </main>
 
       {/* Footer Branding */}
-      <footer className="py-12 border-t bg-white mt-12">
-        <div className="container mx-auto px-4 flex flex-col items-center gap-4">
-          <img src="/logo.jpg" alt="Creative Mark" className="h-12 w-auto object-contain rounded-lg shadow-sm" />
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-gray-400">
-            ReviewBoost &bull; Creative Mark AI Systems
-          </p>
-          <p className="text-[10px] text-gray-400 font-bold">
-            &copy; {new Date().getFullYear()} All rights reserved. Precision Automated Solutions.
-          </p>
+      <footer className="py-16 border-t border-gray-100 bg-white mt-20">
+        <div className="container mx-auto px-4 flex flex-col items-center gap-6">
+          <img src="/logo.jpg" alt="Creative Mark" className="h-16 w-auto object-contain rounded-xl" />
+          <div className="space-y-4 text-center">
+            <p className="text-sm font-black uppercase tracking-[0.3em] text-gray-900">
+              ReviewBoost &bull; Creative Mark AI Systems
+            </p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+              &copy; {new Date().getFullYear()} Precision Automated Solutions. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
     </div>

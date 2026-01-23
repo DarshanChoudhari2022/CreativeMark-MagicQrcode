@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Star, Loader2, ExternalLink, CheckCircle2,
   Sparkles, MessageSquare, ThumbsUp, Copy, ArrowRight,
-  Heart, Zap, Award, Smartphone
+  Heart, Zap, Award, Smartphone, Globe, ShieldCheck, Languages
 } from "lucide-react";
 import { generateReviewSuggestions } from "@/services/gemini";
 import { useTranslation } from "react-i18next";
@@ -170,196 +170,182 @@ const ReviewLanding = () => {
           campaign_id: campaignId,
           event_type: 'review_click',
           metadata: {
+            suggestion: text,
             rating: selectedRating,
-            category: selectedCategory,
-            suggestion: text
+            category: selectedCategory
           }
         });
 
       toast({
         title: t('review.copied'),
-        description: t('review.copied_desc'),
+        description: t('review.redirecting'),
       });
 
       setTimeout(() => {
-        const url = location?.google_review_url || campaign?.google_review_url;
-        if (url) {
-          window.location.href = url;
-        }
+        window.location.href = location?.google_review_url || campaign?.google_review_url || '#';
       }, 1500);
-    } catch (err) {
-      console.error('Copy failed:', err);
+    } catch (error) {
+      console.error('Copy error:', error);
+    }
+  };
+
+  const handlePrivateFeedback = async (feedback: string) => {
+    try {
+      await (supabase as any)
+        .from('analytics_logs')
+        .insert({
+          campaign_id: campaignId,
+          event_type: 'private_feedback',
+          metadata: {
+            feedback,
+            rating: selectedRating
+          }
+        });
+
+      setStep('redirect');
+    } catch (error) {
+      console.error('Feedback error:', error);
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-red-600 mx-auto mb-4" />
-          <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">{t('review.loading')}</p>
-        </div>
+        <Loader2 className="h-10 w-10 animate-spin text-red-600" />
       </div>
     );
   }
 
+  const primaryColor = campaign?.theme_color || '#dc2626';
+
   return (
-    <div className="min-h-screen bg-gray-50 font-inter pb-12">
-      {/* Premium Gradient Background */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-br from-gray-900 via-gray-800 to-black z-0"></div>
-
-      <div className="relative z-10 max-w-lg mx-auto px-4 pt-12">
-        {/* Header Branding */}
-        <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="bg-white p-3 rounded-2xl inline-block shadow-2xl mb-4 border-2 border-white/20 overflow-hidden w-24 h-24">
+    <div className="min-h-screen bg-white font-inter">
+      {/* Premium Header */}
+      <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 px-4 py-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-3">
             {location?.logo_url ? (
-              <img
-                src={location.logo_url}
-                alt={location.name}
-                className="w-full h-full object-contain"
-              />
+              <img src={location.logo_url} alt="Logo" className="h-10 w-auto rounded-lg shadow-sm" />
             ) : (
-              <Award className="w-full h-full text-red-600" />
+              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-200">
+                <Star className="text-white h-5 w-5 fill-white" />
+              </div>
             )}
+            <div>
+              <h1 className="text-sm font-black text-gray-900 uppercase tracking-tight leading-none">{location?.name || campaign?.name}</h1>
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Managed Review System</p>
+            </div>
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight uppercase">
-            {location?.name || campaign?.name || t('review.we_love_to_hear')}
-          </h1>
-          <p className="text-gray-400 font-medium mt-1">
-            {campaign?.headline || t('review.how_was_experience')}
-          </p>
+          <LanguageToggle />
         </div>
+      </header>
 
-        {/* Floating Language Toggle */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-1">
-            <LanguageToggle />
-          </div>
-        </div>
+      <main className="container mx-auto px-4 py-12 max-w-xl">
+        <div className="space-y-8">
 
-        {/* Step-based Progress */}
-        <div className="flex justify-center gap-2 mb-8">
-          {['rating', 'category', 'suggestion'].map((s, index) => {
-            const currentStepIndex = ['rating', 'category', 'suggestion', 'redirect'].indexOf(step);
-            return (
-              <div
-                key={s}
-                className={`h-1.5 w-16 rounded-full transition-all duration-500 ${currentStepIndex >= index
-                  ? 'bg-red-500 shadow-[0_0_10px_rgba(220,38,38,0.5)]'
-                  : 'bg-gray-300'
-                  }`}
-              />
-            );
-          })}
-        </div>
-
-        <main className="animate-in fade-in slide-in-from-bottom-6 duration-700">
           {/* Step 1: Rating */}
           {step === 'rating' && (
-            <Card className="border-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl overflow-hidden hover:shadow-2xl transition-shadow bg-white">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Heart className="h-8 w-8 text-red-500 fill-red-500/20" />
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="text-center mb-10">
+                <div className="inline-block bg-red-50 px-4 py-1.5 rounded-full mb-6">
+                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Feedback Portal</p>
                 </div>
-                <h2 className="text-2xl font-black mb-2 text-gray-900 tracking-tight">{t('review.how_was_experience')}</h2>
-                <p className="text-gray-500 font-medium mb-8 uppercase tracking-widest text-[10px]">{t('review.tap_to_select')}</p>
+                <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-4 leading-none">{t('review.how_was_experience')}</h2>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] px-8">{t('review.tap_stars')}</p>
+              </div>
 
-                <div className="flex justify-between gap-1 mb-10">
-                  {[1, 2, 3, 4, 5].map((rating) => (
-                    <button
-                      key={rating}
-                      onClick={() => setSelectedRating(rating)}
-                      className={`flex-1 aspect-square rounded-2xl transition-all duration-300 flex items-center justify-center border-2 ${selectedRating >= rating
-                        ? 'bg-yellow-400 border-yellow-400 shadow-lg shadow-yellow-400/30'
-                        : 'bg-white border-gray-100 hover:border-gray-200'
-                        }`}
-                    >
-                      <Star
-                        className={`w-full h-full p-2 ${selectedRating >= rating
-                          ? 'text-white fill-white'
-                          : 'text-gray-200'
-                          }`}
-                      />
-                    </button>
-                  ))}
-                </div>
+              <Card className="border-0 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.08)] rounded-[2.5rem] bg-white overflow-hidden">
+                <CardContent className="p-12 text-center">
+                  <div className="flex justify-center gap-2 mb-10">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onMouseEnter={() => setSelectedRating(star)}
+                        onClick={() => {
+                          setSelectedRating(star);
+                          handleRatingSubmit();
+                        }}
+                        className="transition-all transform hover:scale-125"
+                      >
+                        <Star
+                          className={`h-12 w-12 ${star <= selectedRating
+                              ? "fill-red-600 text-red-600"
+                              : "text-gray-100"
+                            }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
 
-                <div className="bg-gray-50 py-4 px-6 rounded-2xl mb-8">
-                  <p className="text-xl font-black text-gray-800 italic">
-                    {selectedRating === 5 && t('review.rating_5')}
-                    {selectedRating === 4 && t('review.rating_4')}
-                    {selectedRating === 3 && t('review.rating_3')}
-                    {selectedRating === 2 && t('review.rating_2')}
-                    {selectedRating === 1 && t('review.rating_1')}
-                  </p>
-                </div>
-
-                <Button
-                  onClick={handleRatingSubmit}
-                  className="w-full h-16 bg-gray-900 border-b-4 border-black hover:bg-black text-white text-xl font-black rounded-2xl transition-all shadow-xl hover:translate-y-0.5 active:translate-y-1"
-                >
-                  {t('review.continue')}
-                  <ArrowRight className="ml-2 h-6 w-6" />
-                </Button>
-              </CardContent>
-            </Card>
+                  <Button
+                    onClick={handleRatingSubmit}
+                    className="w-full h-16 bg-red-600 hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200"
+                  >
+                    {t('common.continue')}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           )}
 
           {/* Step 2: Category */}
           {step === 'category' && (
-            <Card className="border-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl overflow-hidden bg-white">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Zap className="h-8 w-8 text-blue-500 fill-blue-500/20" />
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="text-center mb-10">
+                <div className="inline-block bg-red-50 px-4 py-1.5 rounded-full mb-6">
+                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Service Breakdown</p>
                 </div>
-                <h2 className="text-2xl font-black mb-2 text-gray-900 tracking-tight">{t('review.select_what_stood_out')}</h2>
-                <p className="text-gray-500 font-medium mb-8 uppercase tracking-widest text-[10px]">{t('review.pick_category')}</p>
+                <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-3 leading-none">{t('review.select_what_stood_out')}</h2>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">{t('review.pick_category')}</p>
+              </div>
 
-                <div className="grid grid-cols-1 gap-3 mb-8">
-                  {reviewCategories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => handleCategorySelect(cat.id)}
-                      className="p-5 bg-gray-50 hover:bg-red-50 rounded-2xl border-2 border-transparent hover:border-red-200 transition-all flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="text-3xl group-hover:scale-125 transition-transform">{cat.emoji}</span>
-                        <span className="font-black text-gray-800 text-lg uppercase tracking-tight">{cat.name}</span>
+              <div className="grid grid-cols-1 gap-4">
+                {reviewCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleCategorySelect(cat.id)}
+                    className="p-6 bg-white hover:bg-red-600 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-white transition-colors">
+                        {cat.emoji}
                       </div>
-                      <ArrowRight className="h-5 w-5 text-gray-300 group-hover:text-red-500" />
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                      <span className="font-black text-gray-900 group-hover:text-white text-lg uppercase tracking-tight">{cat.name}</span>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-gray-300 group-hover:text-white" />
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* Step 3: Suggestion */}
           {step === 'suggestion' && (
-            <Card className="border-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl bg-white overflow-hidden">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="h-8 w-8 text-purple-600" />
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="text-center mb-8">
+                <div className="inline-block bg-red-50 px-4 py-1.5 rounded-full mb-6">
+                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">AI Content Generation</p>
                 </div>
-                <h2 className="text-2xl font-black mb-2 text-gray-900 tracking-tight">{t('review.choose_review_line')}</h2>
-                <p className="text-gray-500 font-medium mb-6 uppercase tracking-widest text-[10px]">{t('review.select_and_post')}</p>
+                <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-3 leading-none">{t('review.choose_review_line')}</h2>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8">{t('review.select_and_post')}</p>
 
-                {/* AI Review Language Toggle */}
-                <div className="flex justify-center mb-6">
-                  <div className="bg-gray-100 p-1 rounded-xl flex gap-1">
+                {/* AI Review Language Toggle - Professional Style */}
+                <div className="flex justify-center mb-8">
+                  <div className="bg-gray-100 p-1 rounded-2xl flex gap-1">
                     <button
                       onClick={() => setSuggestionLanguage('en')}
-                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'en'
-                          ? 'bg-white text-red-600 shadow-sm'
+                      className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'en'
+                          ? 'bg-red-600 text-white shadow-xl'
                           : 'text-gray-400 hover:text-gray-600'
                         }`}
                     >
-                      EN
+                      ENG
                     </button>
                     <button
                       onClick={() => setSuggestionLanguage('mr')}
-                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'mr'
-                          ? 'bg-white text-red-600 shadow-sm'
+                      className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'mr'
+                          ? 'bg-red-600 text-white shadow-xl'
                           : 'text-gray-400 hover:text-gray-600'
                         }`}
                     >
@@ -367,77 +353,81 @@ const ReviewLanding = () => {
                     </button>
                   </div>
                 </div>
+              </div>
 
-                {loadingSuggestions ? (
-                  <div className="py-20">
-                    <Loader2 className="h-10 w-10 animate-spin text-red-600 mx-auto mb-4" />
-                    <p className="text-gray-400 font-black text-xs uppercase animate-pulse">{t('review.ai_crafting')}</p>
+              {loadingSuggestions ? (
+                <div className="py-24 text-center">
+                  <div className="relative inline-block">
+                    <div className="absolute -inset-4 bg-red-600/10 rounded-full blur-xl animate-pulse"></div>
+                    <Loader2 className="h-12 w-12 animate-spin text-red-600 mx-auto mb-6 relative z-10" />
                   </div>
-                ) : (
-                  <div className="space-y-4 mb-8">
-                    {suggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleCopyAndPost(suggestion)}
-                        className="w-full p-6 text-left bg-gray-50 hover:bg-white rounded-2xl border-2 border-transparent hover:border-red-500/30 hover:shadow-xl transition-all group relative overflow-hidden"
-                      >
-                        <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Copy className="h-4 w-4 text-red-500" />
+                  <p className="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em] animate-pulse">{t('review.ai_crafting')}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleCopyAndPost(suggestion)}
+                      className="w-full p-8 text-left bg-white hover:bg-gray-50 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-red-600 p-2 rounded-xl shadow-lg shadow-red-200">
+                          <ThumbsUp className="h-4 w-4 text-white" />
                         </div>
-                        <p className="text-gray-700 font-bold leading-relaxed line-clamp-3">"{suggestion}"</p>
-                      </button>
-                    ))}
+                      </div>
+                      <p className="text-gray-900 font-bold leading-relaxed pr-8">
+                        "{suggestion}"
+                      </p>
+                    </button>
+                  ))}
+
+                  <div className="pt-8 text-center">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                      <ShieldCheck className="h-3 w-3 text-red-600" />
+                      AI Verified Professional Review Content
+                    </p>
                   </div>
-                )}
-
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-4">
-                  AI-Powered Review Generation
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Fallback Redirect */}
-          {step === 'redirect' && (
-            <Card className="border-0 shadow-xl rounded-3xl bg-white">
-              <CardContent className="p-8 text-center">
-                <div className="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                  <Smartphone className="h-10 w-10 text-white" />
                 </div>
-                <h2 className="text-2xl font-black mb-4 text-gray-900">{t('review.almost_done')}</h2>
-                <div className="bg-red-50 p-6 rounded-2xl text-left mb-8 border border-red-100">
-                  <p className="text-red-900 font-bold leading-relaxed whitespace-pre-line">
-                    {t('review.instructions')}
-                  </p>
-                </div>
-                <Button
-                  onClick={() => {
-                    const url = location?.google_review_url || campaign?.google_review_url;
-                    if (url) window.location.href = url;
-                  }}
-                  className="w-full h-16 bg-red-600 hover:bg-red-700 text-white text-xl font-black rounded-2xl shadow-xl hover:shadow-red-500/40 transition-all border-b-4 border-red-900"
-                >
-                  {t('review.open_google')}
-                  <ExternalLink className="ml-2 h-5 w-5" />
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </main>
-
-        <footer className="mt-12 text-center pb-8">
-          <div className="flex flex-col items-center justify-center gap-4">
-            <img src="/logo.jpg" alt="Creative Mark" className="h-10 w-auto object-contain rounded-lg opacity-80" />
-            <div className="flex items-center justify-center gap-2 text-gray-400 font-bold uppercase tracking-widest text-[9px]">
-              <CheckCircle2 className="h-3 w-3" />
-              {t('common.powered_by')}
+              )}
             </div>
-            <p className="text-gray-400 text-[10px] uppercase tracking-tighter">
-              &copy; {new Date().getFullYear()} ReviewBoost &bull; Creative Mark AI Systems
+          )}
+
+          {/* Simple Thank You / Redirect */}
+          {step === 'redirect' && (
+            <div className="animate-in fade-in zoom-in duration-500 text-center py-20">
+              <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-10 shadow-xl shadow-red-200/50">
+                <CheckCircle2 className="h-12 w-12 text-red-600" />
+              </div>
+              <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-4 leading-none">{t('review.thank_you')}</h2>
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-12">
+                {selectedRating < 4 ? t('review.feedback_received') : t('review.redirecting')}
+              </p>
+              <Button
+                onClick={() => window.location.href = location?.google_review_url || '/'}
+                className="bg-red-600 hover:bg-black text-white h-14 px-10 rounded-full font-black uppercase tracking-widest shadow-xl shadow-red-100"
+              >
+                Return to Profile
+              </Button>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Corporate Footer */}
+      <footer className="py-20 border-t border-gray-50 text-center bg-gray-50/50">
+        <div className="container mx-auto px-4 flex flex-col items-center gap-6">
+          <img src="/logo.jpg" alt="Creative Mark" className="h-10 w-auto object-contain grayscale opacity-50" />
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-[10px] font-black text-gray-900 uppercase tracking-[0.3em]">
+              Review Management Intelligence &bull; Creative Mark
+            </p>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest max-w-xs mx-auto leading-loose">
+              Automating reputation growth for businesses across Maharashtra through precision AI systems.
             </p>
           </div>
-        </footer>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 };

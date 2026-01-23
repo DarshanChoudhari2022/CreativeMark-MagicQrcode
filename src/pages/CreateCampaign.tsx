@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Sparkles, QrCode } from "lucide-react";
+import { ArrowLeft, Sparkles, QrCode, Building2, Globe, Palette, CheckCircle2, Loader2, ArrowRight, Zap, Target } from "lucide-react";
 import { z } from "zod";
 import type { User } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
@@ -29,8 +29,7 @@ const campaignSchema = z.object({
   googleReviewUrl: z.string().url("Please enter a valid Google review URL"),
   customMessage: z.string().max(500, "Message must be less than 500 characters").optional(),
   businessCategory: z.string().min(1, "Please select a business category"),
-  theme: z.enum(['lightBlue', 'darkNavy', 'blackGold', 'whiteBlue']).default('lightBlue'),
-  logoUrl: z.string().optional(),
+  theme: z.enum(['lightBlue', 'darkNavy', 'blackGold', 'whiteBlue']).default('whiteBlue'),
 });
 
 const CreateCampaign = () => {
@@ -38,54 +37,18 @@ const CreateCampaign = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+
+  // Form State
   const [campaignName, setCampaignName] = useState("");
   const [googleReviewUrl, setGoogleReviewUrl] = useState("");
   const [customMessage, setCustomMessage] = useState("");
   const [businessCategory, setBusinessCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
-  const [primaryColor, setPrimaryColor] = useState("#4285F4");
+  const [primaryColor, setPrimaryColor] = useState("#dc2626"); // Default Red
   const [secondaryColor, setSecondaryColor] = useState("#ffffff");
-  const [theme, setTheme] = useState("lightBlue"); // Keeping for backward compatibility or removing if fully replaced
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const generateAITheme = async () => {
-    // Simple heuristic-based generation for now to ensure speed/reliability
-    // In production, this call an AI endpoint
-    const cat = businessCategory === 'Other' ? customCategory : businessCategory;
-
-    // Default fallback
-    let p = "#4285F4";
-    let s = "#ffffff";
-
-    const normalized = cat.toLowerCase();
-
-    if (normalized.includes('food') || normalized.includes('restaurant') || normalized.includes('pizza') || normalized.includes('burger')) {
-      p = "#EA4335"; // Red for food
-      s = "#FFF5F5";
-    } else if (normalized.includes('health') || normalized.includes('medical') || normalized.includes('gym') || normalized.includes('fitness')) {
-      p = "#34A853"; // Green for health
-      s = "#F0FFF4";
-    } else if (normalized.includes('tech') || normalized.includes('auto') || normalized.includes('service')) {
-      p = "#4285F4"; // Blue for trust
-      s = "#F5F8FF";
-    } else if (normalized.includes('luxury') || normalized.includes('real estate') || normalized.includes('jewel') || normalized.includes('black')) {
-      p = "#1A1A1A"; // Black/Gold for luxury
-      s = "#FAFAFA";
-    } else if (normalized.includes('native') || normalized.includes('berry') || normalized.includes('farm')) {
-      p = "#D32F2F"; // Berry red
-      s = "#FFF0F5";
-    }
-
-    setPrimaryColor(p);
-    setSecondaryColor(s);
-
-    toast({
-      title: "Theme Generated!",
-      description: `Applied colors optimized for ${cat}`,
-    });
-  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -104,49 +67,23 @@ const CreateCampaign = () => {
     checkAuth();
   }, [navigate]);
 
-  // Helper: Resize image before upload
-  const resizeImage = (file: File, maxSize: number = 500, quality: number = 0.8): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        // Scale down proportionally
-        if (width > height) {
-          if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
-        } else {
-          if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error("Canvas toBlob failed"));
-        }, 'image/jpeg', quality);
-      };
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
+  const generateAITheme = () => {
+    setPrimaryColor("#dc2626");
+    setSecondaryColor("#ffffff");
+    toast({
+      title: "Optimized Red & White Applied",
+      description: "Applied professional branding system.",
     });
   };
 
   const uploadLogoToStorage = async (file: File): Promise<string | null> => {
     if (!user) return null;
     try {
-      // Resize the image first
-      const resizedBlob = await resizeImage(file, 500, 0.8);
-      const resizedFile = new File([resizedBlob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' });
-
       const fileName = `${uuidv4()}.jpg`;
       const filePath = `${user.id}/${fileName}`;
       const { error: uploadError } = await supabase.storage
         .from('qr-logos')
-        .upload(filePath, resizedFile);
+        .upload(filePath, file);
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage
         .from('qr-logos')
@@ -154,17 +91,17 @@ const CreateCampaign = () => {
       return publicUrl;
     } catch (error) {
       console.error('Logo upload error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process image. Please try a different one.",
-        variant: "destructive",
-      });
       return null;
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (activeStep < 3) {
+      setActiveStep(prev => prev + 1);
+      return;
+    }
+
     setLoading(true);
     try {
       const validated = campaignSchema.parse({
@@ -172,25 +109,20 @@ const CreateCampaign = () => {
         googleReviewUrl,
         customMessage: customMessage || undefined,
         businessCategory: businessCategory === 'Other' ? customCategory : businessCategory,
-        theme,
+        theme: 'whiteBlue',
       });
 
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
+      if (!user) throw new Error("User not authenticated");
 
-      // Upload logo if provided
       let logoUrl: string | null = null;
       if (logoFile) {
         logoUrl = await uploadLogoToStorage(logoFile);
       }
 
-      // Generate location ID client-side to avoid schema cache issues
       const locationId = uuidv4();
       const shortCode = uuidv4().substring(0, 8).toUpperCase();
 
-      // Create location first without trying to get the response
-      const { error: locationError } = await supabase
+      const { error: locationError } = await (supabase as any)
         .from('locations')
         .insert([{
           id: locationId,
@@ -201,13 +133,9 @@ const CreateCampaign = () => {
           logo_url: logoUrl,
         }]);
 
-      if (locationError) {
-        console.error('Location creation error:', locationError);
-        throw locationError;
-      }
+      if (locationError) throw locationError;
 
-      // Create campaign with the location ID
-      const { data: campaignData, error: campaignError } = await supabase
+      const { data: campaignData, error: campaignError } = await (supabase as any)
         .from('campaigns')
         .insert([{
           location_id: locationId,
@@ -217,39 +145,22 @@ const CreateCampaign = () => {
           status: 'active',
           category: validated.businessCategory,
           theme_color: primaryColor,
-          // I will also add a metadata field if available? 
-          // Looking at the insert, `theme_color` is used.
-          // I'll hope `theme_color` accepts arbitrary strings (VARCHAR).
         }])
         .select('id')
         .single();
 
-      if (campaignError) {
-        console.error('Campaign creation error:', campaignError);
-        throw campaignError;
-      }
+      if (campaignError) throw campaignError;
 
-      if (!campaignData || !campaignData.id) {
-        throw new Error('Failed to create campaign');
-      }
-
-      console.log('Campaign created successfully:', campaignData.id);
       toast({
-        title: "Success!",
-        description: "Campaign created successfully.",
-        variant: "default",
+        title: "Campaign Operational!",
+        description: "Your AI-powered review campaign is now live.",
       });
 
-      setTimeout(() => {
-        navigate(`/campaign/${campaignData.id}`);
-      }, 1000);
+      navigate(`/campaign/${campaignData.id}`);
     } catch (error: any) {
-      console.error('Complete error object:', error);
-      console.error('Error message:', error?.message);
-      console.error('Error code:', error?.code);
       toast({
-        title: "Error",
-        description: `Failed to create campaign: ${error?.message || 'Unknown error'}`,
+        title: "Configuration Error",
+        description: error.message || "Something went wrong",
         variant: "destructive",
       });
     } finally {
@@ -259,202 +170,255 @@ const CreateCampaign = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-red-50">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-2">Error</h1>
-          <p className="text-red-500">{error}</p>
-          <Button onClick={() => navigate('/auth')} className="mt-4">
-            Go to Login
-          </Button>
+          <p className="text-red-500 font-black uppercase tracking-widest">{error}</p>
+          <Button onClick={() => navigate('/auth')} className="mt-4 bg-red-600">Re-Authenticate</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <header className="border-b bg-white/80 backdrop-blur-sm shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/dashboard")}
-            className="hover:bg-blue-50"
-          >
+    <div className="min-h-screen bg-white font-inter">
+      <header className="border-b bg-white sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="text-gray-400 hover:text-red-600 rounded-full h-10 px-6 font-black uppercase tracking-widest text-[10px]">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Exit Setup
           </Button>
+          <div className="flex items-center gap-2">
+            <img src="/logo.jpg" alt="Logo" className="h-8 w-auto rounded-md" />
+            <span className="text-xs font-black uppercase tracking-widest text-gray-900 leading-none">Campaign Builder</span>
+          </div>
         </div>
       </header>
-      <main className="container mx-auto px-4 py-8">
-        <Card className="max-w-2xl mx-auto">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-            <div className="flex items-center gap-3">
-              <QrCode className="h-6 w-6" />
-              <div>
-                <CardTitle className="text-2xl">Create QR Campaign</CardTitle>
-                <CardDescription className="text-blue-100">
-                  Set up your AI-powered Google review collection campaign
-                </CardDescription>
-              </div>
+
+      <main className="container mx-auto px-4 py-12 max-w-4xl">
+        <div className="mb-12">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-4xl font-black text-gray-900 uppercase tracking-tighter">New Campaign</h1>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Professional Review System Deployment</p>
             </div>
-          </CardHeader>
-          <CardContent className="pt-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Label htmlFor="campaignName">Campaign Name</Label>
-                <Input
-                  id="campaignName"
-                  placeholder="e.g., Surajit Auto Garage - Counter 1"
-                  value={campaignName}
-                  onChange={(e) => setCampaignName(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="businessCategory">Business Category</Label>
-                <select
-                  id="businessCategory"
-                  value={businessCategory}
-                  onChange={(e) => setBusinessCategory(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Select your business type...</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                  <option value="Other">Other (Custom)</option>
-                </select>
-                {businessCategory === 'Other' && (
-                  <Input
-                    className="mt-2"
-                    placeholder="Enter your specific business category (e.g. Strawberry Farm)"
-                    value={customCategory}
-                    onChange={(e) => setCustomCategory(e.target.value)}
-                    required
-                  />
+            <div className="hidden md:flex gap-2">
+              {[1, 2, 3].map(s => (
+                <div key={s} className={`w-8 h-1 transition-all rounded-full ${activeStep >= s ? 'bg-red-600' : 'bg-gray-100'}`}></div>
+              ))}
+            </div>
+          </div>
+
+          <Card className="border-0 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.08)] rounded-[3rem] overflow-hidden bg-white">
+            <div className="h-2 bg-red-600 w-full" style={{ clipPath: `inset(0 ${100 - (activeStep * 33.3)}% 0 0)` }}></div>
+
+            <CardContent className="p-10 md:p-16">
+              <form onSubmit={handleSubmit} className="space-y-10">
+
+                {/* Step 1: Identity */}
+                {activeStep === 1 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-8">
+                    <div className="flex items-center gap-4 border-b border-gray-50 pb-6">
+                      <div className="bg-red-50 p-4 rounded-2xl">
+                        <Building2 className="h-6 w-6 text-red-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Business Identity</h2>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Basic operational details</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <Label htmlFor="campaignName" className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Business Name</Label>
+                        <Input
+                          id="campaignName"
+                          placeholder="The Grand Palace"
+                          value={campaignName}
+                          onChange={(e) => setCampaignName(e.target.value)}
+                          required
+                          className="h-14 rounded-2xl border-gray-200 focus:border-red-600 focus:ring-red-100 font-bold"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="businessCategory" className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Industry Type</Label>
+                        <select
+                          id="businessCategory"
+                          value={businessCategory}
+                          onChange={(e) => setBusinessCategory(e.target.value)}
+                          className="w-full h-14 px-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-red-50 focus:border-red-600 font-bold transition-all"
+                          required
+                        >
+                          <option value="">Industry Category</option>
+                          {CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                          <option value="Other">Other (Custom)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-2">
+                        <Globe className="h-3 w-3 text-red-600" />
+                        Google Review URL
+                      </Label>
+                      <Input
+                        type="url"
+                        placeholder="https://g.page/r/YOUR_ID/review"
+                        value={googleReviewUrl}
+                        onChange={(e) => setGoogleReviewUrl(e.target.value)}
+                        required
+                        className="h-14 rounded-2xl border-gray-200 focus:border-red-600 focus:ring-red-100 font-bold"
+                      />
+                      <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest pl-1">Link obtained from Google My Business Profile</p>
+                    </div>
+                  </div>
                 )}
-              </div>
-              <div className="border border-dashed border-blue-300 rounded-lg p-6 bg-blue-50">
-                <Label htmlFor="logoFile">Business Logo (Optional)</Label>
-                <div className="mt-4">
-                  <Input
-                    id="logoFile"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setLogoFile(e.target.files[0]);
-                      }
-                    }}
-                    disabled={uploadingLogo}
-                  />
-                  <p className="text-sm text-gray-600 mt-2">Max file size: 5MB</p>
-                </div>
-              </div>
-              <div>
-                <Label>QR Card Theme Colors</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                  <div>
-                    <Label htmlFor="primaryColor" className="text-xs text-gray-500">Primary Color (Buttons/Accents)</Label>
-                    <div className="flex gap-2 items-center mt-1">
-                      <Input
-                        id="primaryColor"
-                        type="color"
-                        value={primaryColor}
-                        onChange={(e) => setPrimaryColor(e.target.value)}
-                        className="h-10 w-16 p-1 cursor-pointer"
-                      />
-                      <Input
-                        value={primaryColor}
-                        onChange={(e) => setPrimaryColor(e.target.value)}
-                        className="font-mono uppercase"
-                        maxLength={7}
-                      />
+
+                {/* Step 2: Visual System */}
+                {activeStep === 2 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-10">
+                    <div className="flex items-center gap-4 border-b border-gray-50 pb-6">
+                      <div className="bg-red-50 p-4 rounded-2xl">
+                        <Palette className="h-6 w-6 text-red-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Visual Configuration</h2>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Landing Page Presentation</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-8 rounded-[2.5rem] border border-gray-100">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6 block">Business Brand Logo</Label>
+                      <div className="flex flex-col md:flex-row items-center gap-8">
+                        <div className="w-32 h-32 bg-white rounded-3xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden">
+                          {logoFile ? (
+                            <img src={URL.createObjectURL(logoFile)} className="w-full h-full object-contain p-2" alt="Preview" />
+                          ) : (
+                            <QrCode className="w-10 h-10 text-gray-200" />
+                          )}
+                        </div>
+                        <div className="flex-1 space-y-4">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => e.target.files?.[0] && setLogoFile(e.target.files[0])}
+                            className="h-12 border-gray-200 bg-white shadow-sm file:bg-red-600 file:text-white file:border-0 file:rounded-lg file:mr-4 file:px-4 file:h-full file:cursor-pointer rounded-xl font-bold"
+                          />
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Resolution 512x512 Recommended (Max 5MB)</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Primary Color</Label>
+                          <div className="w-8 h-8 rounded-full shadow-lg" style={{ backgroundColor: primaryColor }}></div>
+                        </div>
+                        <Input
+                          type="color"
+                          value={primaryColor}
+                          onChange={e => setPrimaryColor(e.target.value)}
+                          className="h-10 w-full cursor-pointer border-0 p-0"
+                        />
+                      </div>
+                      <div className="flex items-center justify-center">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={generateAITheme}
+                          className="w-full h-16 border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-black uppercase tracking-[0.2em] rounded-2xl transition-all"
+                        >
+                          <Zap className="w-4 h-4 mr-2" />
+                          Reset to Brand Palette
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="secondaryColor" className="text-xs text-gray-500">Background Color (Card)</Label>
-                    <div className="flex gap-2 items-center mt-1">
-                      <Input
-                        id="secondaryColor"
-                        type="color"
-                        value={secondaryColor}
-                        onChange={(e) => setSecondaryColor(e.target.value)}
-                        className="h-10 w-16 p-1 cursor-pointer"
+                )}
+
+                {/* Step 3: Final Deployment */}
+                {activeStep === 3 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-8">
+                    <div className="flex items-center gap-4 border-b border-gray-50 pb-6">
+                      <div className="bg-red-50 p-4 rounded-2xl">
+                        <Target className="h-6 w-6 text-red-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Final Deployment</h2>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Message & Confirmation</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="customMessage" className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Landing Page Message (Optional)</Label>
+                      <Textarea
+                        id="customMessage"
+                        placeholder="Your feedback helps us grow. Thank you for your support!"
+                        value={customMessage}
+                        onChange={(e) => setCustomMessage(e.target.value)}
+                        maxLength={500}
+                        className="min-h-[150px] rounded-3xl border-gray-200 focus:border-red-600 focus:ring-red-100 font-bold p-6 leading-relaxed"
                       />
-                      <Input
-                        value={secondaryColor}
-                        onChange={(e) => setSecondaryColor(e.target.value)}
-                        className="font-mono uppercase"
-                        maxLength={7}
-                      />
+                      <div className="flex justify-between items-center px-1">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Enterprise grade data encryption enabled</p>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{customMessage.length}/500</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-900 p-8 rounded-[2.5rem] flex items-center justify-between group">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center">
+                          <CheckCircle2 className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-white font-black uppercase tracking-tight">One-Click Setup Ready</p>
+                          <p className="text-gray-500 text-[9px] font-black uppercase tracking-widest">Verification Status: PASSED</p>
+                        </div>
+                      </div>
+                      <Sparkles className="h-6 w-6 text-red-600 animate-pulse" />
                     </div>
                   </div>
-                </div>
-                <div className="mt-2 flex justify-end">
+                )}
+
+                <div className="flex gap-4 pt-10 border-t border-gray-50">
+                  {activeStep > 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setActiveStep(prev => prev - 1)}
+                      className="h-16 px-10 rounded-2xl border-gray-200 text-gray-400 font-black uppercase tracking-widest text-[10px]"
+                    >
+                      Previous Phase
+                    </Button>
+                  )}
                   <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={generateAITheme}
-                    disabled={!businessCategory}
+                    type="submit"
+                    disabled={loading}
+                    className={`flex-1 h-16 rounded-[1.5rem] text-sm font-black uppercase tracking-[0.2em] transition-all shadow-2xl active:scale-95 ${activeStep === 3 ? 'bg-red-600 hover:bg-black shadow-red-200' : 'bg-gray-900 hover:bg-black'}`}
                   >
-                    <Sparkles className="h-3 w-3 mr-2" />
-                    Auto-Generate Theme
+                    {loading ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {activeStep === 3 ? 'Deploy Campaign' : 'Next Configuration Step'}
+                        <ArrowRight className="h-4 w-4" />
+                      </div>
+                    )}
                   </Button>
                 </div>
-              </div>
-              <div>
-                <Label htmlFor="googleReviewUrl">Google Review Link *</Label>
-                <Input
-                  id="googleReviewUrl"
-                  type="url"
-                  placeholder="https://g.page/business-name/review"
-                  value={googleReviewUrl}
-                  onChange={(e) => setGoogleReviewUrl(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="customMessage">Custom Message (Optional)</Label>
-                <Textarea
-                  id="customMessage"
-                  placeholder="Add a custom message to appear on the QR card..."
-                  value={customMessage}
-                  onChange={(e) => setCustomMessage(e.target.value)}
-                  maxLength={500}
-                />
-                <p className="text-sm text-gray-500 mt-2">
-                  {customMessage.length}/500 characters
-                </p>
-              </div>
-              <div className="flex gap-4 pt-4">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                >
-                  {loading ? (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                      Creating Campaign...
-                    </>
-                  ) : (
-                    <>
-                      <QrCode className="h-4 w-4 mr-2" />
-                      Create Campaign
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </main>
-    </div >
+
+      <footer className="py-20 border-t border-gray-50 text-center">
+        <img src="/logo.jpg" alt="Logo" className="h-10 w-auto mx-auto mb-4" />
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">© 2026 Creative Mark Precision Systems</p>
+      </footer>
+    </div>
   );
 };
 
