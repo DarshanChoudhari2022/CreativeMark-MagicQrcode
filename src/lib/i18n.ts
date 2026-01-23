@@ -7,22 +7,31 @@ import en from '../locales/en.json';
 import hi from '../locales/hi.json';
 import mr from '../locales/mr.json';
 
+const resources = {
+  en: {
+    translation: en
+  },
+  hi: {
+    translation: hi
+  },
+  mr: {
+    translation: mr
+  }
+};
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      en: { translation: en },
-      hi: { translation: hi },
-      mr: { translation: mr }
-    },
+    resources,
     fallbackLng: 'en',
+    debug: false,
     interpolation: {
-      escapeValue: false
+      escapeValue: false, // not needed for react as it escapes by default
     },
     detection: {
       order: ['localStorage', 'navigator'],
-      caches: ['localStorage']
+      caches: ['localStorage'],
     }
   });
 

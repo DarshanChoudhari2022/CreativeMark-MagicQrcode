@@ -86,11 +86,10 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
       {/* The Printable Card Area */}
       <div
         ref={canvasRef}
-        className="relative overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-white flex flex-col items-center p-10 select-none"
+        className="relative overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-white flex flex-col items-center p-6 md:p-10 select-none w-full max-w-[400px]"
         style={{
-          width: '400px',
           backgroundColor: secondaryColor,
-          fontFamily: "'Outfit', 'Inter', sans-serif"
+          fontFamily: "'Inter', sans-serif"
         }}
       >
         {/* Modern Google Accent Bar */}
@@ -152,8 +151,9 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
             SCAN TO REVIEW
           </div>
 
-          <p className="text-[10px] text-[#70757A] font-medium flex items-center gap-1.5 opacity-60 uppercase tracking-tighter">
-            <span>Powered by Google Maps technology</span>
+          <img src="/logo.jpg" alt="Creative Mark" className="h-4 w-auto opacity-80" />
+          <p className="text-[8px] text-[#70757A] font-bold uppercase tracking-widest -mt-2">
+            ReviewBoost Technology
           </p>
         </div>
       </div>
