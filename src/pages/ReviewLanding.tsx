@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Star, Loader2, ExternalLink, CheckCircle2,
   Sparkles, MessageSquare, ThumbsUp, Copy, ArrowRight,
-  Heart, Zap, Award, Smartphone, Globe, ShieldCheck, Languages
+  Heart, Zap, Award, Smartphone
 } from "lucide-react";
 import { generateReviewSuggestions } from "@/services/gemini";
 import { useTranslation } from "react-i18next";
@@ -170,241 +170,274 @@ const ReviewLanding = () => {
           campaign_id: campaignId,
           event_type: 'review_click',
           metadata: {
-            suggestion: text,
             rating: selectedRating,
-            category: selectedCategory
+            category: selectedCategory,
+            suggestion: text
           }
         });
 
       toast({
         title: t('review.copied'),
-        description: t('review.redirecting'),
+        description: t('review.copied_desc'),
       });
 
       setTimeout(() => {
-        window.location.href = location?.google_review_url || campaign?.google_review_url || '#';
+        const url = location?.google_review_url || campaign?.google_review_url;
+        if (url) {
+          window.location.href = url;
+        }
       }, 1500);
-    } catch (error) {
-      console.error('Copy error:', error);
+    } catch (err) {
+      console.error('Copy failed:', err);
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="h-10 w-10 animate-spin text-red-600" />
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-red-600 mx-auto mb-4" />
+          <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">{t('review.loading')}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white font-inter">
-      {/* Premium Header */}
-      <header className="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 px-6 py-6 transition-all">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-5">
+    <div className="min-h-screen bg-gray-50 font-inter pb-12">
+      {/* Premium Gradient Background */}
+      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-br from-gray-900 via-gray-800 to-black z-0"></div>
+
+      <div className="relative z-10 max-w-lg mx-auto px-4 pt-12">
+        {/* Header Branding */}
+        <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="bg-white p-3 rounded-2xl inline-block shadow-2xl mb-4 border-2 border-white/20 overflow-hidden w-24 h-24">
             {location?.logo_url ? (
-              <img src={location.logo_url} alt="Logo" className="h-14 w-auto rounded-xl shadow-md border border-gray-50 bg-white" />
+              <img
+                src={location.logo_url}
+                alt={location.name}
+                className="w-full h-full object-contain"
+              />
             ) : (
-              <div className="w-14 h-14 bg-red-600 rounded-xl flex items-center justify-center shadow-xl shadow-red-200 transition-transform hover:scale-105">
-                <Star className="text-white h-7 w-7 fill-white" />
-              </div>
+              <Award className="w-full h-full text-red-600" />
             )}
-            <div>
-              <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter leading-none">{location?.name || campaign?.name}</h1>
-              <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-2">Verified Feedback Portal</p>
-            </div>
           </div>
-          <LanguageToggle />
+          <h1 className="text-2xl font-black text-white tracking-tight uppercase">
+            {location?.name || campaign?.name || t('review.we_love_to_hear')}
+          </h1>
+          <p className="text-gray-400 font-medium mt-1">
+            {campaign?.headline || t('review.how_was_experience')}
+          </p>
         </div>
-      </header>
 
-      <main className="container mx-auto px-6 py-20 max-w-2xl">
-        <div className="space-y-12">
+        {/* Floating Language Toggle */}
+        <div className="flex justify-center mb-8">
+          <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-1">
+            <LanguageToggle />
+          </div>
+        </div>
 
+        {/* Step-based Progress */}
+        <div className="flex justify-center gap-2 mb-8">
+          {['rating', 'category', 'suggestion'].map((s, index) => {
+            const currentStepIndex = ['rating', 'category', 'suggestion', 'redirect'].indexOf(step);
+            return (
+              <div
+                key={s}
+                className={`h-1.5 w-16 rounded-full transition-all duration-500 ${currentStepIndex >= index
+                  ? 'bg-red-500 shadow-[0_0_10px_rgba(220,38,38,0.5)]'
+                  : 'bg-gray-300'
+                  }`}
+              />
+            );
+          })}
+        </div>
+
+        <main className="animate-in fade-in slide-in-from-bottom-6 duration-700">
           {/* Step 1: Rating */}
           {step === 'rating' && (
-            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-              <div className="text-center mb-16">
-                <div className="inline-block bg-red-600 text-white px-6 py-2 rounded-full mb-10 shadow-xl shadow-red-200">
-                  <p className="text-xs font-black uppercase tracking-widest">Growth Engine Active</p>
+            <Card className="border-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl overflow-hidden hover:shadow-2xl transition-shadow bg-white">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Heart className="h-8 w-8 text-red-500 fill-red-500/20" />
                 </div>
-                <h2 className="text-5xl md:text-6xl font-black text-gray-900 uppercase tracking-tighter mb-6 leading-none italic">{t('review.how_was_experience')}</h2>
-                <p className="text-gray-400 font-black uppercase tracking-widest text-sm px-12">{t('review.tap_stars')}</p>
-              </div>
+                <h2 className="text-2xl font-black mb-2 text-gray-900 tracking-tight">{t('review.how_was_experience')}</h2>
+                <p className="text-gray-500 font-medium mb-8 uppercase tracking-widest text-[10px]">{t('review.tap_to_select')}</p>
 
-              <Card className="border-0 shadow-[0_80px_160px_-40px_rgba(0,0,0,0.1)] rounded-[3.5rem] bg-white overflow-hidden transition-all hover:scale-[1.01]">
-                <CardContent className="p-16 text-center">
-                  <div className="flex justify-center gap-4 mb-14">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onMouseEnter={() => setSelectedRating(star)}
-                        onClick={() => {
-                          setSelectedRating(star);
-                          handleRatingSubmit();
-                        }}
-                        className="transition-all transform hover:scale-125"
-                      >
-                        <Star
-                          className={`h-16 w-16 transition-all ${star <= selectedRating
-                            ? "fill-red-600 text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.4)]"
-                            : "text-gray-100"
-                            }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
+                <div className="flex justify-between gap-1 mb-10">
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <button
+                      key={rating}
+                      onClick={() => setSelectedRating(rating)}
+                      className={`flex-1 aspect-square rounded-2xl transition-all duration-300 flex items-center justify-center border-2 ${selectedRating >= rating
+                        ? 'bg-yellow-400 border-yellow-400 shadow-lg shadow-yellow-400/30'
+                        : 'bg-white border-gray-100 hover:border-gray-200'
+                        }`}
+                    >
+                      <Star
+                        className={`w-full h-full p-2 ${selectedRating >= rating
+                          ? 'text-white fill-white'
+                          : 'text-gray-200'
+                          }`}
+                      />
+                    </button>
+                  ))}
+                </div>
 
-                  <Button
-                    onClick={handleRatingSubmit}
-                    className="w-full h-20 bg-red-600 hover:bg-black text-white font-black uppercase tracking-widest text-lg rounded-3xl shadow-2xl shadow-red-300 active:scale-[0.98] transition-all"
-                  >
-                    {t('common.continue')}
-                    <ArrowRight className="ml-3 h-6 w-6" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+                <div className="bg-gray-50 py-4 px-6 rounded-2xl mb-8">
+                  <p className="text-xl font-black text-gray-800 italic">
+                    {selectedRating === 5 && t('review.rating_5')}
+                    {selectedRating === 4 && t('review.rating_4')}
+                    {selectedRating === 3 && t('review.rating_3')}
+                    {selectedRating === 2 && t('review.rating_2')}
+                    {selectedRating === 1 && t('review.rating_1')}
+                  </p>
+                </div>
+
+                <Button
+                  onClick={handleRatingSubmit}
+                  className="w-full h-16 bg-gray-900 border-b-4 border-black hover:bg-black text-white text-xl font-black rounded-2xl transition-all shadow-xl hover:translate-y-0.5 active:translate-y-1"
+                >
+                  {t('review.continue')}
+                  <ArrowRight className="ml-2 h-6 w-6" />
+                </Button>
+              </CardContent>
+            </Card>
           )}
 
           {/* Step 2: Category */}
           {step === 'category' && (
-            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-              <div className="text-center mb-16">
-                <div className="inline-block bg-white border border-red-100 px-6 py-2 rounded-full mb-10 shadow-sm">
-                  <p className="text-xs font-black text-red-600 uppercase tracking-widest">Precision Audit</p>
+            <Card className="border-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl overflow-hidden bg-white">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Zap className="h-8 w-8 text-blue-500 fill-blue-500/20" />
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter mb-6 leading-none italic">{t('review.select_what_stood_out')}</h2>
-                <p className="text-gray-400 font-black uppercase tracking-widest text-sm italic">{t('review.pick_category')}</p>
-              </div>
+                <h2 className="text-2xl font-black mb-2 text-gray-900 tracking-tight">{t('review.select_what_stood_out')}</h2>
+                <p className="text-gray-500 font-medium mb-8 uppercase tracking-widest text-[10px]">{t('review.pick_category')}</p>
 
-              <div className="grid grid-cols-1 gap-6">
-                {reviewCategories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => handleCategorySelect(cat.id)}
-                    className="p-10 bg-white hover:bg-red-600 rounded-[3rem] border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-between group overflow-hidden relative"
-                  >
-                    <div className="flex items-center gap-8 relative z-10">
-                      <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-white transition-all shadow-inner">
-                        {cat.emoji}
+                <div className="grid grid-cols-1 gap-3 mb-8">
+                  {reviewCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => handleCategorySelect(cat.id)}
+                      className="p-5 bg-gray-50 hover:bg-red-50 rounded-2xl border-2 border-transparent hover:border-red-200 transition-all flex items-center justify-between group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="text-3xl group-hover:scale-125 transition-transform">{cat.emoji}</span>
+                        <span className="font-black text-gray-800 text-lg uppercase tracking-tight">{cat.name}</span>
                       </div>
-                      <span className="font-black text-gray-900 group-hover:text-white text-2xl uppercase tracking-tight transition-colors">{cat.name}</span>
-                    </div>
-                    <ArrowRight className="h-8 w-8 text-red-600 group-hover:text-white transition-all transform group-hover:translate-x-2 relative z-10" />
-                  </button>
-                ))}
-              </div>
-            </div>
+                      <ArrowRight className="h-5 w-5 text-gray-300 group-hover:text-red-500" />
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Step 3: Suggestion */}
           {step === 'suggestion' && (
-            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-              <div className="text-center mb-12">
-                <div className="inline-block bg-red-600 text-white px-6 py-2 rounded-full mb-10 shadow-xl shadow-red-100">
-                  <p className="text-xs font-black uppercase tracking-widest">AI Intelligence Link</p>
+            <Card className="border-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl bg-white overflow-hidden">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="h-8 w-8 text-purple-600" />
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter mb-6 leading-none italic">{t('review.choose_review_line')}</h2>
-                <p className="text-gray-400 font-black uppercase tracking-widest text-sm mb-12 italic">{t('review.select_and_post')}</p>
+                <h2 className="text-2xl font-black mb-2 text-gray-900 tracking-tight">{t('review.choose_review_line')}</h2>
+                <p className="text-gray-500 font-medium mb-6 uppercase tracking-widest text-[10px]">{t('review.select_and_post')}</p>
 
-                <div className="flex justify-center mb-12">
-                  <div className="bg-gray-100 p-2 rounded-3xl flex gap-1 shadow-inner">
+                {/* AI Review Language Toggle */}
+                <div className="flex justify-center mb-6">
+                  <div className="bg-gray-100 p-1 rounded-xl flex gap-1">
                     <button
                       onClick={() => setSuggestionLanguage('en')}
-                      className={`px-10 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'en'
-                        ? 'bg-red-600 text-white shadow-2xl'
-                        : 'text-gray-400 hover:text-gray-600'
+                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'en'
+                          ? 'bg-white text-red-600 shadow-sm'
+                          : 'text-gray-400 hover:text-gray-600'
                         }`}
                     >
-                      ENG
+                      EN
                     </button>
                     <button
                       onClick={() => setSuggestionLanguage('mr')}
-                      className={`px-10 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'mr'
-                        ? 'bg-red-600 text-white shadow-2xl'
-                        : 'text-gray-400 hover:text-gray-600'
+                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${suggestionLanguage === 'mr'
+                          ? 'bg-white text-red-600 shadow-sm'
+                          : 'text-gray-400 hover:text-gray-600'
                         }`}
                     >
                       मराठी
                     </button>
                   </div>
                 </div>
-              </div>
 
-              {loadingSuggestions ? (
-                <div className="py-32 text-center">
-                  <div className="relative inline-block mb-10">
-                    <div className="absolute -inset-8 bg-red-600/10 rounded-full blur-2xl animate-pulse"></div>
-                    <Loader2 className="h-20 w-20 animate-spin text-red-600 mx-auto relative z-10" />
+                {loadingSuggestions ? (
+                  <div className="py-20">
+                    <Loader2 className="h-10 w-10 animate-spin text-red-600 mx-auto mb-4" />
+                    <p className="text-gray-400 font-black text-xs uppercase animate-pulse">{t('review.ai_crafting')}</p>
                   </div>
-                  <p className="text-red-600 font-black text-sm uppercase tracking-[0.4em] animate-pulse italic">{t('review.ai_crafting')}</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {suggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleCopyAndPost(suggestion)}
-                      className="w-full p-12 text-left bg-white hover:bg-gray-50 rounded-[3.5rem] border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden active:scale-[0.98]"
-                    >
-                      <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
-                        <div className="bg-red-600 p-3 rounded-2xl shadow-2xl shadow-red-200">
-                          <ThumbsUp className="h-6 w-6 text-white" />
+                ) : (
+                  <div className="space-y-4 mb-8">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleCopyAndPost(suggestion)}
+                        className="w-full p-6 text-left bg-gray-50 hover:bg-white rounded-2xl border-2 border-transparent hover:border-red-500/30 hover:shadow-xl transition-all group relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Copy className="h-4 w-4 text-red-500" />
                         </div>
-                      </div>
-                      <p className="text-gray-900 font-bold text-xl md:text-2xl leading-relaxed pr-12 italic">
-                        "{suggestion}"
-                      </p>
-                    </button>
-                  ))}
-
-                  <div className="pt-12 text-center">
-                    <p className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center justify-center gap-3 italic">
-                      <ShieldCheck className="h-5 w-5 text-red-600" />
-                      AI Verified Professional Content
-                    </p>
+                        <p className="text-gray-700 font-bold leading-relaxed line-clamp-3">"{suggestion}"</p>
+                      </button>
+                    ))}
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-4">
+                  AI-Powered Review Generation
+                </p>
+              </CardContent>
+            </Card>
           )}
 
-          {/* Simple Thank You / Redirect */}
+          {/* Fallback Redirect */}
           {step === 'redirect' && (
-            <div className="animate-in fade-in zoom-in duration-700 text-center py-32">
-              <div className="w-32 h-32 bg-red-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-12 shadow-2xl shadow-red-100/50">
-                <CheckCircle2 className="h-16 w-16 text-red-600" />
-              </div>
-              <h2 className="text-5xl font-black text-gray-900 uppercase tracking-tighter mb-8 leading-none italic">{t('review.thank_you')}</h2>
-              <p className="text-gray-400 font-black uppercase tracking-widest text-sm mb-16 italic font-medium max-w-sm mx-auto">
-                {selectedRating < 4 ? t('review.feedback_received') : t('review.redirecting')}
-              </p>
-              <Button
-                onClick={() => window.location.href = location?.google_review_url || '/'}
-                className="bg-red-600 hover:bg-black text-white h-20 px-16 rounded-full font-black uppercase tracking-widest text-lg shadow-2xl shadow-red-200"
-              >
-                Return to Profile
-              </Button>
-            </div>
+            <Card className="border-0 shadow-xl rounded-3xl bg-white">
+              <CardContent className="p-8 text-center">
+                <div className="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                  <Smartphone className="h-10 w-10 text-white" />
+                </div>
+                <h2 className="text-2xl font-black mb-4 text-gray-900">{t('review.almost_done')}</h2>
+                <div className="bg-red-50 p-6 rounded-2xl text-left mb-8 border border-red-100">
+                  <p className="text-red-900 font-bold leading-relaxed whitespace-pre-line">
+                    {t('review.instructions')}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => {
+                    const url = location?.google_review_url || campaign?.google_review_url;
+                    if (url) window.location.href = url;
+                  }}
+                  className="w-full h-16 bg-red-600 hover:bg-red-700 text-white text-xl font-black rounded-2xl shadow-xl hover:shadow-red-500/40 transition-all border-b-4 border-red-900"
+                >
+                  {t('review.open_google')}
+                  <ExternalLink className="ml-2 h-5 w-5" />
+                </Button>
+              </CardContent>
+            </Card>
           )}
-        </div>
-      </main>
+        </main>
 
-      <footer className="py-24 border-t border-gray-100 text-center bg-gray-50/30">
-        <div className="container mx-auto px-10 flex flex-col items-center gap-10">
-          <img src="/logo.jpg" alt="Creative Mark" className="h-14 w-auto object-contain grayscale opacity-60" />
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-xs font-black text-gray-900 uppercase tracking-[0.4em] italic leading-none">
-              Intelligence &bull; Creative Mark Systems
-            </p>
-            <p className="text-xs text-gray-400 font-black uppercase tracking-widest max-w-md mx-auto leading-loose italic">
-              Automating reputation growth for businesses across Maharashtra through precision AI strategies.
+        <footer className="mt-12 text-center pb-8">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <img src="/logo.jpg" alt="Creative Mark" className="h-10 w-auto object-contain rounded-lg opacity-80" />
+            <div className="flex items-center justify-center gap-2 text-gray-400 font-bold uppercase tracking-widest text-[9px]">
+              <CheckCircle2 className="h-3 w-3" />
+              {t('common.powered_by')}
+            </div>
+            <p className="text-gray-400 text-[10px] uppercase tracking-tighter">
+              &copy; {new Date().getFullYear()} ReviewBoost &bull; Creative Mark AI Systems
             </p>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 };

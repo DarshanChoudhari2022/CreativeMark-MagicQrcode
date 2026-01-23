@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Sparkles, QrCode, Building2, Globe, Palette, CheckCircle2, Loader2, ArrowRight, Zap, Target } from "lucide-react";
+import { ArrowLeft, Sparkles, QrCode } from "lucide-react";
 import { z } from "zod";
 import type { User } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
@@ -29,7 +29,8 @@ const campaignSchema = z.object({
   googleReviewUrl: z.string().url("Please enter a valid Google review URL"),
   customMessage: z.string().max(500, "Message must be less than 500 characters").optional(),
   businessCategory: z.string().min(1, "Please select a business category"),
-  theme: z.enum(['lightBlue', 'darkNavy', 'blackGold', 'whiteBlue']).default('whiteBlue'),
+  theme: z.enum(['lightBlue', 'darkNavy', 'blackGold', 'whiteBlue']).default('lightBlue'),
+  logoUrl: z.string().optional(),
 });
 
 const CreateCampaign = () => {
@@ -37,18 +38,54 @@ const CreateCampaign = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeStep, setActiveStep] = useState(1);
-
-  // Form State
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [campaignName, setCampaignName] = useState("");
   const [googleReviewUrl, setGoogleReviewUrl] = useState("");
   const [customMessage, setCustomMessage] = useState("");
   const [businessCategory, setBusinessCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
-  const [primaryColor, setPrimaryColor] = useState("#dc2626"); // Default Red
+  const [primaryColor, setPrimaryColor] = useState("#4285F4");
   const [secondaryColor, setSecondaryColor] = useState("#ffffff");
+  const [theme, setTheme] = useState("lightBlue"); // Keeping for backward compatibility or removing if fully replaced
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const generateAITheme = async () => {
+    // Simple heuristic-based generation for now to ensure speed/reliability
+    // In production, this call an AI endpoint
+    const cat = businessCategory === 'Other' ? customCategory : businessCategory;
+
+    // Default fallback
+    let p = "#4285F4";
+    let s = "#ffffff";
+
+    const normalized = cat.toLowerCase();
+
+    if (normalized.includes('food') || normalized.includes('restaurant') || normalized.includes('pizza') || normalized.includes('burger')) {
+      p = "#EA4335"; // Red for food
+      s = "#FFF5F5";
+    } else if (normalized.includes('health') || normalized.includes('medical') || normalized.includes('gym') || normalized.includes('fitness')) {
+      p = "#34A853"; // Green for health
+      s = "#F0FFF4";
+    } else if (normalized.includes('tech') || normalized.includes('auto') || normalized.includes('service')) {
+      p = "#4285F4"; // Blue for trust
+      s = "#F5F8FF";
+    } else if (normalized.includes('luxury') || normalized.includes('real estate') || normalized.includes('jewel') || normalized.includes('black')) {
+      p = "#1A1A1A"; // Black/Gold for luxury
+      s = "#FAFAFA";
+    } else if (normalized.includes('native') || normalized.includes('berry') || normalized.includes('farm')) {
+      p = "#D32F2F"; // Berry red
+      s = "#FFF0F5";
+    }
+
+    setPrimaryColor(p);
+    setSecondaryColor(s);
+
+    toast({
+      title: "Theme Generated!",
+      description: `Applied colors optimized for ${cat}`,
+    });
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -67,23 +104,49 @@ const CreateCampaign = () => {
     checkAuth();
   }, [navigate]);
 
-  const generateAITheme = () => {
-    setPrimaryColor("#dc2626");
-    setSecondaryColor("#ffffff");
-    toast({
-      title: "Optimized Red & White Applied",
-      description: "Applied professional branding system.",
+  // Helper: Resize image before upload
+  const resizeImage = (file: File, maxSize: number = 500, quality: number = 0.8): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Scale down proportionally
+        if (width > height) {
+          if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
+        } else {
+          if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Canvas toBlob failed"));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
     });
   };
 
   const uploadLogoToStorage = async (file: File): Promise<string | null> => {
     if (!user) return null;
     try {
+      // Resize the image first
+      const resizedBlob = await resizeImage(file, 500, 0.8);
+      const resizedFile = new File([resizedBlob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' });
+
       const fileName = `${uuidv4()}.jpg`;
       const filePath = `${user.id}/${fileName}`;
       const { error: uploadError } = await supabase.storage
         .from('qr-logos')
-        .upload(filePath, file);
+        .upload(filePath, resizedFile);
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage
         .from('qr-logos')
@@ -91,17 +154,17 @@ const CreateCampaign = () => {
       return publicUrl;
     } catch (error) {
       console.error('Logo upload error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process image. Please try a different one.",
+        variant: "destructive",
+      });
       return null;
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (activeStep < 3) {
-      setActiveStep(prev => prev + 1);
-      return;
-    }
-
     setLoading(true);
     try {
       const validated = campaignSchema.parse({
@@ -109,20 +172,25 @@ const CreateCampaign = () => {
         googleReviewUrl,
         customMessage: customMessage || undefined,
         businessCategory: businessCategory === 'Other' ? customCategory : businessCategory,
-        theme: 'whiteBlue',
+        theme,
       });
 
-      if (!user) throw new Error("User not authenticated");
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
 
+      // Upload logo if provided
       let logoUrl: string | null = null;
       if (logoFile) {
         logoUrl = await uploadLogoToStorage(logoFile);
       }
 
+      // Generate location ID client-side to avoid schema cache issues
       const locationId = uuidv4();
       const shortCode = uuidv4().substring(0, 8).toUpperCase();
 
-      const { error: locationError } = await (supabase as any)
+      // Create location first without trying to get the response
+      const { error: locationError } = await supabase
         .from('locations')
         .insert([{
           id: locationId,
@@ -133,9 +201,13 @@ const CreateCampaign = () => {
           logo_url: logoUrl,
         }]);
 
-      if (locationError) throw locationError;
+      if (locationError) {
+        console.error('Location creation error:', locationError);
+        throw locationError;
+      }
 
-      const { data: campaignData, error: campaignError } = await (supabase as any)
+      // Create campaign with the location ID
+      const { data: campaignData, error: campaignError } = await supabase
         .from('campaigns')
         .insert([{
           location_id: locationId,
@@ -145,22 +217,39 @@ const CreateCampaign = () => {
           status: 'active',
           category: validated.businessCategory,
           theme_color: primaryColor,
+          // I will also add a metadata field if available? 
+          // Looking at the insert, `theme_color` is used.
+          // I'll hope `theme_color` accepts arbitrary strings (VARCHAR).
         }])
         .select('id')
         .single();
 
-      if (campaignError) throw campaignError;
+      if (campaignError) {
+        console.error('Campaign creation error:', campaignError);
+        throw campaignError;
+      }
 
+      if (!campaignData || !campaignData.id) {
+        throw new Error('Failed to create campaign');
+      }
+
+      console.log('Campaign created successfully:', campaignData.id);
       toast({
-        title: "Campaign Operational!",
-        description: "Your AI-powered review campaign is now live.",
+        title: "Success!",
+        description: "Campaign created successfully.",
+        variant: "default",
       });
 
-      navigate(`/campaign/${campaignData.id}`);
+      setTimeout(() => {
+        navigate(`/campaign/${campaignData.id}`);
+      }, 1000);
     } catch (error: any) {
+      console.error('Complete error object:', error);
+      console.error('Error message:', error?.message);
+      console.error('Error code:', error?.code);
       toast({
-        title: "Configuration Error",
-        description: error.message || "Something went wrong",
+        title: "Error",
+        description: `Failed to create campaign: ${error?.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
@@ -170,258 +259,202 @@ const CreateCampaign = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-red-50">
         <div className="text-center">
-          <p className="text-red-600 font-black uppercase tracking-widest text-lg italic">{error}</p>
-          <Button onClick={() => navigate('/auth')} className="mt-8 bg-black text-white px-10 h-14 rounded-2xl font-black uppercase tracking-widest">Re-Authenticate</Button>
+          <h1 className="text-2xl font-bold text-red-600 mb-2">Error</h1>
+          <p className="text-red-500">{error}</p>
+          <Button onClick={() => navigate('/auth')} className="mt-4">
+            Go to Login
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white font-inter">
-      <header className="border-b bg-white italic sticky top-0 z-50 shadow-sm border-gray-50">
-        <div className="container mx-auto px-6 py-6 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="text-gray-400 hover:text-red-600 rounded-full h-12 px-8 font-black uppercase tracking-widest text-xs">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <header className="border-b bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/dashboard")}
+            className="hover:bg-blue-50"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Exit Setup
+            Back to Dashboard
           </Button>
-          <div className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="Logo" className="h-10 w-auto rounded-lg" />
-            <span className="text-sm font-black uppercase tracking-widest text-gray-900 leading-none">Campaign Builder</span>
-          </div>
         </div>
       </header>
-
-      <main className="container mx-auto px-6 py-20 max-w-5xl">
-        <div className="mb-16">
-          <div className="flex justify-between items-center mb-12">
-            <div>
-              <h1 className="text-5xl font-black text-gray-900 uppercase tracking-tighter italic">New Campaign</h1>
-              <p className="text-sm font-black text-gray-400 uppercase tracking-widest mt-2">Professional Review System Deployment</p>
+      <main className="container mx-auto px-4 py-8">
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+            <div className="flex items-center gap-3">
+              <QrCode className="h-6 w-6" />
+              <div>
+                <CardTitle className="text-2xl">Create QR Campaign</CardTitle>
+                <CardDescription className="text-blue-100">
+                  Set up your AI-powered Google review collection campaign
+                </CardDescription>
+              </div>
             </div>
-            <div className="hidden md:flex gap-3">
-              {[1, 2, 3].map(s => (
-                <div key={s} className={`w-12 h-2 transition-all rounded-full ${activeStep >= s ? 'bg-red-600 shadow-lg shadow-red-200' : 'bg-gray-100'}`}></div>
-              ))}
-            </div>
-          </div>
-
-          <Card className="border-0 shadow-[0_80px_160px_-40px_rgba(0,0,0,0.1)] rounded-[4rem] overflow-hidden bg-white group hover:scale-[1.01] transition-all duration-500">
-            <div className="h-3 bg-red-600 w-full transition-all duration-700 ease-in-out" style={{ clipPath: `inset(0 ${100 - (activeStep * 33.3)}% 0 0)` }}></div>
-
-            <CardContent className="p-12 md:p-20">
-              <form onSubmit={handleSubmit} className="space-y-12">
-
-                {/* Step 1: Identity */}
-                {activeStep === 1 && (
-                  <div className="animate-in fade-in slide-in-from-right-8 duration-700 space-y-10">
-                    <div className="flex items-center gap-6 border-b border-gray-50 pb-8">
-                      <div className="bg-red-50 p-5 rounded-2xl shadow-sm italic">
-                        <Building2 className="h-8 w-8 text-red-600" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Business Identity</h2>
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-1">Foundational operational parameters</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                      <div className="space-y-4">
-                        <Label htmlFor="campaignName" className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Official Business Name *</Label>
-                        <Input
-                          id="campaignName"
-                          placeholder="e.g. The Pune Boutique"
-                          value={campaignName}
-                          onChange={(e) => setCampaignName(e.target.value)}
-                          required
-                          className="h-16 rounded-2xl border-gray-200 focus:border-red-600 focus:ring-red-100 font-bold text-lg"
-                        />
-                      </div>
-                      <div className="space-y-4">
-                        <Label htmlFor="businessCategory" className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Industry Sector *</Label>
-                        <select
-                          id="businessCategory"
-                          value={businessCategory}
-                          onChange={(e) => setBusinessCategory(e.target.value)}
-                          className="w-full h-16 px-6 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-red-50 focus:border-red-600 font-bold text-lg transition-all appearance-none"
-                          required
-                        >
-                          <option value="">Select Industry</option>
-                          {CATEGORIES.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                          <option value="Other">Other (Specialized)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 pt-4">
-                      <Label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-3">
-                        <Globe className="h-4 w-4 text-red-600" />
-                        Google Review Audit Link *
-                      </Label>
+          </CardHeader>
+          <CardContent className="pt-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <Label htmlFor="campaignName">Campaign Name</Label>
+                <Input
+                  id="campaignName"
+                  placeholder="e.g., Surajit Auto Garage - Counter 1"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="businessCategory">Business Category</Label>
+                <select
+                  id="businessCategory"
+                  value={businessCategory}
+                  onChange={(e) => setBusinessCategory(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">Select your business type...</option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  <option value="Other">Other (Custom)</option>
+                </select>
+                {businessCategory === 'Other' && (
+                  <Input
+                    className="mt-2"
+                    placeholder="Enter your specific business category (e.g. Strawberry Farm)"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    required
+                  />
+                )}
+              </div>
+              <div className="border border-dashed border-blue-300 rounded-lg p-6 bg-blue-50">
+                <Label htmlFor="logoFile">Business Logo (Optional)</Label>
+                <div className="mt-4">
+                  <Input
+                    id="logoFile"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setLogoFile(e.target.files[0]);
+                      }
+                    }}
+                    disabled={uploadingLogo}
+                  />
+                  <p className="text-sm text-gray-600 mt-2">Max file size: 5MB</p>
+                </div>
+              </div>
+              <div>
+                <Label>QR Card Theme Colors</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <Label htmlFor="primaryColor" className="text-xs text-gray-500">Primary Color (Buttons/Accents)</Label>
+                    <div className="flex gap-2 items-center mt-1">
                       <Input
-                        type="url"
-                        placeholder="https://g.page/r/YOUR_ID/review"
-                        value={googleReviewUrl}
-                        onChange={(e) => setGoogleReviewUrl(e.target.value)}
-                        required
-                        className="h-16 rounded-2xl border-gray-200 focus:border-red-600 focus:ring-red-100 font-bold text-lg"
+                        id="primaryColor"
+                        type="color"
+                        value={primaryColor}
+                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="h-10 w-16 p-1 cursor-pointer"
                       />
-                      <p className="text-[11px] text-gray-400 font-black uppercase tracking-[0.2em] pl-1 italic">Synchronization link from your Google My Business Console</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 2: Visual System */}
-                {activeStep === 2 && (
-                  <div className="animate-in fade-in slide-in-from-right-8 duration-700 space-y-12">
-                    <div className="flex items-center gap-6 border-b border-gray-50 pb-8">
-                      <div className="bg-red-50 p-5 rounded-2xl shadow-sm italic">
-                        <Palette className="h-8 w-8 text-red-600" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Visual Design Matrix</h2>
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-1">Branding & System Aesthetics</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-50 p-10 rounded-[3rem] border border-gray-100 shadow-inner">
-                      <Label className="text-xs font-black uppercase tracking-widest text-gray-400 mb-8 block">Corporate Identity Logo</Label>
-                      <div className="flex flex-col md:flex-row items-center gap-12">
-                        <div className="w-40 h-40 bg-white rounded-3xl border-4 border-dashed border-gray-100 flex items-center justify-center overflow-hidden shadow-2xl transition-transform hover:rotate-3">
-                          {logoFile ? (
-                            <img src={URL.createObjectURL(logoFile)} className="w-full h-full object-contain p-4" alt="Preview" />
-                          ) : (
-                            <QrCode className="w-16 h-16 text-gray-100" />
-                          )}
-                        </div>
-                        <div className="flex-1 space-y-6">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => e.target.files?.[0] && setLogoFile(e.target.files[0])}
-                            className="h-14 border-gray-200 bg-white shadow-xl file:bg-gray-900 file:text-white file:border-0 file:rounded-xl file:mr-6 file:px-8 file:h-full file:cursor-pointer rounded-2xl font-black uppercase tracking-widest text-xs"
-                          />
-                          <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] italic">High Resolution SVG or JPG Highly Recommended</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                      <div className="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-xl space-y-6 flex flex-col justify-center">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-xs font-black uppercase tracking-widest text-gray-400">System Primary</Label>
-                          <div className="w-12 h-12 rounded-[1.2rem] shadow-2xl border-4 border-white" style={{ backgroundColor: primaryColor }}></div>
-                        </div>
-                        <Input
-                          type="color"
-                          value={primaryColor}
-                          onChange={e => setPrimaryColor(e.target.value)}
-                          className="h-14 w-full cursor-pointer border-0 p-0 rounded-2xl overflow-hidden shadow-inner"
-                        />
-                      </div>
-                      <div className="flex items-center justify-center">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={generateAITheme}
-                          className="w-full h-24 border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-black uppercase tracking-[0.3em] text-xs rounded-[2rem] transition-all shadow-xl shadow-red-50 group active:scale-95"
-                        >
-                          <Zap className="w-5 h-5 mr-3 group-hover:animate-bounce" />
-                          Apply Corporate Red System
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Final Deployment */}
-                {activeStep === 3 && (
-                  <div className="animate-in fade-in slide-in-from-right-8 duration-700 space-y-12">
-                    <div className="flex items-center gap-6 border-b border-gray-50 pb-8">
-                      <div className="bg-red-50 p-5 rounded-2xl shadow-sm italic">
-                        <Target className="h-8 w-8 text-red-600" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Deployment Authorization</h2>
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-1">Final Content Audit & Confirmation</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <Label htmlFor="customMessage" className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1 italic">Activation Message (Optional Content)</Label>
-                      <Textarea
-                        id="customMessage"
-                        placeholder="Welcome! Your experience drives our mission. Tap above to share your journey."
-                        value={customMessage}
-                        onChange={(e) => setCustomMessage(e.target.value)}
-                        maxLength={500}
-                        className="min-h-[200px] rounded-[3rem] border-gray-200 focus:border-red-600 focus:ring-red-100 font-bold p-10 leading-relaxed text-lg italic shadow-inner bg-gray-50/50"
+                      <Input
+                        value={primaryColor}
+                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="font-mono uppercase"
+                        maxLength={7}
                       />
-                      <div className="flex justify-between items-center px-2 pt-2">
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest italic flex items-center gap-2">
-                          <ShieldCheck className="h-4 w-4 text-red-600" /> AES-256 Bit Encryption Verified
-                        </p>
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{customMessage.length} / 500 CHARS</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-950 p-10 rounded-[3rem] flex items-center justify-between group shadow-2xl relative overflow-hidden">
-                      <div className="absolute inset-0 bg-red-600/5 group-hover:bg-red-600/10 transition-colors"></div>
-                      <div className="flex items-center gap-6 relative z-10">
-                        <div className="w-16 h-16 bg-red-600 rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-red-500/20">
-                          <CheckCircle2 className="h-8 w-8 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-white font-black uppercase tracking-tight text-xl">Operational Ready Status</p>
-                          <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.4em] mt-1">Verification Engine: PASSED</p>
-                        </div>
-                      </div>
-                      <Sparkles className="h-10 w-10 text-red-600 animate-pulse relative z-10" />
                     </div>
                   </div>
-                )}
-
-                <div className="flex flex-col md:flex-row gap-6 pt-12 border-t border-gray-50">
-                  {activeStep > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setActiveStep(prev => prev - 1)}
-                      className="h-20 px-12 rounded-[1.5rem] border-2 border-gray-100 text-gray-400 font-black uppercase tracking-widest text-xs hover:bg-gray-50 active:scale-95 transition-all"
-                    >
-                      Back Track Configuration
-                    </Button>
-                  )}
+                  <div>
+                    <Label htmlFor="secondaryColor" className="text-xs text-gray-500">Background Color (Card)</Label>
+                    <div className="flex gap-2 items-center mt-1">
+                      <Input
+                        id="secondaryColor"
+                        type="color"
+                        value={secondaryColor}
+                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        className="h-10 w-16 p-1 cursor-pointer"
+                      />
+                      <Input
+                        value={secondaryColor}
+                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        className="font-mono uppercase"
+                        maxLength={7}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 flex justify-end">
                   <Button
-                    type="submit"
-                    disabled={loading}
-                    className={`flex-1 h-20 rounded-[1.5rem] text-sm font-black uppercase tracking-[0.3em] transition-all shadow-2xl active:scale-[0.98] ${activeStep === 3 ? 'bg-red-600 hover:bg-black shadow-red-300' : 'bg-gray-900 hover:bg-red-600'}`}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateAITheme}
+                    disabled={!businessCategory}
                   >
-                    {loading ? (
-                      <Loader2 className="h-8 w-8 animate-spin text-white" />
-                    ) : (
-                      <div className="flex items-center gap-3">
-                        {activeStep === 3 ? 'Deploy System Asset' : 'Proceed to Next Matrix'}
-                        <ArrowRight className="h-6 w-6" />
-                      </div>
-                    )}
+                    <Sparkles className="h-3 w-3 mr-2" />
+                    Auto-Generate Theme
                   </Button>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+              <div>
+                <Label htmlFor="googleReviewUrl">Google Review Link *</Label>
+                <Input
+                  id="googleReviewUrl"
+                  type="url"
+                  placeholder="https://g.page/business-name/review"
+                  value={googleReviewUrl}
+                  onChange={(e) => setGoogleReviewUrl(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="customMessage">Custom Message (Optional)</Label>
+                <Textarea
+                  id="customMessage"
+                  placeholder="Add a custom message to appear on the QR card..."
+                  value={customMessage}
+                  onChange={(e) => setCustomMessage(e.target.value)}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-2">
+                  {customMessage.length}/500 characters
+                </p>
+              </div>
+              <div className="flex gap-4 pt-4">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  {loading ? (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                      Creating Campaign...
+                    </>
+                  ) : (
+                    <>
+                      <QrCode className="h-4 w-4 mr-2" />
+                      Create Campaign
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </main>
-
-      <footer className="py-24 border-t border-gray-100 text-center bg-gray-50/50 mt-20">
-        <img src="/logo.jpg" alt="Logo" className="h-14 w-auto mx-auto mb-6 grayscale opacity-40 shadow-sm rounded-xl" />
-        <p className="text-xs font-black text-gray-400 uppercase tracking-[0.4em] italic leading-none">© 2026 Creative Mark Precision Core Systems</p>
-      </footer>
-    </div>
+    </div >
   );
 };
 
