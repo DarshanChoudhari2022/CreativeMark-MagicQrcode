@@ -241,7 +241,6 @@ const Index = () => {
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-16">
             <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.clients_title')}</h2>
-            <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tight italic text-gray-900">{t('landing.clients_subtitle')}</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
