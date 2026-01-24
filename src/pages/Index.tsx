@@ -81,7 +81,7 @@ const Index = () => {
             </Button>
             <Button
               onClick={() => navigate("/request-service")}
-              className="bg-red-600 hover:bg-black text-white text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 sm:px-6 h-10 rounded-full shadow-lg shadow-red-100 transition-all hover:scale-105 active:scale-95"
+              className="hidden sm:flex bg-red-600 hover:bg-black text-white text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 sm:px-6 h-10 rounded-full shadow-lg shadow-red-100 transition-all hover:scale-105 active:scale-95"
             >
               {t('nav.get_started')}
             </Button>
@@ -125,72 +125,7 @@ const Index = () => {
         )}
       </header>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 md:pt-40 md:pb-32 bg-white overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-red-50/40 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 -z-10"></div>
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-5xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-red-50 border border-red-100 px-4 py-1.5 rounded-full mb-8 shadow-sm">
-              <span className="text-[10px] font-bold text-red-600 tracking-widest uppercase">{t('landing.badge_new')}</span>
-              <span className="text-gray-300">|</span>
-              <span className="text-[10px] font-bold text-gray-900 tracking-wider uppercase">{t('landing.badge_ai')}</span>
-            </div>
 
-            {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-[1.1] text-slate-900 tracking-tight italic uppercase">
-              {t('landing.hero_title')} 🚀
-            </h1>
-
-            {/* Subheadline */}
-            <p className="text-lg md:text-xl text-slate-500 mb-10 max-w-3xl mx-auto leading-relaxed">
-              <strong className="text-slate-900 block mb-2 font-semibold tracking-wide uppercase text-sm">{t('landing.hero_subtitle_bold')}</strong>
-              {t('landing.hero_subtitle')}
-            </p>
-
-            {/* Price Badge */}
-            <div className="flex justify-center mb-10">
-              <span className="bg-slate-900 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg uppercase tracking-widest">
-                {t('landing.price_badge')}
-              </span>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Button
-                onClick={() => navigate("/request-service")}
-                className="bg-red-600 hover:bg-black text-white text-sm md:text-base font-black uppercase tracking-widest px-8 md:px-10 h-14 md:h-16 rounded-full shadow-2xl shadow-red-200 transition-all hover:-translate-y-1 active:scale-95"
-              >
-                {t('landing.cta_main')}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => scrollToSection('pricing')}
-                className="text-base px-8 h-12 rounded-full border-2 border-gray-100 text-gray-600 font-bold hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all"
-              >
-                {t('landing.cta_secondary')}
-              </Button>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="flex flex-wrap justify-center gap-6 md:gap-12 opacity-80">
-              {[
-                { icon: TrendingUp, text: t('landing.feature_rank'), color: 'text-red-600' },
-                { icon: Zap, text: t('landing.feature_speed'), color: 'text-slate-900' },
-                { icon: Users, text: t('landing.trusted_by'), color: 'text-slate-900' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className={`p-2 bg-slate-50 rounded-lg`}>
-                    <item.icon className={`h-5 w-5 md:h-6 md:w-6 ${item.color}`} />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{item.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Logic Sequence / Process Section */}
       <section id="how_it_works" className="py-24 bg-white border-y border-gray-100">
