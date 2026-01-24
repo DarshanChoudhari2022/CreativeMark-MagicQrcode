@@ -376,25 +376,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-24 bg-white relative overflow-hidden">
-        <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
-          <h2 className="text-4xl md:text-7xl font-black text-gray-900 mb-8 italic tracking-tighter uppercase">
-            {t('landing.cta_footer_title')}
-          </h2>
-          <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto font-bold uppercase tracking-widest">
-            {t('landing.cta_footer_subtitle')}
-          </p>
-          <div className="flex justify-center">
-            <Button
-              onClick={() => navigate("/request-service")}
-              className="bg-red-600 text-white hover:bg-black text-lg font-black uppercase tracking-widest px-12 h-20 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
-            >
-              Get ReviewBoost Now 🚀
-            </Button>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="py-20 bg-gray-950 text-white border-t border-gray-900">
