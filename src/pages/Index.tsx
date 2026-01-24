@@ -126,13 +126,48 @@ const Index = () => {
       </header>
 
 
-
-      {/* Logic Sequence / Process Section */}
-      <section id="how_it_works" className="pt-32 md:pt-40 pb-16 md:pb-20 bg-white border-b border-gray-100">
+      {/* Hero / Overview Section */}
+      <section id="overview" className="pt-32 md:pt-44 pb-16 md:pb-24 bg-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50/40 blur-[100px] rounded-full translate-x-1/3 -translate-y-1/2 -z-10"></div>
         <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-red-50 border border-red-100 px-4 py-1.5 rounded-full mb-6 shadow-sm">
+              <span className="text-[10px] font-bold text-red-600 tracking-widest uppercase">{t('landing.badge_new')}</span>
+              <span className="text-gray-300">|</span>
+              <span className="text-[10px] font-bold text-gray-900 tracking-wider uppercase">{t('landing.badge_ai')}</span>
+            </div>
+            <h1 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-slate-900 leading-tight">
+              {t('landing.what_is_reviewboost')}
+            </h1>
+            <p className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed max-w-3xl mx-auto mb-8">
+              {t('landing.reviewboost_desc')}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => navigate("/request-service")}
+                className="bg-red-600 hover:bg-black text-white text-sm font-black uppercase tracking-widest px-8 h-14 rounded-full shadow-xl shadow-red-200 transition-all hover:-translate-y-1 active:scale-95"
+              >
+                {t('landing.cta_main')}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => scrollToSection('pricing')}
+                className="text-sm px-8 h-14 rounded-full border-2 border-gray-200 text-gray-600 font-bold hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all"
+              >
+                {t('landing.cta_secondary')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works / Process Section */}
+      <section id="how_it_works" className="py-16 md:py-24 bg-gray-50 border-y border-gray-100">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="text-center mb-12 px-4">
             <h2 className="text-[10px] font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.how_it_works_title')}</h2>
-            <h3 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-tight">
+            <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
               {t('landing.reviewboost_desc').split('.')[0] + '.'}
             </h3>
           </div>
@@ -141,20 +176,20 @@ const Index = () => {
             {/* Connecting Line (Desktop) */}
             <div className="hidden md:block absolute top-[2.5rem] left-[15%] right-[15%] h-0.5 bg-red-100 z-0"></div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
               {[
                 { emoji: '📲', text: t('landing.flow_scan'), icon: Smartphone, label: t('landing.step_01_label'), desc: t('landing.step1_desc') },
                 { emoji: '✨', text: t('landing.flow_post'), icon: Sparkles, label: t('landing.step_02_label'), desc: t('landing.step2_desc') },
                 { emoji: '🚀', text: t('landing.flow_rank'), icon: TrendingUp, label: t('landing.step_result_label'), desc: t('landing.step3_desc') }
               ].map((flow, i) => (
                 <div key={i} className="flex flex-col items-center text-center group">
-                  <div className="w-20 h-20 bg-white border-4 border-red-50 rounded-full flex items-center justify-center shadow-xl mb-8 group-hover:scale-110 transition-transform duration-300 relative">
+                  <div className="w-20 h-20 bg-white border-4 border-red-50 rounded-full flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300 relative">
                     <flow.icon className="h-8 w-8 text-red-600" />
                     <div className="absolute -top-3 bg-gray-900 text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase">
                       {flow.label}
                     </div>
                   </div>
-                  <h4 className="text-lg font-bold tracking-tight mb-3 text-slate-900">{flow.text}</h4>
+                  <h4 className="text-lg font-bold tracking-tight mb-2 text-slate-900">{flow.text}</h4>
                   <p className="text-sm text-gray-500 font-medium leading-relaxed max-w-xs">
                     {flow.desc}
                   </p>
@@ -165,41 +200,28 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Overview Section */}
-      <section id="overview" className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.overview_title')}</h2>
-            <h3 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight text-slate-900">{t('landing.what_is_reviewboost')}</h3>
-            <p className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed max-w-3xl mx-auto">
-              {t('landing.reviewboost_desc')}
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Comparative Matrix */}
-      <section className="py-20 bg-gray-50/50">
+      <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.comparison_title')}</h2>
-            <h3 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">{t('landing.before_after_title')}</h3>
+            <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{t('landing.before_after_title')}</h3>
           </div>
 
-          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 items-stretch">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6 items-stretch">
             {/* Before Card */}
-            <Card className="bg-slate-200 border-2 border-dashed border-slate-300 shadow-none rounded-3xl overflow-hidden relative group hover:bg-slate-300/50 transition-colors">
-              <CardContent className="p-8 md:p-12 text-center h-full flex flex-col justify-center">
-                <div className="absolute top-0 left-0 bg-slate-400 text-white text-[10px] font-bold px-6 py-1.5 rounded-br-xl uppercase tracking-widest">
+            <Card className="bg-slate-100 border-2 border-dashed border-slate-200 shadow-none rounded-2xl overflow-hidden relative group hover:bg-slate-200/50 transition-colors">
+              <CardContent className="p-6 md:p-10 text-center h-full flex flex-col justify-center">
+                <div className="absolute top-0 left-0 bg-slate-400 text-white text-[10px] font-bold px-5 py-1.5 rounded-br-xl uppercase tracking-widest">
                   {t('landing.before_label')}
                 </div>
-                <div className="w-20 h-20 bg-slate-300 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl grayscale opacity-70">
+                <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-5 text-3xl grayscale opacity-70">
                   😕
                 </div>
-                <h4 className="text-xl font-bold text-slate-600 mb-4 uppercase tracking-tight line-through decoration-red-500/50 decoration-2">
+                <h4 className="text-lg font-bold text-slate-600 mb-3 uppercase tracking-tight line-through decoration-red-500/50 decoration-2">
                   Traditional Way
                 </h4>
-                <p className="text-sm text-slate-600 font-medium leading-relaxed mb-8">
+                <p className="text-sm text-slate-500 font-medium leading-relaxed mb-6">
                   {t('landing.before_desc')}
                 </p>
                 <div className="mt-auto">
@@ -211,22 +233,22 @@ const Index = () => {
             </Card>
 
             {/* After Card (ReviewBoost) */}
-            <Card className="bg-gradient-to-br from-red-600 to-red-700 text-white border-0 shadow-2xl shadow-red-200 rounded-3xl overflow-hidden relative transform md:-rotate-1 hover:rotate-0 transition-transform duration-300">
-              <div className="absolute top-0 right-0 bg-black/20 text-white text-[10px] font-bold px-6 py-1.5 rounded-bl-xl uppercase tracking-widest backdrop-blur-sm">
+            <Card className="bg-gradient-to-br from-red-600 to-red-700 text-white border-0 shadow-xl shadow-red-200 rounded-2xl overflow-hidden relative transform md:-rotate-1 hover:rotate-0 transition-transform duration-300">
+              <div className="absolute top-0 right-0 bg-black/20 text-white text-[10px] font-bold px-5 py-1.5 rounded-bl-xl uppercase tracking-widest backdrop-blur-sm">
                 {t('common.recommended')}
               </div>
-              <CardContent className="p-8 md:p-12 text-center h-full flex flex-col justify-center">
-                <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-6 text-5xl shadow-inner">
+              <CardContent className="p-6 md:p-10 text-center h-full flex flex-col justify-center">
+                <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-5 text-4xl shadow-inner">
                   🚀
                 </div>
-                <h4 className="text-3xl font-black mb-4 uppercase tracking-tight italic">
+                <h4 className="text-2xl font-black mb-3 uppercase tracking-tight italic">
                   With ReviewBoost
                 </h4>
-                <p className="text-lg text-red-100 font-medium leading-relaxed mb-8">
+                <p className="text-base text-red-100 font-medium leading-relaxed mb-6">
                   {t('landing.after_desc')}
                 </p>
                 <div className="mt-auto">
-                  <span className="inline-block bg-white text-red-600 px-8 py-3 rounded-full text-sm font-black uppercase tracking-widest shadow-lg">
+                  <span className="inline-block bg-white text-red-600 px-6 py-2.5 rounded-full text-sm font-black uppercase tracking-widest shadow-lg">
                     {t('landing.after_result')}
                   </span>
                 </div>
@@ -236,52 +258,30 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Proof Section */}
-      <section className="py-20 md:py-32 bg-white">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.clients_title')}</h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
-            {clients.map((client, index) => (
-              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all rounded-3xl bg-slate-50 hover:bg-white hover:-translate-y-1 group">
-                <div className="h-1 bg-red-600 w-0 group-hover:w-full transition-all duration-500 rounded-t-3xl"></div>
-                <CardContent className="p-6 text-center">
-                  <h4 className="font-bold text-lg uppercase tracking-tight mb-2 italic">{client.name}</h4>
-                  <span className="bg-white text-red-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-slate-100 inline-block mb-4">{client.location}</span>
-                  <p className="text-slate-400 text-xs font-medium leading-relaxed">{client.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
-      <section id="testimonials" className="py-20 md:py-32 bg-gray-900 overflow-hidden relative">
+      <section id="testimonials" className="py-16 md:py-24 bg-gray-900 overflow-hidden relative">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-20 relative z-10">
+          <div className="text-center mb-12 relative z-10">
             <h2 className="text-xs font-bold text-red-500 tracking-[0.3em] mb-4 uppercase">{t('landing.testimonials_title')}</h2>
-            <h3 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight italic">{t('landing.testimonials_subtitle')}</h3>
+            <h3 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tight italic">{t('landing.testimonials_subtitle')}</h3>
           </div>
 
-          <div className="flex gap-6 overflow-x-auto pb-8 custom-scrollbar snap-x">
+          <div className="flex gap-5 overflow-x-auto pb-6 custom-scrollbar snap-x">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="min-w-[300px] md:min-w-[400px] border-0 bg-white/5 backdrop-blur-md rounded-3xl hover:bg-white/10 transition-all border border-white/10 snap-center">
-                <CardContent className="p-8">
-                  <div className="flex gap-1 mb-6">
+              <Card key={index} className="min-w-[280px] md:min-w-[360px] border-0 bg-white/5 backdrop-blur-md rounded-2xl hover:bg-white/10 transition-all border border-white/10 snap-center">
+                <CardContent className="p-6">
+                  <div className="flex gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-red-500 text-red-500" />
+                      <Star key={i} className="w-4 h-4 fill-red-500 text-red-500" />
                     ))}
                   </div>
-                  <p className="text-lg text-white mb-8 font-medium italic leading-relaxed">"{testimonial.text}"</p>
-                  <div className="flex items-center gap-4 border-t border-white/10 pt-6">
-                    <div className="w-12 h-12 bg-red-600 text-white rounded-xl flex items-center justify-center text-xl font-black">
+                  <p className="text-base text-white mb-6 font-medium italic leading-relaxed">"{testimonial.text}"</p>
+                  <div className="flex items-center gap-3 border-t border-white/10 pt-4">
+                    <div className="w-10 h-10 bg-red-600 text-white rounded-lg flex items-center justify-center text-lg font-black">
                       {testimonial.author.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-bold text-white text-base uppercase tracking-tight">{testimonial.author}</p>
+                      <p className="font-bold text-white text-sm uppercase tracking-tight">{testimonial.author}</p>
                       <p className="text-gray-400 text-xs uppercase tracking-wider">{testimonial.location}</p>
                     </div>
                   </div>
@@ -293,39 +293,39 @@ const Index = () => {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-20 md:py-32 bg-white relative">
+      <section id="pricing" className="py-16 md:py-24 bg-white relative">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-[10px] font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('pricing.title')}</h2>
-            <h3 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">{t('pricing.choose_plan')}</h3>
+            <h3 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">{t('pricing.choose_plan')}</h3>
           </div>
 
-          <div className="max-w-2xl mx-auto">
-            <Card className="border-4 border-gray-100 shadow-2xl rounded-[3rem] relative overflow-hidden group hover:border-red-50 transition-colors bg-white">
-              <div className="absolute top-0 right-0 bg-red-600 text-white text-[10px] font-bold px-8 py-2 rounded-bl-2xl uppercase tracking-widest z-10">
+          <div className="max-w-xl mx-auto">
+            <Card className="border-2 border-gray-100 shadow-xl rounded-3xl relative overflow-hidden group hover:border-red-100 transition-colors bg-white">
+              <div className="absolute top-0 right-0 bg-red-600 text-white text-[10px] font-bold px-6 py-1.5 rounded-bl-2xl uppercase tracking-widest z-10">
                 {t('pricing.limited_offer')}
               </div>
-              <CardContent className="p-8 md:p-12">
-                <div className="text-center mb-10">
-                  <h4 className="text-2xl font-black mb-6 uppercase tracking-tight italic">{t('pricing.lifetime_pro')}</h4>
+              <CardContent className="p-6 md:p-10">
+                <div className="text-center mb-8">
+                  <h4 className="text-xl font-black mb-4 uppercase tracking-tight italic">{t('pricing.lifetime_pro')}</h4>
                   <div className="flex flex-col items-center gap-2">
-                    <div className="flex items-center gap-4">
-                      <span className="text-6xl md:text-7xl font-black text-gray-900 tracking-tighter italic">₹999</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-5xl md:text-6xl font-black text-gray-900 tracking-tighter italic">₹999</span>
                       <div className="text-left">
-                        <p className="text-red-600 font-bold text-sm uppercase tracking-widest">{t('pricing.lifetime_text')}</p>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t('pricing.no_renewal')}</p>
+                        <p className="text-red-600 font-bold text-xs uppercase tracking-widest">{t('pricing.lifetime_text')}</p>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t('pricing.no_renewal')}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-gray-50/80 p-8 rounded-3xl border border-gray-100 mb-10 grid md:grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8 grid grid-cols-1 md:grid-cols-2 gap-3">
                   {[
                     t('pricing.item1'), t('pricing.item2'), t('pricing.item3'), t('pricing.item4'),
                     t('pricing.item5'), t('pricing.item6'), t('pricing.item7'), t('pricing.item8'),
                   ].map((feature, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-red-600 flex-shrink-0" />
+                    <div key={index} className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-red-600 flex-shrink-0" />
                       <span className="text-gray-700 font-bold uppercase tracking-wide text-[10px]">{feature}</span>
                     </div>
                   ))}
@@ -333,10 +333,10 @@ const Index = () => {
 
                 <Button
                   onClick={() => navigate("/request-service")}
-                  className="w-full bg-red-600 hover:bg-black text-white h-16 text-lg font-black uppercase tracking-widest shadow-xl rounded-2xl transition-all hover:scale-[1.02] active:scale-95"
+                  className="w-full bg-red-600 hover:bg-black text-white h-14 text-base font-black uppercase tracking-widest shadow-lg rounded-xl transition-all hover:scale-[1.02] active:scale-95"
                 >
                   {t('pricing.claim_button')}
-                  <ArrowRight className="ml-4 h-6 w-6" />
+                  <ArrowRight className="ml-3 h-5 w-5" />
                 </Button>
               </CardContent>
             </Card>
@@ -345,28 +345,28 @@ const Index = () => {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-20 bg-gray-50 border-t border-gray-100">
+      <section id="faq" className="py-16 md:py-24 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('faq.title')}</h2>
-            <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tight italic text-gray-900">{t('faq.subtitle')}</h3>
+            <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tight italic text-gray-900">{t('faq.subtitle')}</h3>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-2xl mx-auto space-y-3">
             {[...Array(4)].map((_, index) => (
               <Card
                 key={index}
-                className={`cursor-pointer border-0 rounded-3xl transition-all duration-300 overflow-hidden ${openFaq === index ? 'shadow-lg bg-white' : 'bg-white/50 border border-transparent hover:bg-white'}`}
+                className={`cursor-pointer border-0 rounded-2xl transition-all duration-300 overflow-hidden ${openFaq === index ? 'shadow-lg bg-white' : 'bg-white/50 border border-transparent hover:bg-white'}`}
                 onClick={() => setOpenFaq(openFaq === index ? null : index)}
               >
-                <CardContent className="p-6 md:p-8">
-                  <div className="flex justify-between items-center gap-6">
-                    <h4 className="font-bold text-lg md:text-xl uppercase tracking-tight italic text-gray-900">{t(`faq.q${index + 1}`)}</h4>
-                    <span className={`text-2xl font-bold text-red-600 transition-transform duration-300 ${openFaq === index ? 'rotate-45' : ''}`}>+</span>
+                <CardContent className="p-5 md:p-6">
+                  <div className="flex justify-between items-center gap-4">
+                    <h4 className="font-bold text-base md:text-lg uppercase tracking-tight italic text-gray-900">{t(`faq.q${index + 1}`)}</h4>
+                    <span className={`text-xl font-bold text-red-600 transition-transform duration-300 ${openFaq === index ? 'rotate-45' : ''}`}>+</span>
                   </div>
                   {openFaq === index && (
-                    <div className="mt-6 pt-6 border-t border-gray-100">
-                      <p className="text-base text-gray-500 font-medium leading-relaxed">{t(`faq.a${index + 1}`)}</p>
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <p className="text-sm text-gray-500 font-medium leading-relaxed">{t(`faq.a${index + 1}`)}</p>
                     </div>
                   )}
                 </CardContent>
@@ -375,6 +375,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+
 
 
       {/* Footer */}
