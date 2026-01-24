@@ -128,7 +128,7 @@ const Index = () => {
 
 
       {/* Logic Sequence / Process Section */}
-      <section id="how_it_works" className="py-24 bg-white border-y border-gray-100">
+      <section id="how_it_works" className="pt-32 md:pt-40 pb-16 md:pb-20 bg-white border-b border-gray-100">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-16 px-4">
             <h2 className="text-[10px] font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.how_it_works_title')}</h2>
@@ -166,7 +166,7 @@ const Index = () => {
       </section>
 
       {/* Overview Section */}
-      <section id="overview" className="py-20 md:py-32 bg-white">
+      <section id="overview" className="py-12 md:py-16 bg-white">
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-xs font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.overview_title')}</h2>
