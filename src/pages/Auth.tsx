@@ -176,7 +176,7 @@ const Auth = () => {
         <div className="flex justify-between items-center mb-8 px-1">
           <Button
             variant="ghost"
-            onClick={() => navigate("/")}
+            onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
             className={`text-gray-400 hover:text-white lg:hover:text-gray-900 transition-colors font-medium text-sm gap-2 ${isMarathi ? 'text-base' : ''}`}
           >
             <ArrowLeft className="h-4 w-4" />

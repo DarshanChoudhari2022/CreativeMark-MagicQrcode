@@ -210,20 +210,20 @@ const AdminPanel = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50/20">
             {/* Header */}
             <header className="border-b bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Back
+                <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+                        <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="h-9 md:h-10 px-2 md:px-4 shrink-0">
+                            <ArrowLeft className="h-4 w-4 md:mr-2" />
+                            <span className="hidden md:inline">Back</span>
                         </Button>
-                        <div className="flex items-center gap-4">
-                            <img src="/logo.jpg" alt="Creative Mark Logo" className="h-16 w-auto object-contain" />
-                            <h1 className="text-xl font-bold border-l pl-4">Admin Panel</h1>
+                        <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                            <img src="/logo.jpg" alt="Creative Mark Logo" className="h-10 md:h-16 w-auto object-contain shrink-0" />
+                            <h1 className="text-base md:text-xl font-bold border-l pl-3 md:pl-4 truncate">Admin Panel</h1>
                         </div>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sign Out
+                    <Button variant="ghost" size="sm" onClick={handleSignOut} className="h-9 md:h-10 shrink-0">
+                        <LogOut className="h-4 w-4 md:mr-2" />
+                        <span className="hidden md:inline">Sign Out</span>
                     </Button>
                 </div>
             </header>
@@ -231,42 +231,42 @@ const AdminPanel = () => {
             <main className="container mx-auto px-4 py-8">
                 {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-none shadow-xl">
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-blue-100 text-sm font-medium">Total Users</p>
-                                    <h3 className="text-3xl font-bold">{allUsers.length}</h3>
+                    <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-none shadow-lg">
+                        <CardContent className="p-4 md:p-6 text-center sm:text-left">
+                            <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 md:gap-0">
+                                <div className="order-2 sm:order-1">
+                                    <p className="text-blue-100 text-xs md:text-sm font-bold uppercase tracking-widest mb-1">Total Users</p>
+                                    <h3 className="text-3xl md:text-4xl font-black italic">{allUsers.length}</h3>
                                 </div>
-                                <Users className="h-10 w-10 text-blue-200" />
+                                <Users className="h-8 w-8 md:h-10 md:w-10 text-blue-200 opacity-50 sm:opacity-100 order-1 sm:order-2" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-none shadow-xl">
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-green-100 text-sm font-medium">Active Subscriptions</p>
-                                    <h3 className="text-3xl font-bold">
+                    <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-none shadow-lg">
+                        <CardContent className="p-4 md:p-6 text-center sm:text-left">
+                            <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 md:gap-0">
+                                <div className="order-2 sm:order-1">
+                                    <p className="text-green-100 text-xs md:text-sm font-bold uppercase tracking-widest mb-1">Active Access</p>
+                                    <h3 className="text-3xl md:text-4xl font-black italic">
                                         {allUsers.filter(u => u.can_create_campaigns).length}
                                     </h3>
                                 </div>
-                                <CheckCircle2 className="h-10 w-10 text-green-200" />
+                                <CheckCircle2 className="h-8 w-8 md:h-10 md:w-10 text-green-200 opacity-50 sm:opacity-100 order-1 sm:order-2" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-none shadow-xl">
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-red-100 text-sm font-medium">Expired/Inactive</p>
-                                    <h3 className="text-3xl font-bold">
+                    <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-none shadow-lg">
+                        <CardContent className="p-4 md:p-6 text-center sm:text-left">
+                            <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 md:gap-0">
+                                <div className="order-2 sm:order-1">
+                                    <p className="text-red-100 text-xs md:text-sm font-bold uppercase tracking-widest mb-1">Pending/Exp.</p>
+                                    <h3 className="text-3xl md:text-4xl font-black italic">
                                         {allUsers.filter(u => !u.can_create_campaigns).length}
                                     </h3>
                                 </div>
-                                <XCircle className="h-10 w-10 text-red-200" />
+                                <XCircle className="h-8 w-8 md:h-10 md:w-10 text-red-200 opacity-50 sm:opacity-100 order-1 sm:order-2" />
                             </div>
                         </CardContent>
                     </Card>
@@ -393,40 +393,41 @@ const AdminPanel = () => {
                                     {filteredUsers.map((u) => (
                                         <div
                                             key={u.id}
-                                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                                            className="flex flex-col sm:flex-row sm:items-center justify-between p-4 md:p-6 border border-slate-100 rounded-2xl hover:bg-gray-50 transition-all gap-6"
                                         >
                                             <div className="flex items-center gap-4">
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${u.role === 'super_admin' ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
+                                                <div className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center ${u.role === 'super_admin' ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
                                                     u.role === 'admin' ? 'bg-gradient-to-br from-blue-400 to-blue-600' :
-                                                        'bg-gradient-to-br from-gray-400 to-gray-600'
-                                                    } text-white font-bold`}>
-                                                    {u.role === 'super_admin' ? <Crown className="h-5 w-5" /> :
-                                                        u.role === 'admin' ? <Shield className="h-5 w-5" /> :
+                                                        'bg-slate-900'
+                                                    } text-white font-bold shadow-lg`}>
+                                                    {u.role === 'super_admin' ? <Crown className="h-6 w-6" /> :
+                                                        u.role === 'admin' ? <Shield className="h-6 w-6" /> :
                                                             'U'}
                                                 </div>
-                                                <div>
-                                                    <p className="font-medium text-sm">{u.user_id}</p>
-                                                    <div className="flex items-center gap-2 mt-1">
+                                                <div className="overflow-hidden">
+                                                    <p className="font-bold text-sm text-slate-950 truncate">{u.user_id}</p>
+                                                    <div className="flex flex-wrap items-center gap-2 mt-2">
                                                         <Badge variant={u.can_create_campaigns ? 'default' : 'secondary'} className={
-                                                            u.can_create_campaigns ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                                                            u.can_create_campaigns ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'
                                                         }>
-                                                            {u.can_create_campaigns ? 'Active' : 'Inactive'}
+                                                            {u.can_create_campaigns ? 'Verified' : 'Pending'}
                                                         </Badge>
-                                                        <span className="text-xs text-gray-500">
-                                                            Plan: {u.subscription_plan}
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                                                            {u.subscription_plan}
                                                         </span>
-                                                        <span className="text-xs text-gray-500">
-                                                            • {u.max_campaigns} campaigns
+                                                        <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded border border-red-100">
+                                                            {u.max_campaigns} Slots
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 pt-4 sm:pt-0">
                                                 {u.subscription_end && (
-                                                    <div className="text-right">
-                                                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                            <Calendar className="h-3 w-3" />
-                                                            Expires: {new Date(u.subscription_end).toLocaleDateString()}
+                                                    <div className="text-left sm:text-right">
+                                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Expires On</p>
+                                                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                                                            <Calendar className="h-3 h-3 text-red-600" />
+                                                            {new Date(u.subscription_end).toLocaleDateString()}
                                                         </div>
                                                     </div>
                                                 )}
@@ -435,6 +436,7 @@ const AdminPanel = () => {
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() => {/* Open edit modal */ }}
+                                                        className="h-10 w-10 rounded-xl"
                                                     >
                                                         <Settings className="h-4 w-4" />
                                                     </Button>
@@ -444,6 +446,7 @@ const AdminPanel = () => {
                                                             size="sm"
                                                             onClick={() => handleRevokeAccess(u.user_id)}
                                                             disabled={actionLoading === u.user_id}
+                                                            className="h-10 w-10 rounded-xl"
                                                         >
                                                             {actionLoading === u.user_id ? (
                                                                 <Loader2 className="h-4 w-4 animate-spin" />

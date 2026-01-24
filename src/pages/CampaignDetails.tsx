@@ -106,9 +106,9 @@ const CampaignDetails = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      <header className="border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-4">
-          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3 md:py-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="font-bold uppercase tracking-widest text-[10px] md:text-xs">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
@@ -125,104 +125,83 @@ const CampaignDetails = () => {
           </div>
 
           {/* Analytics Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">QR Scans</CardTitle>
-                <QrCode className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.scans}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Page Views</CardTitle>
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.views}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">AI Suggestions</CardTitle>
-                <Sparkles className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.ai_suggestions}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Review Clicks</CardTitle>
-                <MousePointerClick className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.click_review}</div>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {[
+              { label: 'QR Scans', value: analytics.scans, icon: QrCode },
+              { label: 'Page Views', value: analytics.views, icon: Eye },
+              { label: 'AI Suggestions', value: analytics.ai_suggestions, icon: Sparkles },
+              { label: 'Review Clicks', value: analytics.click_review, icon: MousePointerClick }
+            ].map((stat, i) => (
+              <Card key={i} className="border-slate-100 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 p-3 md:p-6">
+                  <CardTitle className="text-[9px] md:text-sm font-bold uppercase tracking-widest text-slate-400">{stat.label}</CardTitle>
+                  <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-red-600" />
+                </CardHeader>
+                <CardContent className="p-3 md:p-6 pt-0 md:pt-0">
+                  <div className="text-xl md:text-3xl font-black italic">{stat.value}</div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {/* QR Code Card */}
           <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>QR Code</CardTitle>
-                <CardDescription>
-                  Customers scan this to leave reviews
+            <Card className="border-0 shadow-xl rounded-[2rem] overflow-hidden">
+              <CardHeader className="p-6 md:p-8">
+                <CardTitle className="text-xl font-bold tracking-tight">QR Center</CardTitle>
+                <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Deploy to physical locations
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex flex-col items-center space-y-4">
-                <BrandedQRCard
-                  value={reviewUrl}
-                  businessName={businessName}
-                  logoUrl={logoUrl}
-                  primaryColor="#4285F4"
-                  secondaryColor="#ffffff"
-                  size={250}
-                />
+              <CardContent className="flex flex-col items-center space-y-6 md:space-y-8 p-6 md:p-10 pt-0 md:pt-0">
+                <div className="scale-[0.85] sm:scale-100 transition-transform">
+                  <BrandedQRCard
+                    value={reviewUrl}
+                    businessName={businessName}
+                    logoUrl={logoUrl}
+                    primaryColor="#4285F4"
+                    secondaryColor="#ffffff"
+                    size={240}
+                  />
+                </div>
                 <Button onClick={() => window.open(reviewUrl, '_blank')} variant="outline"
-                  className="w-full">
+                  className="w-full h-14 rounded-xl font-bold uppercase tracking-widest text-[10px] border-slate-100">
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Preview Landing Page
+                  Live Preview Landing
                 </Button>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Details</CardTitle>
-                <CardDescription>
-                  Configuration and settings
+            <Card className="border-0 shadow-xl rounded-[2rem] overflow-hidden">
+              <CardHeader className="p-6 md:p-8">
+                <CardTitle className="text-xl font-bold tracking-tight">Configuration</CardTitle>
+                <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Target assets and links
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6 p-6 md:p-8 pt-0 md:pt-0">
                 {googleReviewUrl && (
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Google Review URL</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Google Direct Link</h4>
                     <a
                       href={googleReviewUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline break-all"
+                      className="text-sm text-red-600 font-bold hover:underline break-all block"
                     >
                       {googleReviewUrl}
                     </a>
                   </div>
                 )}
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Review Landing URL</h4>
-                  <p className="text-sm break-all">{reviewUrl}</p>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Review Booster URL</h4>
+                  <p className="text-sm font-bold text-slate-900 break-all">{reviewUrl}</p>
                 </div>
                 {location && (
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Location</h4>
-                    <p className="text-sm">{location.name}</p>
-                    {location.address && <p className="text-xs text-gray-500">{location.address}</p>}
+                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Linked Location</h4>
+                    <p className="text-base font-black text-slate-900 uppercase italic mb-1">{location.name}</p>
+                    {location.address && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">{location.address}</p>}
                   </div>
                 )}
               </CardContent>

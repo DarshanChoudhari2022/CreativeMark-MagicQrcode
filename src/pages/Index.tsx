@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Star, Sparkles, TrendingUp, Zap, Users,
-  CheckCircle2, ArrowRight, Menu, X, Smartphone, MessageSquare
+  CheckCircle2, ArrowRight, Menu, X, Smartphone, MessageSquare, ArrowLeft
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -41,13 +41,29 @@ const Index = () => {
     <div className="min-h-screen bg-white font-inter text-gray-900 overflow-x-hidden">
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="container mx-auto px-4 md:px-6 h-24 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.jpg" alt="Creative Mark Logo" className="h-16 md:h-20 w-auto object-contain rounded-lg" />
+        <div className="container mx-auto px-4 md:px-6 h-16 md:h-24 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+              className="lg:hidden h-10 w-10 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full shrink-0"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = "https://creative-mark.vercel.app/"}>
+              <img src="/logo.jpg" alt="Creative Mark Logo" className="h-10 md:h-20 w-auto object-contain rounded-lg" />
+            </div>
           </div>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-8">
+            <a
+              href="https://creative-mark.vercel.app/"
+              className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition-colors"
+            >
+              Main Home
+            </a>
             {['overview', 'how_it_works', 'testimonials', 'pricing', 'faq'].map((section) => (
               <button
                 key={section}
@@ -65,7 +81,7 @@ const Index = () => {
             </Button>
             <Button
               onClick={() => navigate("/request-service")}
-              className="bg-red-600 hover:bg-black text-white text-xs font-bold uppercase tracking-widest px-6 h-10 rounded-full shadow-lg shadow-red-100 transition-all hover:scale-105 active:scale-95"
+              className="bg-red-600 hover:bg-black text-white text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 sm:px-6 h-10 rounded-full shadow-lg shadow-red-100 transition-all hover:scale-105 active:scale-95"
             >
               {t('nav.get_started')}
             </Button>
@@ -83,6 +99,12 @@ const Index = () => {
         {isMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-xl animate-in slide-in-from-top-2 duration-300">
             <nav className="flex flex-col p-6 gap-4">
+              <a
+                href="https://creative-mark.vercel.app/"
+                className="text-left py-3 border-b border-gray-50 text-sm font-bold uppercase tracking-widest text-gray-900"
+              >
+                Main Home
+              </a>
               {['overview', 'how_it_works', 'testimonials', 'pricing', 'faq'].map((section) => (
                 <button
                   key={section}
@@ -116,7 +138,7 @@ const Index = () => {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-slate-900 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-[1.1] text-slate-900 tracking-tight italic uppercase">
               {t('landing.hero_title')} 🚀
             </h1>
 
@@ -137,7 +159,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Button
                 onClick={() => navigate("/request-service")}
-                className="bg-red-600 hover:bg-red-700 text-white text-base font-bold px-8 h-12 rounded-full shadow-lg shadow-red-100 transition-all hover:-translate-y-1"
+                className="bg-red-600 hover:bg-black text-white text-sm md:text-base font-black uppercase tracking-widest px-8 md:px-10 h-14 md:h-16 rounded-full shadow-2xl shadow-red-200 transition-all hover:-translate-y-1 active:scale-95"
               >
                 {t('landing.cta_main')}
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -445,7 +467,12 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-12 mb-16">
             <div className="space-y-6">
-              <img src="/logo.jpg" alt="Logo" className="h-16 w-auto object-contain transition-all" />
+              <img
+                src="/logo.jpg"
+                alt="Logo"
+                className="h-16 w-auto object-contain transition-all cursor-pointer hover:opacity-80"
+                onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+              />
               <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
                 {t('landing.footer_tagline')}
               </p>

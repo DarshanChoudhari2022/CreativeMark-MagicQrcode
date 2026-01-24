@@ -134,14 +134,14 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-2 p-0 hover:bg-transparent justify-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+        <div className="border-l-8 border-red-600 pl-6 py-2">
+          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-2 p-0 hover:bg-transparent justify-start text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-red-600">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          <h1 className="text-3xl font-bold">Enhanced Analytics</h1>
-          <p className="text-muted-foreground">Track your review performance and insights</p>
+          <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight">Enhanced Analytics</h1>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Track your review performance and insights</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="icon">
@@ -151,52 +151,52 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Scans</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-0 shadow-lg bg-slate-900 text-white overflow-hidden group">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 p-4 md:p-6">
+            <CardTitle className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400 group-hover:text-red-500 transition-colors">Total Scans</CardTitle>
+            <Users className="h-3 w-3 md:h-4 md:w-4 text-red-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalScans || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Total Interactions
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
+            <div className="text-2xl md:text-4xl font-black italic">{stats?.totalScans || 0}</div>
+            <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">
+              Interactions
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+        <Card className="border-0 shadow-lg bg-white overflow-hidden group">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 p-4 md:p-6">
+            <CardTitle className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400">Conv. Rate</CardTitle>
+            <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.conversionRate.toFixed(1) || 0}%</div>
-            <p className="text-xs text-muted-foreground">
-              {stats?.totalReviews || 0} reviews from {stats?.totalScans || 0} scans
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
+            <div className="text-2xl md:text-4xl font-black italic text-slate-950">{stats?.conversionRate.toFixed(1) || 0}%</div>
+            <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">
+              {stats?.totalReviews || 0} / {stats?.totalScans || 0} Scans
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
-            <Star className="h-4 w-4 text-yellow-500" />
+        <Card className="border-0 shadow-lg bg-white overflow-hidden group">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 p-4 md:p-6">
+            <CardTitle className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400">Avg Rating</CardTitle>
+            <Star className="h-3 w-3 md:h-4 md:w-4 text-yellow-500 fill-yellow-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.averageRating.toFixed(1) || 0}</div>
-            <p className="text-xs text-muted-foreground">Out of 5.0 stars</p>
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
+            <div className="text-2xl md:text-4xl font-black italic text-slate-950">{stats?.averageRating.toFixed(1) || 0}</div>
+            <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Out of 5.0</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
+        <Card className="border-0 shadow-lg bg-red-600 text-white overflow-hidden group">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 p-4 md:p-6">
+            <CardTitle className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-red-100">Reviews</CardTitle>
+            <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-white" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalReviews || 0}</div>
-            <p className="text-xs text-muted-foreground">Latest period</p>
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
+            <div className="text-2xl md:text-4xl font-black italic">{stats?.totalReviews || 0}</div>
+            <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-red-200 mt-1">Total Collected</p>
           </CardContent>
         </Card>
       </div>

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, LogOut, Plus, Trash2, Edit2, MapPin } from "lucide-react";
+import { Building2, LogOut, Plus, Trash2, Edit2, MapPin, ArrowLeft } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 interface Location {
@@ -149,8 +149,18 @@ const Locations = () => {
       <header className="border-b bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-blue-600" />
-            <h1 className="text-xl font-bold">ReviewBoost AI</h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+              className="h-9 w-9 text-slate-400 hover:text-red-600 rounded-full"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/dashboard")}>
+              <Building2 className="h-6 w-6 text-blue-600" />
+              <h1 className="text-xl font-bold">ReviewBoost AI</h1>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">My Locations</span>
@@ -181,66 +191,72 @@ const Locations = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Business Name *</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Business Name *</Label>
                     <Input
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
                       placeholder="e.g. Main Branch"
+                      className="h-12 rounded-xl border-slate-100 bg-slate-50 focus:bg-white"
                     />
                   </div>
-                  <div>
-                    <Label>Category</Label>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Category</Label>
                     <Input
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       placeholder="e.g. Retail Store"
+                      className="h-12 rounded-xl border-slate-100 bg-slate-50 focus:bg-white"
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Address</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Address</Label>
                     <Input
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       placeholder="Street address"
+                      className="h-12 rounded-xl border-slate-100 bg-slate-50 focus:bg-white"
                     />
                   </div>
-                  <div>
-                    <Label>City</Label>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">City</Label>
                     <Input
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder="City"
+                      className="h-12 rounded-xl border-slate-100 bg-slate-50 focus:bg-white"
                     />
                   </div>
                 </div>
-                <div>
-                  <Label>Country</Label>
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Country</Label>
                   <Input
                     value={formData.country}
                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                     placeholder="Country"
+                    className="h-12 rounded-xl border-slate-100 bg-slate-50 focus:bg-white"
                   />
                 </div>
-                <div>
-                  <Label>Google Review URL *</Label>
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Google Review URL *</Label>
                   <Input
                     type="url"
                     value={formData.google_review_url}
                     onChange={(e) => setFormData({ ...formData, google_review_url: e.target.value })}
                     required
                     placeholder="https://g.page/business/review"
+                    className="h-12 rounded-xl border-slate-100 bg-slate-50 focus:bg-white"
                   />
                 </div>
-                <div className="flex gap-4">
-                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-black h-12 rounded-xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95">
                     {editingId ? "Update Location" : "Create Location"}
                   </Button>
-                  <Button type="button" variant="outline" onClick={resetForm} className="flex-1">
+                  <Button type="button" variant="outline" onClick={resetForm} className="flex-1 h-12 rounded-xl font-bold uppercase tracking-widest text-xs border-slate-100">
                     Cancel
                   </Button>
                 </div>

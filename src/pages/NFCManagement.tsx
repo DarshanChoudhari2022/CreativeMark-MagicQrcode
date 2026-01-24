@@ -133,28 +133,28 @@ export default function NFCManagement() {
 
       {/* Header - Professional & Compact */}
       <header className="border-b bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-slate-100">
-        <div className="container mx-auto px-4 md:px-8 h-24 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 md:px-8 h-20 md:h-24 flex items-center justify-between">
+          <div className="flex items-center gap-2 md:gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate("/dashboard")}
-              className="hover:bg-red-50 text-slate-400 hover:text-red-600 h-10 w-10 rounded-xl transition-all"
+              className="hover:bg-red-50 text-slate-400 hover:text-red-600 h-9 w-9 md:h-10 md:w-10 rounded-xl transition-all"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
-            <div className="flex items-center gap-4">
-              <div className="bg-red-600 p-2.5 rounded-xl shadow-lg">
-                <Nfc className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="bg-red-600 p-2 md:p-2.5 rounded-lg md:rounded-xl shadow-lg">
+                <Nfc className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-slate-950 tracking-tight leading-none">NFC Card Center</h1>
-                <p className="text-[10px] font-bold text-red-600 uppercase tracking-widest mt-1">Hardware Management</p>
+              <div className="block">
+                <h1 className="text-lg md:text-xl font-bold text-slate-950 tracking-tight leading-none">NFC Center</h1>
+                <p className="text-[9px] md:text-[10px] font-bold text-red-600 uppercase tracking-widest mt-1">Hardware</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="Logo" className="h-16 w-auto object-contain rounded-xl shadow-md" />
+            <img src="/logo.jpg" alt="Logo" className="h-10 md:h-16 w-auto object-contain rounded-lg md:rounded-xl shadow-md" />
           </div>
         </div>
       </header>
@@ -253,12 +253,12 @@ export default function NFCManagement() {
           {/* Right Side: Deployment Table */}
           <div className="lg:col-span-8 space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
-              <h2 className="text-2xl font-bold text-slate-950 tracking-tight flex items-center gap-3">
-                <HistoryIcon className="h-6 w-6 text-red-500" />
+              <h2 className="text-xl md:text-2xl font-bold text-slate-950 tracking-tight flex items-center gap-3">
+                <HistoryIcon className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
                 Active Fleet
               </h2>
-              <div className="bg-white border border-slate-100 text-slate-600 px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">
-                <span className="text-red-600 mr-2">{nfcCards.length}</span> Devices Online
+              <div className="bg-white border border-slate-100 text-slate-600 px-4 md:px-6 py-2 md:py-2.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                <span className="text-red-600 mr-1 md:mr-2">{nfcCards.length}</span> Devices Online
               </div>
             </div>
 
@@ -293,11 +293,11 @@ export default function NFCManagement() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md transition-colors">
+                            <div className="flex items-center gap-2 md:gap-3">
+                              <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 text-white rounded-lg md:rounded-xl flex items-center justify-center font-bold text-xs md:text-sm shadow-md transition-colors">
                                 {card.taps_count}
                               </div>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Taps</span>
+                              <span className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-wider">Taps</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-right pr-8">

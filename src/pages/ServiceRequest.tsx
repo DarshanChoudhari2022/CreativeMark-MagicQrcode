@@ -78,11 +78,11 @@ const ServiceRequest = () => {
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <button
-                        onClick={() => navigate("/")}
-                        className="flex items-center gap-2 text-gray-400 hover:text-red-600 font-bold uppercase tracking-widest text-xs transition-colors"
+                        onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+                        className="flex items-center gap-2 text-gray-400 hover:text-red-600 font-bold uppercase tracking-widest text-[10px] md:text-xs transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Back to Home
+                        Agency Home
                     </button>
                     <button
                         onClick={() => navigate("/auth")}
@@ -92,19 +92,19 @@ const ServiceRequest = () => {
                     </button>
                 </div>
 
-                <div className="grid md:grid-cols-5 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 text-center lg:text-left">
                     {/* Info Side */}
-                    <div className="md:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-6 md:space-y-8">
                         <div>
-                            <h1 className="text-4xl font-black text-gray-900 mb-6 uppercase tracking-tight italic leading-none">
+                            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4 md:mb-6 uppercase tracking-tight italic leading-[1.1]">
                                 Get <span className="text-red-600">ReviewBoost</span> For Your Business
                             </h1>
-                            <p className="text-gray-500 font-medium leading-relaxed">
+                            <p className="text-sm md:text-base text-gray-500 font-medium leading-relaxed">
                                 Join hundreds of local businesses growing their GMB ranking with AI-powered smart reviews.
                             </p>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-4 md:space-y-6 max-w-sm mx-auto lg:mx-0">
                             {[
                                 "10x Faster Customer Reviews",
                                 "AI-Powered Review Suggestions",
@@ -112,10 +112,10 @@ const ServiceRequest = () => {
                                 "Dedicated Admin Dashboard"
                             ].map((item, i) => (
                                 <div key={i} className="flex items-center gap-3">
-                                    <div className="w-6 h-6 bg-red-50 rounded-full flex items-center justify-center">
-                                        <CheckCircle2 className="w-4 h-4 text-red-600" />
+                                    <div className="w-5 h-5 md:w-6 md:h-6 bg-red-50 rounded-full flex items-center justify-center shrink-0">
+                                        <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4 text-red-600" />
                                     </div>
-                                    <span className="text-sm font-bold text-gray-700 uppercase tracking-wide">{item}</span>
+                                    <span className="text-xs md:text-sm font-bold text-gray-700 uppercase tracking-wide">{item}</span>
                                 </div>
                             ))}
                         </div>
@@ -129,26 +129,26 @@ const ServiceRequest = () => {
                     </div>
 
                     {/* Form Side */}
-                    <div className="md:col-span-3">
-                        <Card className="border-0 shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
-                            <CardHeader className="bg-red-600 p-8 text-white">
-                                <CardTitle className="text-2xl font-black uppercase tracking-tight italic">Onboarding Form</CardTitle>
-                                <CardDescription className="text-red-100 font-medium tracking-wide">Enter your business details below</CardDescription>
+                    <div className="lg:col-span-3">
+                        <Card className="border-0 shadow-2xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white overflow-hidden">
+                            <CardHeader className="bg-red-600 p-6 md:p-8 text-white">
+                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tight italic">Onboarding Form</CardTitle>
+                                <CardDescription className="text-red-100 font-medium tracking-wide text-xs">Enter your business details below</CardDescription>
                             </CardHeader>
-                            <CardContent className="p-8">
-                                <form onSubmit={handleSubmit} className="space-y-6">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <CardContent className="p-6 md:p-8">
+                                <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
                                         <div className="space-y-2">
-                                            <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                                            <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                                                 <User className="w-3 h-3 text-red-600" /> Full Name
                                             </Label>
-                                            <Input name="fullName" required placeholder="John Doe" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
+                                            <Input name="fullName" required placeholder="John Doe" className="h-11 md:h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all text-sm" />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                                            <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                                                 <Building2 className="w-3 h-3 text-red-600" /> Business Name
                                             </Label>
-                                            <Input name="businessName" required placeholder="My Business" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
+                                            <Input name="businessName" required placeholder="My Business" className="h-11 md:h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all text-sm" />
                                         </div>
                                     </div>
 

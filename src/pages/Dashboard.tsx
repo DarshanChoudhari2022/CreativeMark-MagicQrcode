@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Building2, LogOut, Plus, QrCode, TrendingUp, TrendingDown, Star,
   Settings, Shield, BarChart3, Users, MessageSquare, Phone,
-  Bell, Calendar, Sparkles, ArrowRight, Lock, Bot, Smartphone, Gift, Zap, ShieldAlert, CheckCircle2,
+  Bell, Calendar, Sparkles, ArrowRight, ArrowLeft, Lock, Bot, Smartphone, Gift, Zap, ShieldAlert, CheckCircle2,
   Cpu, LayoutDashboard, Share2, MousePointer2, Loader2, History as HistoryIcon
 } from "lucide-react";
 import { checkAdminAccess, canCreateCampaign, getSubscriptionDetails } from "@/services/adminService";
@@ -150,12 +150,12 @@ const Dashboard = () => {
 
       {/* Header - Professional & Compact */}
       <header className="border-b bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-slate-100">
-        <div className="container mx-auto px-4 md:px-8 h-24 flex items-center justify-between">
-          <div className="flex items-center gap-4 md:gap-8">
-            <div className="flex items-center gap-3 active:scale-95 transition-transform cursor-pointer group" onClick={() => navigate("/")}>
-              <img src="/logo.jpg" alt="Logo" className="h-16 w-auto object-contain rounded-xl shadow-md transition-all group-hover:shadow-lg" />
+        <div className="container mx-auto px-4 md:px-8 h-20 md:h-24 flex items-center justify-between">
+          <div className="flex items-center gap-2 md:gap-8">
+            <div className="flex items-center gap-3 active:scale-95 transition-transform cursor-pointer group" onClick={() => window.location.href = "https://creative-mark.vercel.app/"}>
+              <img src="/logo.jpg" alt="Logo" className="h-10 md:h-16 w-auto object-contain rounded-lg md:rounded-xl shadow-md transition-all group-hover:shadow-lg" />
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-slate-950 tracking-tight leading-none">ReviewBoost</h1>
+                <h1 className="text-lg md:text-xl font-bold text-slate-950 tracking-tight leading-none">ReviewBoost</h1>
                 <p className="text-[10px] font-semibold text-red-600 uppercase tracking-wider mt-1">Dashboard</p>
               </div>
             </div>
@@ -169,7 +169,7 @@ const Dashboard = () => {
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-3 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-6">
             {isAdmin && (
               <Button
                 variant="outline"
@@ -180,9 +180,17 @@ const Dashboard = () => {
                 Admin
               </Button>
             )}
-            <Button variant="ghost" onClick={handleSignOut} className="text-slate-500 hover:text-red-600 rounded-lg px-4 md:px-6 h-10 font-bold uppercase tracking-wider text-[10px] transition-all hover:bg-red-50">
-              <LogOut className="h-3.5 w-3.5 mr-2" />
-              Sign Out
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+              className="text-slate-500 hover:text-red-600 border-slate-200 hover:border-red-100 rounded-lg px-2 md:px-6 h-9 md:h-10 font-bold uppercase tracking-wider text-[9px] md:text-[10px] transition-all hover:bg-red-50"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 mr-1 md:mr-2" />
+              Home
+            </Button>
+            <Button variant="ghost" onClick={handleSignOut} className="text-slate-500 hover:text-red-600 rounded-lg px-2 md:px-6 h-9 md:h-10 font-bold uppercase tracking-wider text-[9px] md:text-[10px] transition-all hover:bg-red-50">
+              <LogOut className="h-3.5 w-3.5 mr-1 md:mr-2" />
+              Exit
             </Button>
           </div>
         </div>
@@ -370,7 +378,12 @@ const Dashboard = () => {
       {/* Footer Branding - Clean & Modern */}
       <footer className="py-16 md:py-24 border-t border-slate-100 bg-slate-50 mt-20">
         <div className="container mx-auto px-8 flex flex-col items-center gap-10">
-          <img src="/logo.jpg" alt="Creative Mark" className="h-16 w-auto object-contain rounded-2xl shadow-lg transition-all duration-500" />
+          <img
+            src="/logo.jpg"
+            alt="Creative Mark"
+            className="h-16 w-auto object-contain rounded-2xl shadow-lg transition-all duration-500 cursor-pointer hover:scale-105"
+            onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+          />
           <div className="text-center">
             <p className="text-lg font-bold uppercase tracking-widest text-slate-950 mb-4">
               ReviewBoost <span className="text-red-600 mx-2">&bull;</span> Creative Mark AI

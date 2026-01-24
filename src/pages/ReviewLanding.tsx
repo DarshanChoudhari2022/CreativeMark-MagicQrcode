@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Star, Loader2, ExternalLink, CheckCircle2,
   Sparkles, MessageSquare, ThumbsUp, Copy, ArrowRight,
-  Heart, Zap, Award, Smartphone
+  Heart, Zap, Award, Smartphone, ArrowLeft
 } from "lucide-react";
 import { generateReviewSuggestions } from "@/services/gemini";
 import { useTranslation } from "react-i18next";
@@ -223,15 +223,26 @@ const ReviewLanding = () => {
       <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-red-50 to-transparent z-0"></div>
       <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-100/30 rounded-full blur-[120px] -z-10"></div>
 
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+          className="h-10 w-10 bg-white/50 backdrop-blur-md text-slate-400 hover:text-red-600 rounded-full shadow-sm hover:bg-white"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+      </div>
+
       <div className="relative z-10 max-w-xl mx-auto px-4 pt-12 md:pt-20">
         {/* Header Branding - Clean & Focused */}
         <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
-          <div className="bg-white p-4 rounded-3xl inline-block shadow-xl mb-6 border border-slate-100 overflow-hidden w-28 h-28 md:w-32 md:h-32 transform transition-all duration-500 hover:shadow-2xl">
+          <div className="bg-white p-2 md:p-4 rounded-2xl md:rounded-3xl inline-block shadow-lg md:shadow-xl mb-4 md:mb-6 border border-slate-100 overflow-hidden w-24 h-24 md:w-32 md:h-32 transform transition-all duration-500 hover:shadow-2xl">
             {location?.logo_url ? (
               <img
                 src={location.logo_url}
                 alt={location.name}
-                className="w-full h-full object-contain rounded-xl"
+                className="w-full h-full object-contain rounded-lg md:rounded-xl"
               />
             ) : (
               <Award className="w-full h-full text-red-500" />
@@ -249,13 +260,13 @@ const ReviewLanding = () => {
 
         <main className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
           {/* Main Suggestions Card */}
-          <Card className="border-0 shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
-            <CardContent className="p-6 md:p-10 text-center">
-              <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <Sparkles className="h-8 w-8 text-red-500" />
+          <Card className="border-0 shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white overflow-hidden">
+            <CardContent className="p-5 md:p-10 text-center">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-inner">
+                <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-red-500" />
               </div>
-              <h2 className="text-xl md:text-2xl font-bold mb-2 text-slate-900 tracking-tight">Select a review to copy</h2>
-              <p className="text-slate-400 font-bold mb-8 uppercase tracking-widest text-[10px]">Tapping a card will copy & redirect you</p>
+              <h2 className="text-lg md:text-2xl font-bold mb-2 text-slate-900 tracking-tight">Select a review to copy</h2>
+              <p className="text-slate-400 font-bold mb-6 md:mb-8 uppercase tracking-widest text-[9px] md:text-[10px]">Tapping a card will copy & redirect you</p>
 
               {/* AI Review Language Toggle */}
               <div className="flex justify-center mb-8">
@@ -292,7 +303,7 @@ const ReviewLanding = () => {
                     <button
                       key={index}
                       onClick={() => handleCopyAndPost(suggestion)}
-                      className={`w-full p-6 text-left rounded-2xl border transition-all group relative overflow-hidden active:scale-[0.98] ${selectedSuggestion === suggestion
+                      className={`w-full p-4 md:p-6 text-left rounded-xl md:rounded-2xl border transition-all group relative overflow-hidden active:scale-[0.98] ${selectedSuggestion === suggestion
                         ? 'bg-red-600 border-red-600 text-white shadow-lg'
                         : 'bg-white hover:bg-slate-50 border-slate-100 hover:border-red-200 shadow-sm'
                         }`}
