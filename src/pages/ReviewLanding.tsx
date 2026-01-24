@@ -335,7 +335,7 @@ const ReviewLanding = () => {
 
         <footer className="mt-12 text-center pb-12">
           <div className="flex flex-col items-center gap-6">
-            <img src="/logo.jpg" alt="Creative Mark" className="h-10 w-auto object-contain rounded-xl shadow-md grayscale opacity-40 hover:opacity-100 hover:grayscale-0 transition-all duration-500" />
+            <img src="/logo.jpg" alt="Creative Mark" className="h-16 w-auto object-contain rounded-xl shadow-lg transition-all duration-500" />
             <div className="space-y-2">
               <div className="flex items-center justify-center gap-2 text-red-600 font-bold uppercase tracking-widest text-[9px]">
                 <CheckCircle2 className="h-3 w-3" />

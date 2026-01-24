@@ -217,7 +217,7 @@ const AdminPanel = () => {
                             Back
                         </Button>
                         <div className="flex items-center gap-4">
-                            <img src="/logo.jpg" alt="Creative Mark Logo" className="h-12 w-auto object-contain" />
+                            <img src="/logo.jpg" alt="Creative Mark Logo" className="h-16 w-auto object-contain" />
                             <h1 className="text-xl font-bold border-l pl-4">Admin Panel</h1>
                         </div>
                     </div>

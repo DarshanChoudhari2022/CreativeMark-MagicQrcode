@@ -41,9 +41,9 @@ const Index = () => {
     <div className="min-h-screen bg-white font-inter text-gray-900 overflow-x-hidden">
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="container mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 h-24 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.jpg" alt="Creative Mark Logo" className="h-10 md:h-12 w-auto object-contain rounded-lg" />
+            <img src="/logo.jpg" alt="Creative Mark Logo" className="h-16 md:h-20 w-auto object-contain rounded-lg" />
           </div>
 
           {/* Desktop Nav */}
@@ -231,22 +231,22 @@ const Index = () => {
 
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 items-stretch">
             {/* Before Card */}
-            <Card className="bg-slate-50 border-2 border-dashed border-slate-200 shadow-none rounded-3xl overflow-hidden relative group hover:bg-slate-100/50 transition-colors">
+            <Card className="bg-slate-200 border-2 border-dashed border-slate-300 shadow-none rounded-3xl overflow-hidden relative group hover:bg-slate-300/50 transition-colors">
               <CardContent className="p-8 md:p-12 text-center h-full flex flex-col justify-center">
-                <div className="absolute top-0 left-0 bg-slate-200 text-slate-500 text-[10px] font-bold px-6 py-1.5 rounded-br-xl uppercase tracking-widest">
+                <div className="absolute top-0 left-0 bg-slate-400 text-white text-[10px] font-bold px-6 py-1.5 rounded-br-xl uppercase tracking-widest">
                   {t('landing.before_label')}
                 </div>
-                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl grayscale opacity-70">
+                <div className="w-20 h-20 bg-slate-300 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl grayscale opacity-70">
                   😕
                 </div>
-                <h4 className="text-xl font-bold text-slate-400 mb-4 uppercase tracking-tight line-through decoration-red-500/30 decoration-2">
+                <h4 className="text-xl font-bold text-slate-600 mb-4 uppercase tracking-tight line-through decoration-red-500/50 decoration-2">
                   Traditional Way
                 </h4>
-                <p className="text-sm text-slate-400 font-medium leading-relaxed mb-8">
+                <p className="text-sm text-slate-600 font-medium leading-relaxed mb-8">
                   {t('landing.before_desc')}
                 </p>
                 <div className="mt-auto">
-                  <span className="inline-block bg-white text-slate-400 border border-slate-100 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                  <span className="inline-block bg-white text-slate-600 border border-slate-200 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-sm">
                     {t('landing.before_result')}
                   </span>
                 </div>
@@ -353,7 +353,6 @@ const Index = () => {
                 <div className="text-center mb-10">
                   <h4 className="text-2xl font-black mb-6 uppercase tracking-tight italic">{t('pricing.lifetime_pro')}</h4>
                   <div className="flex flex-col items-center gap-2">
-                    <span className="text-gray-400 line-through text-lg font-bold">₹3,499</span>
                     <div className="flex items-center gap-4">
                       <span className="text-6xl md:text-7xl font-black text-gray-900 tracking-tighter italic">₹999</span>
                       <div className="text-left">
@@ -446,7 +445,7 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-12 mb-16">
             <div className="space-y-6">
-              <img src="/logo.jpg" alt="Logo" className="h-12 w-auto object-contain grayscale invert opacity-50 hover:opacity-100 transition-all" />
+              <img src="/logo.jpg" alt="Logo" className="h-16 w-auto object-contain transition-all" />
               <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
                 {t('landing.footer_tagline')}
               </p>

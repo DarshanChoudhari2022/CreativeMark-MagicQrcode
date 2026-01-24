@@ -150,10 +150,10 @@ const Dashboard = () => {
 
       {/* Header - Professional & Compact */}
       <header className="border-b bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-slate-100">
-        <div className="container mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-8 h-24 flex items-center justify-between">
           <div className="flex items-center gap-4 md:gap-8">
             <div className="flex items-center gap-3 active:scale-95 transition-transform cursor-pointer group" onClick={() => navigate("/")}>
-              <img src="/logo.jpg" alt="Logo" className="h-10 w-auto object-contain rounded-xl shadow-md transition-all group-hover:shadow-lg" />
+              <img src="/logo.jpg" alt="Logo" className="h-16 w-auto object-contain rounded-xl shadow-md transition-all group-hover:shadow-lg" />
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-slate-950 tracking-tight leading-none">ReviewBoost</h1>
                 <p className="text-[10px] font-semibold text-red-600 uppercase tracking-wider mt-1">Dashboard</p>
@@ -370,7 +370,7 @@ const Dashboard = () => {
       {/* Footer Branding - Clean & Modern */}
       <footer className="py-16 md:py-24 border-t border-slate-100 bg-slate-50 mt-20">
         <div className="container mx-auto px-8 flex flex-col items-center gap-10">
-          <img src="/logo.jpg" alt="Creative Mark" className="h-16 w-auto object-contain rounded-2xl shadow-lg opacity-40 hover:opacity-100 transition-all duration-500" />
+          <img src="/logo.jpg" alt="Creative Mark" className="h-16 w-auto object-contain rounded-2xl shadow-lg transition-all duration-500" />
           <div className="text-center">
             <p className="text-lg font-bold uppercase tracking-widest text-slate-950 mb-4">
               ReviewBoost <span className="text-red-600 mx-2">&bull;</span> Creative Mark AI

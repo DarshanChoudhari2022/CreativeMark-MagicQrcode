@@ -151,7 +151,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
             SCAN TO REVIEW
           </div>
 
-          <img src="/logo.jpg" alt="Creative Mark" className="h-4 w-auto opacity-80" />
+          <img src="/logo.jpg" alt="Creative Mark" className="h-8 w-auto" />
           <p className="text-[8px] text-[#70757A] font-bold uppercase tracking-widest -mt-2">
             ReviewBoost Technology
           </p>

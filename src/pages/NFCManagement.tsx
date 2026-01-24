@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -125,71 +126,76 @@ export default function NFCManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-white font-inter pb-32 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 font-inter pb-20 relative overflow-hidden text-slate-900">
       {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-50/50 rounded-full blur-[150px] -z-10 translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-red-500/5 rounded-full blur-[100px] -z-10 translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-slate-200/50 rounded-full blur-[80px] -z-10 -translate-x-1/2 translate-y-1/2"></div>
 
-      {/* Premium Header - Large Logo */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-8 py-8 flex items-center justify-between">
-          <div className="flex items-center gap-10">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="hover:bg-red-50 text-gray-400 hover:text-red-600 h-16 w-16 rounded-2xl transition-all">
-              <ArrowLeft className="h-8 w-8" />
+      {/* Header - Professional & Compact */}
+      <header className="border-b bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-slate-100">
+        <div className="container mx-auto px-4 md:px-8 h-24 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/dashboard")}
+              className="hover:bg-red-50 text-slate-400 hover:text-red-600 h-10 w-10 rounded-xl transition-all"
+            >
+              <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-6 group">
-              <div className="bg-red-600 p-5 rounded-[1.5rem] shadow-2xl group-hover:rotate-12 transition-all">
-                <Nfc className="h-8 w-8 text-white" />
+            <div className="flex items-center gap-4">
+              <div className="bg-red-600 p-2.5 rounded-xl shadow-lg">
+                <Nfc className="h-5 w-5 text-white" />
               </div>
-              <div className="hidden lg:block">
-                <h1 className="text-3xl font-black text-gray-950 tracking-tighter uppercase italic leading-none">NFC Card Center</h1>
-                <p className="text-[10px] font-black text-red-600 uppercase tracking-[0.4em] mt-2 italic leading-none">Hardware Protocol</p>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold text-slate-950 tracking-tight leading-none">NFC Card Center</h1>
+                <p className="text-[10px] font-bold text-red-600 uppercase tracking-widest mt-1">Hardware Management</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="Logo" className="h-20 w-auto object-contain rounded-2xl shadow-2xl transition-all hover:scale-110" />
+            <img src="/logo.jpg" alt="Logo" className="h-16 w-auto object-contain rounded-xl shadow-md" />
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-8 py-20 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+      <main className="container mx-auto px-4 md:px-8 py-8 md:py-16 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
 
-          {/* Left: Registration Form - Large Scale */}
-          <div className="lg:col-span-4 space-y-10">
-            <Card className="border-0 shadow-4xl overflow-hidden rounded-[4rem] group bg-white">
-              <div className="h-4 bg-red-600 w-0 group-hover:w-full transition-all duration-1000"></div>
-              <CardHeader className="p-12">
-                <CardTitle className="text-3xl font-black text-gray-950 uppercase tracking-tighter italic leading-none">Activate Hardware</CardTitle>
-                <CardDescription className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400 mt-4 italic leading-none">Link a professional NFC device</CardDescription>
+          {/* Left Side: Setup & Guide */}
+          <div className="lg:col-span-4 space-y-6">
+            <Card className="border-0 shadow-xl rounded-3xl overflow-hidden bg-white">
+              <CardHeader className="p-6 md:p-8">
+                <CardTitle className="text-xl font-bold text-slate-950 tracking-tight">Activate Hardware</CardTitle>
+                <CardDescription className="font-bold text-[10px] uppercase tracking-wider text-slate-400 mt-2">Link a physical NFC device to your digital campaign</CardDescription>
               </CardHeader>
-              <CardContent className="px-12 pb-12 space-y-10">
-                <div className="space-y-4">
-                  <Label htmlFor="card-id" className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-400 italic flex items-center gap-3 ml-2">
-                    <Smartphone className="h-5 w-5 text-red-600" />
-                    Device Unique Identifier (UID)
+              <CardContent className="p-6 md:p-8 pt-0 space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="card-id" className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <Smartphone className="h-4 w-4 text-red-600" />
+                    NFC Device UID
                   </Label>
                   <Input
                     id="card-id"
-                    placeholder="PROTOCOL_SN_882_012"
+                    placeholder="Enter Card ID (e.g. 04:A1:B2...)"
                     value={newCardId}
                     onChange={(e) => setNewCardId(e.target.value)}
-                    className="h-20 bg-gray-50 border-gray-50 text-gray-950 rounded-[1.5rem] focus:border-red-600 focus:ring-0 focus:scale-[1.02] transition-all font-mono font-black text-xl px-10 shadow-inner"
+                    className="h-14 bg-slate-50 border-slate-100 text-slate-950 rounded-2xl focus:border-red-600 focus:ring-0 transition-all font-mono font-bold px-6 shadow-inner"
                   />
                 </div>
 
-                <div className="space-y-4">
-                  <Label htmlFor="campaign" className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-400 italic flex items-center gap-3 ml-2">
-                    <Zap className="h-5 w-5 text-red-600" />
-                    Target Operational Branch
+                <div className="space-y-2">
+                  <Label htmlFor="campaign" className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-red-600" />
+                    Target Campaign
                   </Label>
                   <select
                     id="campaign"
-                    className="w-full h-20 px-10 rounded-[1.5rem] border-2 border-gray-50 bg-gray-50 text-xl font-black tracking-tighter uppercase italic focus:ring-10 focus:ring-red-100 focus:border-red-600 transition-all outline-none shadow-inner"
+                    className="w-full h-14 px-6 rounded-2xl border border-slate-100 bg-slate-50 text-sm font-bold text-slate-900 tracking-tight focus:border-red-600 transition-all outline-none shadow-inner"
                     value={selectedCampaign}
                     onChange={(e) => setSelectedCampaign(e.target.value)}
                   >
-                    <option value="" className="text-gray-300">SELECT CAMPAIGN</option>
+                    <option value="">Select a Campaign</option>
                     {campaigns.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -198,94 +204,110 @@ export default function NFCManagement() {
 
                 <Button
                   onClick={handleAddCard}
-                  className="w-full h-24 bg-red-600 hover:bg-black text-white font-black uppercase tracking-[0.6em] rounded-[2rem] shadow-[0_30px_60px_-10px_rgba(220,38,38,0.5)] active:scale-95 transition-all mt-10"
+                  className="w-full h-16 bg-red-600 hover:bg-slate-950 text-white font-bold uppercase tracking-widest text-xs rounded-2xl shadow-lg shadow-red-100 active:scale-95 transition-all"
                   disabled={submitting}
                 >
-                  {submitting ? <Loader2 className="h-10 w-10 animate-spin" /> : (
+                  {submitting ? <Loader2 className="h-6 w-6 animate-spin" /> : (
                     <>
-                      <Plus className="mr-6 h-8 w-8" />
-                      ACTIVATE DEVICE
+                      <Plus className="mr-3 h-5 w-5" />
+                      Activate Card
                     </>
                   )}
                 </Button>
               </CardContent>
             </Card>
 
-            {/* High Impact Tech Card */}
-            <Card className="bg-gray-950 border-0 text-white shadow-3xl rounded-[4rem] group relative overflow-hidden scale-95 opacity-80 hover:scale-100 hover:opacity-100 transition-all duration-700">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/20 blur-[60px]"></div>
-              <CardContent className="p-16">
-                <div className="flex items-center gap-6 mb-8">
-                  <div className="p-5 bg-red-600 rounded-[1.5rem] shadow-2xl shadow-red-500/50 group-hover:rotate-6 transition-transform">
-                    <ShieldCheck className="h-10 w-10 text-white" />
+            {/* Usefulness Guide */}
+            <Card className="bg-slate-900 border-0 text-white shadow-xl rounded-3xl relative overflow-hidden group">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-3 bg-red-600 rounded-xl">
+                    <ShieldCheck className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-black uppercase tracking-[0.5em] italic">SECURE CORE</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-widest">NFC Advantage</h3>
                 </div>
-                <p className="text-sm text-gray-400 leading-loose font-bold italic uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">
-                  All devices are synchronized with Creative Mark Secure-Core. Taps are monitored in real-time across the global network.
-                </p>
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <div className="h-6 w-6 bg-white/10 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">1</div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium uppercase tracking-wide">
+                      <strong className="text-white">Zero Friction:</strong> Customers just tap their phone. No camera apps, no scanning logic required.
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="h-6 w-6 bg-white/10 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">2</div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium uppercase tracking-wide">
+                      <strong className="text-white">Premium Feel:</strong> Metal or high-grade PVC cards look much more professional than paper QR codes.
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="h-6 w-6 bg-white/10 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">3</div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium uppercase tracking-wide">
+                      <strong className="text-white">Instant Sync:</strong> Change your Google review link anytime from this dashboard without replacing the card.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right: Active Devices Table - Massive Fidelity */}
-          <div className="lg:col-span-8 space-y-12">
-            <div className="flex items-center justify-between px-6 border-b-4 border-gray-50 pb-10">
-              <h2 className="text-5xl font-black text-gray-950 uppercase tracking-tighter flex items-center gap-8 italic leading-none">
-                <HistoryIcon className="h-12 w-12 text-red-600" />
+          {/* Right Side: Deployment Table */}
+          <div className="lg:col-span-8 space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
+              <h2 className="text-2xl font-bold text-slate-950 tracking-tight flex items-center gap-3">
+                <HistoryIcon className="h-6 w-6 text-red-500" />
                 Active Fleet
               </h2>
-              <div className="bg-red-600 text-white px-10 py-4 rounded-full text-xs font-black uppercase tracking-[0.4em] shadow-2xl shadow-red-200 skew-x-[-10deg] italic">
-                {nfcCards.length} UNITS ONLINE
+              <div className="bg-white border border-slate-100 text-slate-600 px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                <span className="text-red-600 mr-2">{nfcCards.length}</span> Devices Online
               </div>
             </div>
 
-            <Card className="border-0 shadow-4xl overflow-hidden bg-white rounded-[5rem] min-h-[600px] border-l-[16px] border-l-red-600">
-              <CardContent className="p-0">
+            <Card className="border-0 shadow-xl overflow-hidden bg-white rounded-3xl min-h-[500px] border-l-4 border-l-red-600">
+              <CardContent className="p-0 overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-gray-50/50">
-                    <TableRow className="border-gray-50 hover:bg-transparent">
-                      <TableHead className="font-black text-gray-400 uppercase tracking-[0.5em] text-[11px] h-24 pl-16 italic">DEVICE_SIGNATURE</TableHead>
-                      <TableHead className="font-black text-gray-400 uppercase tracking-[0.5em] text-[11px] h-24 italic">CAMPAIGN_LINK</TableHead>
-                      <TableHead className="font-black text-gray-400 uppercase tracking-[0.5em] text-[11px] h-24 italic">SYNC_COUNT</TableHead>
-                      <TableHead className="font-black text-gray-400 uppercase tracking-[0.5em] text-[11px] h-24 text-right pr-16 italic">PROTOCOL</TableHead>
+                  <TableHeader className="bg-slate-50/50">
+                    <TableRow className="border-slate-50">
+                      <TableHead className="font-bold text-slate-400 uppercase tracking-widest text-[9px] h-16 pl-8">Device UID</TableHead>
+                      <TableHead className="font-bold text-slate-400 uppercase tracking-widest text-[9px] h-16">Link Status</TableHead>
+                      <TableHead className="font-bold text-slate-400 uppercase tracking-widest text-[9px] h-16">Total Taps</TableHead>
+                      <TableHead className="font-bold text-slate-400 uppercase tracking-widest text-[9px] h-16 text-right pr-8">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {nfcCards.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="py-72 text-center">
-                          <div className="flex flex-col items-center gap-10 opacity-10">
-                            <Smartphone className="h-32 w-32" />
-                            <p className="font-black uppercase tracking-[0.8em] text-xs">No devices linked to satellite</p>
+                        <TableCell colSpan={4} className="py-40 text-center">
+                          <div className="flex flex-col items-center gap-6 opacity-20">
+                            <Smartphone className="h-16 w-16" />
+                            <p className="font-bold uppercase tracking-widest text-[10px]">No active devices found</p>
                           </div>
                         </TableCell>
                       </TableRow>
                     ) : (
                       nfcCards.map((card) => (
-                        <TableRow key={card.id} className="border-gray-50 hover:bg-red-50/30 transition-all duration-500 group">
-                          <TableCell className="font-mono font-black text-2xl text-gray-950 pl-16 py-12 italic translate-x-0 group-hover:translate-x-4 transition-transform">{card.card_id}</TableCell>
+                        <TableRow key={card.id} className="border-slate-50 hover:bg-slate-50/80 transition-all group">
+                          <TableCell className="font-mono font-bold text-sm text-slate-900 pl-8 py-6">{card.card_id}</TableCell>
                           <TableCell>
-                            <span className="bg-white text-gray-950 px-8 py-3 rounded-full text-xs font-black uppercase tracking-[0.3em] italic border-2 border-red-100 shadow-sm group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all">
-                              {(card as any).campaigns?.name || 'SYNCED_UNIT'}
-                            </span>
+                            <Badge className="bg-red-50 text-red-600 hover:bg-red-100 border-red-100 text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg shadow-none">
+                              {(card as any).campaigns?.name || 'Linked'}
+                            </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-6">
-                              <div className="w-16 h-16 bg-gray-950 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-2xl skew-x-[-10deg] group-hover:bg-red-600 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md transition-colors">
                                 {card.taps_count}
                               </div>
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic leading-none">TOTAL_TAPS</span>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Taps</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right pr-16">
+                          <TableCell className="text-right pr-8">
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeleteCard(card.id)}
-                              className="hover:bg-red-600 group/btn text-gray-200 hover:text-white transition-all w-16 h-16 rounded-3xl"
+                              className="hover:bg-red-50 text-slate-300 hover:text-red-600 transition-all rounded-xl"
                             >
-                              <Trash2 className="h-8 w-8 group-hover/btn:scale-110 transition-transform" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -296,24 +318,20 @@ export default function NFCManagement() {
               </CardContent>
             </Card>
 
-            {/* High Impact Help Bar */}
-            <div className="p-16 bg-white border-8 border-dashed border-gray-50 rounded-[5rem] text-center hover:border-red-100 transition-all group scale-95 hover:scale-100 opacity-60 hover:opacity-100 duration-1000">
-              <div className="relative inline-block mb-10">
-                <div className="absolute inset-0 bg-red-600 blur-[40px] opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                <Globe className="h-20 w-20 text-gray-200 group-hover:text-red-600 transition-colors relative z-10 group-hover:scale-125 duration-700" />
-              </div>
-              <p className="text-xl font-black text-gray-300 group-hover:text-gray-950 uppercase tracking-[0.5em] max-w-2xl mx-auto italic transition-colors leading-relaxed">
-                Need operational assistance with NFC deployment? Reach Satellite Support.
+            {/* Assistance Bar */}
+            <div className="p-10 bg-white border-2 border-dashed border-slate-100 rounded-3xl text-center hover:border-red-100 transition-all group opacity-80 hover:opacity-100">
+              <Globe className="h-10 w-10 text-slate-200 group-hover:text-red-600 transition-colors mx-auto mb-6" />
+              <p className="text-[10px] font-bold text-slate-400 group-hover:text-slate-900 uppercase tracking-widest max-w-lg mx-auto transition-colors leading-relaxed">
+                Need help with NFC card writing or mass deployment? Visit our hardware documentation or contact satellite support.
               </p>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Language Toggle Fixed Bottom Right */}
-      <div className="fixed bottom-12 right-12 z-[100] transform hover:scale-125 transition-all duration-500 group">
-        <div className="absolute inset-0 bg-red-600 blur-[40px] opacity-0 group-hover:opacity-30 transition-opacity rounded-full"></div>
-        <div className="bg-white p-4 rounded-full shadow-[0_50px_100px_rgba(220,38,38,0.4)] border-4 border-red-50 relative z-10 transition-transform">
+      {/* Language Toggle Fixed */}
+      <div className="fixed bottom-6 right-6 z-[100] transform hover:scale-110 transition-all duration-300">
+        <div className="bg-white/80 backdrop-blur-xl border border-slate-100 p-2 rounded-full shadow-2xl">
           <LanguageToggle />
         </div>
       </div>

@@ -133,7 +133,7 @@ export default function ReviewManagement() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <img src="/logo.jpg" alt="Logo" className="h-20 w-auto object-contain rounded-2xl shadow-2xl transition-all hover:scale-110" />
+                        <img src="/logo.jpg" alt="Logo" className="h-16 w-auto object-contain rounded-xl shadow-md transition-all hover:scale-110" />
                     </div>
                 </div>
             </header>
@@ -278,7 +278,7 @@ export default function ReviewManagement() {
                     <LanguageToggle />
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
