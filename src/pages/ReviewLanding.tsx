@@ -65,7 +65,7 @@ const ReviewLanding = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>('service');
   const [copied, setCopied] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const [suggestionLanguage, setSuggestionLanguage] = useState(i18n.language);
+  const [suggestionLanguage, setSuggestionLanguage] = useState('en');
 
   // Start directly at suggestion
   const [step, setStep] = useState<'rating' | 'category' | 'suggestion' | 'redirect'>('suggestion');
@@ -268,29 +268,8 @@ const ReviewLanding = () => {
               <h2 className="text-lg md:text-2xl font-bold mb-2 text-slate-900 tracking-tight">Select a review to copy</h2>
               <p className="text-slate-400 font-bold mb-6 md:mb-8 uppercase tracking-widest text-[9px] md:text-[10px]">Tapping a card will copy & redirect you</p>
 
-              {/* AI Review Language Toggle */}
-              <div className="flex justify-center mb-8">
-                <div className="bg-slate-50 p-1 rounded-2xl flex gap-1 border border-slate-100">
-                  <button
-                    onClick={() => setSuggestionLanguage('en')}
-                    className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${suggestionLanguage === 'en'
-                      ? 'bg-white text-red-600 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-600'
-                      }`}
-                  >
-                    English
-                  </button>
-                  <button
-                    onClick={() => setSuggestionLanguage('mr')}
-                    className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${suggestionLanguage === 'mr'
-                      ? 'bg-white text-red-600 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-600'
-                      }`}
-                  >
-                    मराठी
-                  </button>
-                </div>
-              </div>
+              {/* Only English suggestions now */}
+
 
               {loadingSuggestions ? (
                 <div className="py-20">

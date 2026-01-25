@@ -41,6 +41,7 @@ const STATIC_REVIEWS: Record<string, { positive: string[], neutral: string[] }> 
             "It was fine. Nothing to write home about, but it did the job."
         ]
     },
+    /* 
     mr: {
         positive: [
             "खूप छान अनुभव आला! सेवा उत्कृष्ट होती आणि कर्मचारी अतिशय मदतनीस होते. सर्वांना शिफारस करतो!",
@@ -62,6 +63,7 @@ const STATIC_REVIEWS: Record<string, { positive: string[], neutral: string[] }> 
             "काम झाले, पण जसं अपेक्षित होतं तसं उत्कृष्ट नव्हतं. ठीकठाक म्हणता येईल."
         ]
     }
+    */
 };
 
 const STATIC_REPLIES: Record<string, string[]> = {
@@ -72,6 +74,7 @@ const STATIC_REPLIES: Record<string, string[]> = {
         "Thank you for your review! We're happy to hear you enjoyed your visit.",
         "We're thrilled to hear you had a great experience! Thanks for choosing us."
     ],
+    /*
     mr: [
         "तुमच्या प्रेमळ शब्दांबद्दल मनापासून धन्यवाद! आम्ही तुम्हाला पुन्हा सेवा देण्यासाठी उत्सुक आहोत.",
         "आम्ही तुमच्या अभिप्रायाची प्रशंसा करतो आणि तुम्हाला चांगला अनुभव आला याचा आम्हाला आनंद आहे!",
@@ -79,6 +82,7 @@ const STATIC_REPLIES: Record<string, string[]> = {
         "रिव्ह्यू दिल्याबद्दल धन्यवाद! तुम्हाला आमची सेवा आवडली हे ऐकून आम्हाला आनंद झाला.",
         "तुम्हाला उत्तम अनुभव आला हे ऐकून आम्हाला खूप आनंद झाला! आमची निवड केल्याबद्दल धन्यवाद."
     ]
+    */
 };
 
 // --- HELPER FUNCTIONS ---
@@ -135,10 +139,10 @@ function getStaticReviews(rating: number, language: string = 'en'): ReviewSugges
 const LANGUAGE_MAP: Record<string, string> = {
     en: 'English',
     hi: 'Hindi',
-    mr: 'Marathi',
+    // mr: 'Marathi', // Commented out Marathi as requested
 };
 
-const containsMarathi = (text: string) => /[\u0900-\u097F]/.test(text);
+
 
 
 // --- MAIN FUNCTIONS ---
@@ -162,7 +166,6 @@ Instructions:
 - Include relevant keywords from the business context
 - Keep each review 15-30 words, natural sounding
 - Return ONLY a JSON array of strings, no other text
-- CRITICAL: If the language is Marathi, you MUST use Devanagari script only. DO NOT return English text for Marathi requests.
 - Example format: ["Review 1 text", "Review 2 text", "Review 3 text"]`;
 
 
@@ -194,12 +197,6 @@ Instructions:
         const text = data.choices?.[0]?.message?.content || '[]';
         const suggestions = parseReviewResponse(text, rating);
 
-        // Validation for Marathi
-        if (language === 'mr' && suggestions.length > 0 && !containsMarathi(suggestions[0].text)) {
-            console.warn("🔻 Groq returned non-Marathi for Marathi request. Falling back.");
-            throw new Error("Non-Marathi content received");
-        }
-
         return suggestions;
 
     } catch (groqError) {
@@ -208,11 +205,6 @@ Instructions:
         // 2. Try Gemini
         try {
             const suggestions = await generateGeminiReviews(prompt, rating);
-            // Validation for Marathi
-            if (language === 'mr' && suggestions.length > 0 && !containsMarathi(suggestions[0].text)) {
-                console.warn("🔻 Gemini returned non-Marathi for Marathi request. Falling back.");
-                throw new Error("Non-Marathi content received");
-            }
             return suggestions;
         } catch (geminiError) {
 
@@ -236,8 +228,7 @@ export async function generateAutoReply(
     businessName: string,
     language: string = 'en'
 ): Promise<string> {
-    const prompt = `Write a short, professional response to this ${rating}-star review for ${businessName}: "${reviewText}". Keep it warm and under 40 words. 
-    CRITICAL: You MUST use ${LANGUAGE_MAP[language] || 'English'} language. ${language === 'mr' ? 'Use Devanagari script ONLY. NO English.' : ''}`;
+    const prompt = `Write a short, professional response to this ${rating}-star review for ${businessName}: "${reviewText}". Keep it warm and under 40 words.`;
 
     // 1. Try Groq
     try {
@@ -258,11 +249,6 @@ export async function generateAutoReply(
         const data = await response.json();
         const reply = data.choices?.[0]?.message?.content;
 
-        if (language === 'mr' && reply && !containsMarathi(reply)) {
-            console.warn("🔻 Groq reply was not in Marathi. Falling back.");
-            throw new Error("Non-Marathi reply received");
-        }
-
         return reply || (STATIC_REPLIES[language] || STATIC_REPLIES['en'])[0];
 
     } catch (groqError) {
@@ -272,11 +258,6 @@ export async function generateAutoReply(
         try {
             const result = await geminiModel.generateContent(prompt);
             const reply = result.response.text();
-
-            if (language === 'mr' && reply && !containsMarathi(reply)) {
-                console.warn("🔻 Gemini reply was not in Marathi. Falling back.");
-                throw new Error("Non-Marathi reply received");
-            }
 
             return reply;
         } catch (geminiError) {

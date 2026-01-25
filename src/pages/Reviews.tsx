@@ -74,7 +74,7 @@ export default function ReviewManagement() {
                 review.review_text || 'Excellent service',
                 review.rating,
                 'Our Business',
-                i18n.language
+                'en'
             );
 
             await (supabase as any)
