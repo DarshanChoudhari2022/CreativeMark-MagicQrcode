@@ -8,10 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, ArrowLeft, Send, Building2, User, Phone, MapPin, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 const ServiceRequest = () => {
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const isMarathi = i18n.language === 'mr';
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -44,8 +46,8 @@ const ServiceRequest = () => {
         setIsSubmitting(false);
         setSubmitted(true);
         toast({
-            title: "Request Sent!",
-            description: "Redirecting to WhatsApp to send your details...",
+            title: t('service.request_received'),
+            description: t('service.opening_whatsapp'),
         });
     };
 
@@ -57,16 +59,16 @@ const ServiceRequest = () => {
                         <CheckCircle2 className="w-12 h-12 text-green-600" />
                     </div>
                     <h1 className="text-3xl font-black text-gray-900 mb-4 uppercase tracking-tight italic">
-                        Request Received!
+                        {t('service.request_received')}
                     </h1>
                     <p className="text-gray-500 mb-8 font-medium">
-                        We have opened WhatsApp to send your details. Please hit 'Send' in WhatsApp to complete the process. Our admin will verify and contact you shortly.
+                        {t('service.request_received_desc')}
                     </p>
                     <Button
                         onClick={() => navigate("/")}
                         className="w-full bg-red-600 text-white h-14 rounded-2xl font-bold uppercase tracking-widest shadow-lg shadow-red-100"
                     >
-                        Back to Home
+                        {t('service.back_to_home')}
                     </Button>
                 </div>
             </div>
@@ -74,7 +76,10 @@ const ServiceRequest = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/50 py-12 md:py-20 px-4">
+        <div className={`min-h-screen bg-gray-50/50 py-12 md:py-20 px-4 ${isMarathi ? 'font-sans' : 'font-inter'}`}>
+            <div className="fixed top-6 right-6 z-50">
+                <LanguageToggle />
+            </div>
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <button
@@ -82,13 +87,13 @@ const ServiceRequest = () => {
                         className="flex items-center gap-2 text-gray-400 hover:text-red-600 font-bold uppercase tracking-widest text-[10px] md:text-xs transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Agency Home
+                        {t('service.agency_home')}
                     </button>
                     <button
                         onClick={() => navigate("/auth")}
-                        className="text-red-600 hover:text-black font-bold uppercase tracking-widest text-xs transition-colors"
+                        className="text-red-600 hover:text-black font-bold uppercase tracking-widest text-[10px] md:text-xs transition-colors"
                     >
-                        Already a member? Sign In
+                        {t('service.already_member')}
                     </button>
                 </div>
 
@@ -97,19 +102,19 @@ const ServiceRequest = () => {
                     <div className="lg:col-span-2 space-y-6 md:space-y-8">
                         <div>
                             <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4 md:mb-6 uppercase tracking-tight italic leading-[1.1]">
-                                Get <span className="text-red-600">ReviewBoost</span> For Your Business
+                                {t('service.get_for_business').split(' ')[0]} <span className="text-red-600">ReviewBoost</span> {t('service.get_for_business').split(' ').slice(2).join(' ')}
                             </h1>
                             <p className="text-sm md:text-base text-gray-500 font-medium leading-relaxed">
-                                Join hundreds of local businesses growing their GMB ranking with AI-powered smart reviews.
+                                {t('service.join_hundreds')}
                             </p>
                         </div>
 
                         <div className="space-y-4 md:space-y-6 max-w-sm mx-auto lg:mx-0">
                             {[
-                                "10x Faster Customer Reviews",
-                                "AI-Powered Review Suggestions",
-                                "NFC & QR Tech Integration",
-                                "Dedicated Admin Dashboard"
+                                t('service.faster_reviews'),
+                                t('service.ai_suggestions'),
+                                t('service.nfc_qr'),
+                                t('service.admin_dashboard')
                             ].map((item, i) => (
                                 <div key={i} className="flex items-center gap-3">
                                     <div className="w-5 h-5 md:w-6 md:h-6 bg-red-50 rounded-full flex items-center justify-center shrink-0">
@@ -121,9 +126,9 @@ const ServiceRequest = () => {
                         </div>
 
                         <div className="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                            <p className="text-xs font-bold text-red-600 uppercase tracking-widest mb-2">Process</p>
+                            <p className="text-xs font-bold text-red-600 uppercase tracking-widest mb-2">{t('service.process')}</p>
                             <p className="text-sm text-gray-500 font-medium">
-                                Submit this form → Open WhatsApp → Send Details → Admin Approval → Account Activation.
+                                {t('service.process_steps')}
                             </p>
                         </div>
                     </div>
@@ -132,21 +137,21 @@ const ServiceRequest = () => {
                     <div className="lg:col-span-3">
                         <Card className="border-0 shadow-2xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white overflow-hidden">
                             <CardHeader className="bg-red-600 p-6 md:p-8 text-white">
-                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tight italic">Onboarding Form</CardTitle>
-                                <CardDescription className="text-red-100 font-medium tracking-wide text-xs">Enter your business details below</CardDescription>
+                                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tight italic">{t('service.form_title')}</CardTitle>
+                                <CardDescription className="text-red-100 font-medium tracking-wide text-xs">{t('service.form_subtitle')}</CardDescription>
                             </CardHeader>
                             <CardContent className="p-6 md:p-8">
                                 <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
                                         <div className="space-y-2">
                                             <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                                                <User className="w-3 h-3 text-red-600" /> Full Name
+                                                <User className="w-3 h-3 text-red-600" /> {t('service.full_name')}
                                             </Label>
                                             <Input name="fullName" required placeholder="John Doe" className="h-11 md:h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all text-sm" />
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                                                <Building2 className="w-3 h-3 text-red-600" /> Business Name
+                                                <Building2 className="w-3 h-3 text-red-600" /> {t('service.business_name')}
                                             </Label>
                                             <Input name="businessName" required placeholder="My Business" className="h-11 md:h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all text-sm" />
                                         </div>
@@ -155,13 +160,13 @@ const ServiceRequest = () => {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                                                <Phone className="w-3 h-3 text-red-600" /> WhatsApp Number
+                                                <Phone className="w-3 h-3 text-red-600" /> {t('service.whatsapp_number')}
                                             </Label>
                                             <Input name="whatsapp" required type="tel" placeholder="+91 00000 00000" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                                                <Mail className="w-3 h-3 text-red-600" /> Email Address
+                                                <Mail className="w-3 h-3 text-red-600" /> {t('service.email_address')}
                                             </Label>
                                             <Input name="email" required type="email" placeholder="john@example.com" className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
                                         </div>
@@ -169,18 +174,18 @@ const ServiceRequest = () => {
 
                                     <div className="space-y-2">
                                         <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                                            <MapPin className="w-3 h-3 text-red-600" /> GMB Link / Address
+                                            <MapPin className="w-3 h-3 text-red-600" /> {t('service.gmb_link')}
                                         </Label>
                                         <Input name="gmbLink" required placeholder="https://maps.app.goo.gl/..." className="h-12 rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-all" />
                                     </div>
 
                                     <div className="space-y-2">
                                         <Label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                                            Requirement Notes
+                                            {t('service.notes_label')}
                                         </Label>
                                         <Textarea
                                             name="notes"
-                                            placeholder="Tell us about your business goals..."
+                                            placeholder={t('service.notes_placeholder')}
                                             className="min-h-[120px] rounded-2xl bg-gray-50 border-gray-100 focus:bg-white transition-all resize-none"
                                         />
                                     </div>
@@ -190,7 +195,7 @@ const ServiceRequest = () => {
                                         disabled={isSubmitting}
                                         className="w-full bg-red-600 hover:bg-black text-white h-16 text-lg font-black uppercase tracking-widest shadow-xl rounded-2xl transition-all hover:scale-[1.02] active:scale-95"
                                     >
-                                        {isSubmitting ? "Opening WhatsApp..." : "Send Request 🚀"}
+                                        {isSubmitting ? t('service.opening_whatsapp') : t('service.submit_button')}
                                     </Button>
                                 </form>
                             </CardContent>
@@ -198,7 +203,7 @@ const ServiceRequest = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

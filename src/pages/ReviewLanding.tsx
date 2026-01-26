@@ -211,7 +211,7 @@ const ReviewLanding = () => {
       <div className="min-h-screen flex items-center justify-center bg-white font-inter">
         <div className="text-center">
           <Loader2 className="h-16 w-16 animate-spin text-red-600 mx-auto mb-10" />
-          <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Synchronizing Review Gateway...</p>
+          <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">{t('review.syncing')}</p>
         </div>
       </div>
     );
@@ -265,8 +265,8 @@ const ReviewLanding = () => {
               <div className="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-inner">
                 <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-red-500" />
               </div>
-              <h2 className="text-lg md:text-2xl font-bold mb-2 text-slate-900 tracking-tight">Select a review to copy</h2>
-              <p className="text-slate-400 font-bold mb-6 md:mb-8 uppercase tracking-widest text-[9px] md:text-[10px]">Tapping a card will copy & redirect you</p>
+              <h2 className="text-lg md:text-2xl font-bold mb-2 text-slate-900 tracking-tight">{t('review.select_to_copy')}</h2>
+              <p className="text-slate-400 font-bold mb-6 md:mb-8 uppercase tracking-widest text-[9px] md:text-[10px]">{t('review.tap_instruction')}</p>
 
               {/* Only English suggestions now */}
 
@@ -312,11 +312,11 @@ const ReviewLanding = () => {
                   className="w-full py-7 rounded-2xl bg-slate-900 border-0 hover:bg-slate-950 text-white font-bold uppercase tracking-widest text-[10px] flex gap-3 items-center justify-center transition-all shadow-lg hover:shadow-slate-200"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  Leave a Review on Google Maps
+                  {t('review.leave_review_button')}
                 </Button>
 
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                  Use the black button above if redirect fails
+                  {t('review.redirect_fail_note')}
                 </p>
               </div>
             </CardContent>
@@ -332,7 +332,7 @@ const ReviewLanding = () => {
                 {t('common.powered_by')}
               </div>
               <p className="text-slate-300 text-[9px] font-bold uppercase tracking-widest">
-                &copy; {new Date().getFullYear()} Creative Mark AI Systems
+                &copy; {new Date().getFullYear()} {t('review.ai_systems')}
               </p>
             </div>
           </div>

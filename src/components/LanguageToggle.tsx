@@ -14,8 +14,8 @@ export const LanguageToggle = () => {
 
     const languages = [
         { code: 'en', label: 'English', short: 'EN' },
-        { code: 'mr', label: 'मराठी', short: 'MR' },
-        { code: 'hi', label: 'हिन्दी', short: 'HI' }
+        { code: 'mr', label: 'मराठी', short: 'म' },
+        { code: 'hi', label: 'हिन्दी', short: 'हि' }
     ];
 
     const currentLang = languages.find(l => l.code === i18n.language) || languages[0];

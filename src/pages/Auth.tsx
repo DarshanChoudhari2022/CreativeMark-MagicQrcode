@@ -274,7 +274,7 @@ const Auth = () => {
           </CardContent>
           <div className="bg-gray-50 py-4 text-center border-t border-gray-100">
             <p className="text-xs text-gray-400 font-medium">
-              Secure Enterprise Login
+              {t('review.secure_enterprise_login')}
             </p>
           </div>
         </Card>

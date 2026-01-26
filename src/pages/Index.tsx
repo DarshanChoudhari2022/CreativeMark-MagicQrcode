@@ -62,7 +62,7 @@ const Index = () => {
               href="https://creative-mark.vercel.app/"
               className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition-colors"
             >
-              Main Home
+              {t('nav.main_home')}
             </a>
             {['overview', 'how_it_works', 'testimonials', 'pricing', 'faq'].map((section) => (
               <button
@@ -103,7 +103,7 @@ const Index = () => {
                 href="https://creative-mark.vercel.app/"
                 className="text-left py-3 border-b border-gray-50 text-sm font-bold uppercase tracking-widest text-gray-900"
               >
-                Main Home
+                {t('nav.main_home')}
               </a>
               {['overview', 'how_it_works', 'testimonials', 'pricing', 'faq'].map((section) => (
                 <button
@@ -219,7 +219,7 @@ const Index = () => {
                   😕
                 </div>
                 <h4 className="text-lg font-bold text-slate-600 mb-3 uppercase tracking-tight line-through decoration-red-500/50 decoration-2">
-                  Traditional Way
+                  {t('landing.traditional_way')}
                 </h4>
                 <p className="text-sm text-slate-500 font-medium leading-relaxed mb-6">
                   {t('landing.before_desc')}
@@ -242,7 +242,7 @@ const Index = () => {
                   🚀
                 </div>
                 <h4 className="text-2xl font-black mb-3 uppercase tracking-tight italic">
-                  With ReviewBoost
+                  {t('landing.with_reviewboost')}
                 </h4>
                 <p className="text-base text-red-100 font-medium leading-relaxed mb-6">
                   {t('landing.after_desc')}
