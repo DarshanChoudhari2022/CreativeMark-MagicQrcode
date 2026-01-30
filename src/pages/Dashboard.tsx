@@ -104,10 +104,10 @@ const Dashboard = () => {
 
   const loadDashboardMetrics = async (userId: string, campaignIds: string[], mode: 'personal' | 'global') => {
     try {
-      let scansQuery = (supabase as any).from('analytics_logs').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds);
-      let interactionsQuery = (supabase as any).from('analytics_logs').select('*').in('campaign_id', campaignIds).order('created_at', { ascending: false }).limit(10);
-      let reviewsQuery = (supabase as any).from('analytics_logs').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds).eq('event_type', 'review_click');
-      let feedbackQuery = (supabase as any).from('analytics_logs').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds).eq('event_type', 'private_feedback');
+      let scansQuery = (supabase as any).from('analytics_events').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds);
+      let interactionsQuery = (supabase as any).from('analytics_events').select('*').in('campaign_id', campaignIds).order('created_at', { ascending: false }).limit(10);
+      let reviewsQuery = (supabase as any).from('analytics_events').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds).eq('event_type', 'review_click');
+      let feedbackQuery = (supabase as any).from('analytics_events').select('*', { count: 'exact', head: true }).in('campaign_id', campaignIds).eq('event_type', 'private_feedback');
 
       const [scansRes, interactionsRes, reviewsRes, feedbackRes] = await Promise.all([
         scansQuery,

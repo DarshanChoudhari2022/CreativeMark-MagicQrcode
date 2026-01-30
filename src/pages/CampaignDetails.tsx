@@ -46,22 +46,30 @@ const CampaignDetails = () => {
           }
         }
 
-        // Load analytics
-        const { data: scanEventsData } = await supabase
-          .from('scan_events')
-          .select('id')
-          .eq('campaign_id', campaignId);
+        // Load analytics from analytics_events
+        const { count: scanCount } = await (supabase as any)
+          .from('analytics_events')
+          .select('*', { count: 'exact', head: true })
+          .eq('campaign_id', campaignId)
+          .eq('event_type', 'scan');
 
-        const { data: conversionEventsData } = await supabase
-          .from('conversion_events')
-          .select('id')
-          .eq('campaign_id', campaignId);
+        const { count: reviewClickCount } = await (supabase as any)
+          .from('analytics_events')
+          .select('*', { count: 'exact', head: true })
+          .eq('campaign_id', campaignId)
+          .eq('event_type', 'review_click');
+
+        const { count: aiSuggestionCount } = await (supabase as any)
+          .from('analytics_events')
+          .select('*', { count: 'exact', head: true })
+          .eq('campaign_id', campaignId)
+          .eq('event_type', 'ai_suggestion');
 
         setAnalytics({
-          scans: scanEventsData?.length || 0,
-          views: scanEventsData?.length || 0,
-          ai_suggestions: 0,
-          click_review: conversionEventsData?.length || 0,
+          scans: scanCount || 0,
+          views: scanCount || 0, // Assuming 1 scan = 1 view for now
+          ai_suggestions: aiSuggestionCount || 0,
+          click_review: reviewClickCount || 0,
         });
       } catch (error) {
         console.error('Error loading campaign:', error);

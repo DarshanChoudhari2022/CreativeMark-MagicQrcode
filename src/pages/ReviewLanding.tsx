@@ -109,7 +109,7 @@ const ReviewLanding = () => {
     if (!campaignId) return;
     try {
       await (supabase as any)
-        .from('analytics_logs')
+        .from('analytics_events')
         .insert({
           campaign_id: campaignId,
           event_type: 'scan',
@@ -150,6 +150,19 @@ const ReviewLanding = () => {
       );
       if (aiSuggestions && aiSuggestions.length > 0) {
         setSuggestions(aiSuggestions.map(s => s.text));
+
+        // Record AI suggestion event
+        await (supabase as any)
+          .from('analytics_logs')
+          .insert({
+            campaign_id: campaignId,
+            event_type: 'ai_suggestion',
+            metadata: {
+              category: categoryId,
+              language: lang,
+              count: aiSuggestions.length
+            }
+          });
       }
     } catch (error) {
       console.error('AI Suggestion error:', error);
@@ -171,7 +184,7 @@ const ReviewLanding = () => {
       setSelectedSuggestion(text); // Track which one was selected
 
       await (supabase as any)
-        .from('analytics_logs')
+        .from('analytics_events')
         .insert({
           campaign_id: campaignId,
           event_type: 'review_click',
