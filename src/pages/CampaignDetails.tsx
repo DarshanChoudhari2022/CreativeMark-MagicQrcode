@@ -46,21 +46,21 @@ const CampaignDetails = () => {
           }
         }
 
-        // Load analytics from analytics_events
+        // Load analytics from analytics_logs
         const { count: scanCount } = await (supabase as any)
-          .from('analytics_events')
+          .from('analytics_logs')
           .select('*', { count: 'exact', head: true })
           .eq('campaign_id', campaignId)
           .eq('event_type', 'scan');
 
         const { count: reviewClickCount } = await (supabase as any)
-          .from('analytics_events')
+          .from('analytics_logs')
           .select('*', { count: 'exact', head: true })
           .eq('campaign_id', campaignId)
           .eq('event_type', 'review_click');
 
         const { count: aiSuggestionCount } = await (supabase as any)
-          .from('analytics_events')
+          .from('analytics_logs')
           .select('*', { count: 'exact', head: true })
           .eq('campaign_id', campaignId)
           .eq('event_type', 'ai_suggestion');

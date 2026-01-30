@@ -62,9 +62,9 @@ export default function AnalyticsDashboard() {
       const { data: reviewsData } = await reviewsQuery;
       setReviews(reviewsData || []);
 
-      // 3. Fetch Scans (using 'analytics_events' table)
+      // 3. Fetch Scans (using 'analytics_logs' table)
       let scansQuery = (supabase as any)
-        .from('analytics_events')
+        .from('analytics_logs')
         .select('*', { count: 'exact' })
         .in('campaign_id', campaignIds)
         .eq('event_type', 'scan');
@@ -97,7 +97,7 @@ export default function AnalyticsDashboard() {
       const dropOffArray: any[] = []; // Not tracked currently
 
       setStats({
-        totalScans: totalScans, // Count from analytics_events
+        totalScans: totalScans, // Count from analytics_logs
         totalReviews,
         conversionRate,
         averageRating: avgRating,

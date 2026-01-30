@@ -109,7 +109,7 @@ const ReviewLanding = () => {
     if (!campaignId) return;
     try {
       await (supabase as any)
-        .from('analytics_events')
+        .from('analytics_logs')
         .insert({
           campaign_id: campaignId,
           event_type: 'scan',
@@ -184,7 +184,7 @@ const ReviewLanding = () => {
       setSelectedSuggestion(text); // Track which one was selected
 
       await (supabase as any)
-        .from('analytics_events')
+        .from('analytics_logs')
         .insert({
           campaign_id: campaignId,
           event_type: 'review_click',
