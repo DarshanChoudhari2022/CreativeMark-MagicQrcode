@@ -381,7 +381,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="py-20 bg-gray-950 text-white border-t border-gray-900">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-12 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-16">
             <div className="space-y-6">
               <img
                 src="/logo.jpg"
@@ -407,7 +407,7 @@ const Index = () => {
                     </>
                   )}
                   {key === 'email' && (
-                    <li><a href="mailto:creativemarkadvertising@gmail.com" className="lowercase text-gray-500 hover:text-white">creativemarkadvertising@gmail.com</a></li>
+                    <li><a href="mailto:creativemarkadvertising@gmail.com" className="lowercase text-gray-500 hover:text-white break-all">creativemarkadvertising@gmail.com</a></li>
                   )}
                 </ul>
               </div>
