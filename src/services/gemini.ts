@@ -155,12 +155,27 @@ export async function generateReviewSuggestions(
     tone: string = 'Professional'
 ): Promise<ReviewSuggestion[]> {
 
-    const prompt = `Generate 3 SEO-optimized, authentic Google review suggestions for "${businessName}".
+    // Randomize the prompt slightly to prevent caching and deterministic repetition
+    const variations = [
+        "Focus on the friendly staff.",
+        "Highlight the speed of service.",
+        "Mention the great atmosphere.",
+        "Emphasize the value for money.",
+        "Focus on the overall quality.",
+        "Make them sound very enthusiastic!",
+        "Keep them short and sweet.",
+        "Focus on professionalism."
+    ];
+    const randomVariation = variations[Math.floor(Math.random() * variations.length)];
+    const uniqueSessionId = Math.random().toString(36).substring(7);
+
+    const prompt = `Generate 3 unique, SEO-optimized, authentic Google review suggestions for "${businessName}" (Session: ${uniqueSessionId}).
 
 Business Context: ${businessContext || 'General business'}
 Rating: ${rating} stars
 Tone: ${tone}
 Language: ${LANGUAGE_MAP[language] || 'English'}
+Variation Goal: ${randomVariation}
 
 Instructions:
 - Include relevant keywords from the business context
@@ -186,7 +201,7 @@ Instructions:
                     { role: "system", content: "You are a review generation assistant. Output only valid JSON arrays." },
                     { role: "user", content: prompt }
                 ],
-                temperature: 0.7,
+                temperature: 0.9,
                 max_tokens: 300,
             })
         });
