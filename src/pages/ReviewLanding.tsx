@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { generateReviewSuggestions } from "@/services/gemini";
 import { useTranslation } from "react-i18next";
-import { LanguageToggle } from "@/components/LanguageToggle";
+
 
 interface Campaign {
   id: string;
@@ -251,7 +251,6 @@ const ReviewLanding = () => {
             </div>
             Google Review
           </div>
-          <LanguageToggle />
         </div>
       </div>
 
@@ -276,12 +275,7 @@ const ReviewLanding = () => {
             {campaign?.headline || "How was your experience?"}
           </p>
 
-          {/* 5-Star Visual */}
-          <div className="flex items-center justify-center gap-1 mt-4">
-            {[1, 2, 3, 4, 5].map(i => (
-              <Star key={i} className="h-7 w-7 fill-amber-400 text-amber-400 drop-shadow-sm" />
-            ))}
-          </div>
+
         </div>
 
         {/* ─── Main Card: Review Suggestions ───────────────── */}
@@ -334,18 +328,18 @@ const ReviewLanding = () => {
                       onClick={() => handleSelectReview(text)}
                       disabled={redirecting}
                       className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-300 group relative min-h-[60px] ${selectedSuggestion === text
-                          ? 'bg-green-50 border-green-500 shadow-lg shadow-green-100 scale-[1.02]'
-                          : redirecting
-                            ? 'opacity-40 cursor-not-allowed border-slate-100 bg-slate-50'
-                            : 'bg-white hover:bg-blue-50 border-slate-100 hover:border-blue-300 shadow-sm hover:shadow-md active:scale-[0.98]'
+                        ? 'bg-green-50 border-green-500 shadow-lg shadow-green-100 scale-[1.02]'
+                        : redirecting
+                          ? 'opacity-40 cursor-not-allowed border-slate-100 bg-slate-50'
+                          : 'bg-white hover:bg-blue-50 border-slate-100 hover:border-blue-300 shadow-sm hover:shadow-md active:scale-[0.98]'
                         }`}
                       style={{ animation: `fadeInUp ${0.4 + index * 0.1}s ease-out` }}
                     >
                       <div className="flex items-start gap-3">
                         {/* Review Number */}
                         <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${selectedSuggestion === text
-                            ? 'bg-green-500 text-white'
-                            : 'bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
                           } transition-colors`}>
                           {selectedSuggestion === text ? '✓' : index + 1}
                         </div>
