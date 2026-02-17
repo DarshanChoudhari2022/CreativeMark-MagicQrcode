@@ -267,8 +267,8 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
               key={t.id}
               onClick={() => handleThemeSelect(t.id)}
               className={`relative rounded-xl p-3 text-left transition-all duration-200 border-2 ${selectedTheme === t.id
-                  ? 'border-blue-500 shadow-lg scale-[1.02]'
-                  : 'border-transparent hover:border-gray-200 hover:shadow'
+                ? 'border-blue-500 shadow-lg scale-[1.02]'
+                : 'border-transparent hover:border-gray-200 hover:shadow'
                 }`}
               style={{ backgroundColor: t.cardBg }}
             >
@@ -455,9 +455,12 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
               /* NO imageSettings — logo is overlaid separately for html2canvas compatibility */
               />
 
-              {/* Logo overlay on top of QR code center */}
+              {/* Logo overlay — transparent, no background box */}
               {logoUrl && logoLoaded && (
-                <div
+                <img
+                  src={logoUrl}
+                  alt="Logo"
+                  crossOrigin="anonymous"
                   style={{
                     position: 'absolute',
                     top: '50%',
@@ -465,38 +468,21 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                     transform: 'translate(-50%, -50%)',
                     width: `${qrLogoSize}px`,
                     height: `${qrLogoSize}px`,
-                    backgroundColor: theme.qrBg,
-                    borderRadius: '8px',
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    objectFit: 'contain',
+                    display: 'block',
                     zIndex: 2,
-                    boxShadow: `0 1px 4px ${theme.shadowColor}`,
+                    /* No background, no padding, no shadow — logo floats cleanly */
                   }}
-                >
-                  <img
-                    src={logoUrl}
-                    alt="Logo"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      display: 'block',
-                      borderRadius: '4px',
-                    }}
-                    crossOrigin="anonymous"
-                  />
-                </div>
+                />
               )}
             </div>
           </div>
 
           {/* ── "SCAN TO REVIEW" CTA Button ── */}
-          {/* 
-            Using display:block + margin:auto for centering.
-            This is the most reliable method for html2canvas.
-            Flexbox and inline-flex can cause misalignment in rendered output.
+          {/*
+            Using TABLE layout for icon+text centering.
+            Tables use native layout and render pixel-perfect in html2canvas,
+            unlike flexbox/inline-block which html2canvas approximates poorly.
           */}
           <div
             style={{
@@ -504,53 +490,59 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
               textAlign: 'center',
             }}
           >
-            <div
+            <table
+              cellPadding="0"
+              cellSpacing="0"
               style={{
+                margin: '0 auto',
                 backgroundColor: theme.ctaBg,
                 borderRadius: '14px',
-                padding: '14px 36px',
-                color: theme.ctaText,
                 boxShadow: `0 6px 20px -4px ${theme.shadowColor}`,
                 border: `1px solid ${theme.ctaBorder}`,
-                display: 'inline-block',
-                textAlign: 'center',
-                lineHeight: '1',
+                borderCollapse: 'separate',
               }}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={theme.ctaText}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
-                  marginRight: '10px',
-                }}
-              >
-                <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-              </svg>
-              <span
-                style={{
-                  color: theme.ctaText,
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  letterSpacing: '0.14em',
-                  whiteSpace: 'nowrap',
-                  lineHeight: '1',
-                  textTransform: 'uppercase',
-                  fontFamily: 'inherit',
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
-                }}
-              >
-                SCAN TO REVIEW
-              </span>
-            </div>
+              <tbody>
+                <tr>
+                  <td
+                    style={{
+                      padding: '14px 16px 14px 36px',
+                      verticalAlign: 'middle',
+                      lineHeight: 0,
+                    }}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={theme.ctaText}
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                  </td>
+                  <td
+                    style={{
+                      padding: '14px 36px 14px 8px',
+                      verticalAlign: 'middle',
+                      color: theme.ctaText,
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      letterSpacing: '0.14em',
+                      whiteSpace: 'nowrap',
+                      textTransform: 'uppercase',
+                      fontFamily: 'inherit',
+                      lineHeight: '16px',
+                    }}
+                  >
+                    SCAN TO REVIEW
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           {/* ── Footer Branding ── */}
