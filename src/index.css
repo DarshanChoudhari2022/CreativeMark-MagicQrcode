@@ -41,17 +41,17 @@
     --ring: 0 84% 60%;
 
     --radius: 0.75rem;
-    
+
     /* Creative Mark Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 84% 50%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 98%), hsl(0 10% 96%));
     --gradient-hero: linear-gradient(135deg, hsl(0 0% 97%) 0%, hsl(0 0% 100%) 50%, hsl(0 20% 97%) 100%);
-    
+
     /* Shadows */
     --shadow-soft: 0 4px 20px -2px hsl(0 0% 0% / 0.08);
     --shadow-medium: 0 8px 30px -4px hsl(0 0% 0% / 0.12);
     --shadow-strong: 0 12px 40px -6px hsl(0 84% 60% / 0.2);
-    
+
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
@@ -92,13 +92,13 @@
     --border: 0 0% 20%;
     --input: 0 0% 20%;
     --ring: 0 84% 55%;
-    
+
     --gradient-primary: linear-gradient(135deg, hsl(0 84% 55%), hsl(0 84% 45%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 5%), hsl(0 0% 8%));
-    
+
     --shadow-soft: 0 4px 20px -2px hsl(0 0% 0% / 0.4);
     --shadow-medium: 0 8px 30px -4px hsl(0 0% 0% / 0.5);
-    
+
     --sidebar-background: 0 0% 8%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 0 84% 55%;
@@ -117,26 +117,52 @@
 
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Headings */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply tracking-tight;
+  }
+
+  /* Touch-friendly form elements */
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+    /* Prevents iOS zoom on focus */
+  }
+
+  @media (min-width: 768px) {
+
+    input,
+    select,
+    textarea,
+    button {
+      font-size: inherit;
+    }
   }
 }
 
 @layer components {
+
   /* Creative Mark Button Styles */
   .btn-creative {
-    @apply bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 
-           text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300
-           hover:scale-[1.02] active:scale-[0.98];
+    @apply bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
   }
 
   /* Card hover effect */
@@ -166,9 +192,12 @@
   }
 
   @keyframes pulse-ring {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 1;
     }
+
     50% {
       opacity: 0.7;
     }
@@ -176,8 +205,13 @@
 
   /* Scroll animation for testimonials */
   @keyframes scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
   }
 
   .animate-scroll {
@@ -190,9 +224,12 @@
 
   /* Floating animation */
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0);
     }
+
     50% {
       transform: translateY(-10px);
     }
@@ -208,6 +245,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -219,17 +257,129 @@
   }
 
   /* Stagger animation delays */
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-400 { animation-delay: 400ms; }
-  .delay-500 { animation-delay: 500ms; }
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* ========================================
+     RESPONSIVE UTILITIES
+     ======================================== */
+
+  /* Touch-friendly tap targets (44px minimum as per WCAG) */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Safe area padding for notched devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Responsive text utility */
+  .text-responsive-xs {
+    @apply text-[9px] md:text-xs;
+  }
+
+  .text-responsive-sm {
+    @apply text-xs md:text-sm;
+  }
+
+  .text-responsive-base {
+    @apply text-sm md:text-base;
+  }
+
+  .text-responsive-lg {
+    @apply text-base md:text-lg lg:text-xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+
+  .text-responsive-2xl {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  .text-responsive-hero {
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  /* Mobile-first responsive container */
+  .container-responsive {
+    @apply w-full px-4 md:px-6 lg:px-8 mx-auto;
+    max-width: min(100% - 2rem, 1280px);
+  }
+
+  /* Responsive card padding */
+  .card-padding {
+    @apply p-4 md:p-6 lg:p-8;
+  }
+
+  /* Responsive gap utilities */
+  .gap-responsive {
+    @apply gap-3 md:gap-6 lg:gap-8;
+  }
+
+  /* Mobile-optimized grid layouts */
+  .grid-metrics {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6;
+  }
+
+  .grid-campaigns {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6;
+  }
+
+  .grid-actions {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-6;
+  }
+
+  /* Print-optimized QR card */
+  @media print {
+    .qr-card-printable {
+      width: 3.5in !important;
+      height: 2in !important;
+      page-break-inside: avoid;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+  }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
 }
 
 ::-webkit-scrollbar-track {
@@ -259,11 +409,29 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Prevent double-tap zoom on touch devices */
+@media (pointer: coarse) {
+
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+/* Orientation change smoothing */
+@media (orientation: landscape) and (max-height: 500px) {
+  .landscape-compact {
+    @apply py-2;
   }
 }

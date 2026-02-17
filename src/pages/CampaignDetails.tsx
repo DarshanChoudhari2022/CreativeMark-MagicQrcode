@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, QrCode, TrendingUp, Eye, MousePointerClick, Sparkles, ExternalLink } from "lucide-react";
+import { ArrowLeft, QrCode, TrendingUp, Eye, MousePointerClick, Sparkles, ExternalLink, Menu, X, Edit2, Save } from "lucide-react";
+import { Input } from '@/components/ui/input';
 import { BrandedQRCard } from '@/components/BrandedQRCard';
 
 const CampaignDetails = () => {
@@ -20,6 +21,8 @@ const CampaignDetails = () => {
     click_review: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState('');
 
   useEffect(() => {
     const loadCampaignData = async () => {
@@ -33,6 +36,7 @@ const CampaignDetails = () => {
 
         if (campaignError) throw campaignError;
         setCampaign(campaignData);
+        setNewName(campaignData.name);
 
         // Load location
         if (campaignData?.location_id) {
@@ -67,7 +71,7 @@ const CampaignDetails = () => {
 
         setAnalytics({
           scans: scanCount || 0,
-          views: scanCount || 0, // Assuming 1 scan = 1 view for now
+          views: scanCount || 0,
           ai_suggestions: aiSuggestionCount || 0,
           click_review: reviewClickCount || 0,
         });
@@ -86,6 +90,32 @@ const CampaignDetails = () => {
     loadCampaignData();
   }, [campaignId, toast]);
 
+  const handleUpdateName = async () => {
+    if (!newName.trim()) return;
+    try {
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ name: newName })
+        .eq('id', campaignId);
+
+      if (error) throw error;
+
+      setCampaign(prev => prev ? { ...prev, name: newName } : null);
+      setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Campaign name updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating name:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update campaign name",
+        variant: "destructive",
+      });
+    }
+  };
+
   const baseUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
   const reviewUrl = `${baseUrl}/review/${campaignId}`;
 
@@ -99,10 +129,10 @@ const CampaignDetails = () => {
 
   if (!campaign) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Campaign Not Found</h1>
-          <Button onClick={() => navigate("/dashboard")}>Return to Dashboard</Button>
+          <h1 className="text-xl md:text-2xl font-bold text-red-600 mb-4">Campaign Not Found</h1>
+          <Button onClick={() => navigate("/dashboard")} className="min-h-[44px]">Return to Dashboard</Button>
         </div>
       </div>
     );
@@ -114,36 +144,66 @@ const CampaignDetails = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
+      {/* Responsive Header */}
       <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 md:py-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="font-bold uppercase tracking-widest text-[10px] md:text-xs">
+        <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="font-bold uppercase tracking-widest text-[9px] md:text-xs min-h-[44px] min-w-[44px]">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
           </Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <main className="container mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+        <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
+          {/* Campaign Title with Edit */}
           <div>
-            <h1 className="text-3xl font-bold mb-2">{campaign?.name}</h1>
-            <p className="text-muted-foreground">
+            {isEditing ? (
+              <div className="flex items-center gap-2 mb-2 max-w-2xl">
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="text-xl md:text-3xl font-bold h-12 md:h-14 bg-white shadow-sm"
+                  autoFocus
+                />
+                <Button onClick={handleUpdateName} size="icon" className="h-12 w-12 bg-green-600 hover:bg-green-700 min-w-[48px]">
+                  <Save className="h-5 w-5" />
+                </Button>
+                <Button onClick={() => setIsEditing(false)} size="icon" variant="outline" className="h-12 w-12 min-w-[48px]">
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-start gap-3 group mb-1 md:mb-2">
+                <h1 className="text-2xl md:text-3xl font-bold break-words leading-tight">{campaign?.name}</h1>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsEditing(true)}
+                  className="opacity-50 group-hover:opacity-100 transition-opacity h-8 w-8 hover:bg-slate-100 rounded-full"
+                >
+                  <Edit2 className="h-4 w-4 text-slate-400" />
+                </Button>
+              </div>
+            )}
+            <p className="text-muted-foreground text-sm md:text-base">
               Status: <span className="capitalize font-medium">{campaign?.status}</span>
             </p>
           </div>
 
-          {/* Analytics Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {/* Analytics Cards - Responsive Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
             {[
               { label: 'QR Scans', value: analytics.scans, icon: QrCode },
               { label: 'Page Views', value: analytics.views, icon: Eye },
               { label: 'AI Suggestions', value: analytics.ai_suggestions, icon: Sparkles },
               { label: 'Review Clicks', value: analytics.click_review, icon: MousePointerClick }
             ].map((stat, i) => (
-              <Card key={i} className="border-slate-100 shadow-sm">
+              <Card key={i} className="border-slate-100 shadow-sm overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 p-3 md:p-6">
-                  <CardTitle className="text-[9px] md:text-sm font-bold uppercase tracking-widest text-slate-400">{stat.label}</CardTitle>
-                  <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-red-600" />
+                  <CardTitle className="text-[8px] md:text-sm font-bold uppercase tracking-widest text-slate-400 truncate pr-2">{stat.label}</CardTitle>
+                  <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-red-600 shrink-0" />
                 </CardHeader>
                 <CardContent className="p-3 md:p-6 pt-0 md:pt-0">
                   <div className="text-xl md:text-3xl font-black italic">{stat.value}</div>
@@ -152,92 +212,106 @@ const CampaignDetails = () => {
             ))}
           </div>
 
-          {/* QR Code Card */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="border-0 shadow-xl rounded-[2rem] overflow-hidden">
-              <CardHeader className="p-6 md:p-8">
-                <CardTitle className="text-xl font-bold tracking-tight">QR Center</CardTitle>
-                <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          {/* QR Code Card + Configuration - Responsive */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* QR Center */}
+            <Card className="border-0 shadow-xl rounded-2xl md:rounded-[2rem] overflow-hidden">
+              <CardHeader className="p-4 md:p-8">
+                <CardTitle className="text-lg md:text-xl font-bold tracking-tight">QR Center</CardTitle>
+                <CardDescription className="text-[9px] md:text-xs font-bold uppercase tracking-wider text-slate-400">
                   Deploy to physical locations
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex flex-col items-center space-y-6 md:space-y-8 p-6 md:p-10 pt-0 md:pt-0">
-                <div className="scale-[0.85] sm:scale-100 transition-transform">
+              <CardContent className="flex flex-col items-center space-y-4 md:space-y-8 p-4 md:p-10 pt-0 md:pt-0">
+                {/* CRITICAL: Uses existing QR URL — never regenerates */}
+                <div className="w-full flex justify-center">
                   <BrandedQRCard
                     value={reviewUrl}
                     businessName={businessName}
                     logoUrl={logoUrl}
                     primaryColor="#4285F4"
                     secondaryColor="#ffffff"
-                    size={240}
+                    size={220}
                   />
                 </div>
                 <Button onClick={() => window.open(reviewUrl, '_blank')} variant="outline"
-                  className="w-full h-14 rounded-xl font-bold uppercase tracking-widest text-[10px] border-slate-100">
+                  className="w-full h-12 md:h-14 rounded-xl font-bold uppercase tracking-widest text-[9px] md:text-[10px] border-slate-100 min-h-[44px]">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Live Preview Landing
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-xl rounded-[2rem] overflow-hidden">
-              <CardHeader className="p-6 md:p-8">
-                <CardTitle className="text-xl font-bold tracking-tight">Configuration</CardTitle>
-                <CardDescription className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            {/* Configuration Panel */}
+            <Card className="border-0 shadow-xl rounded-2xl md:rounded-[2rem] overflow-hidden">
+              <CardHeader className="p-4 md:p-8">
+                <CardTitle className="text-lg md:text-xl font-bold tracking-tight">Configuration</CardTitle>
+                <CardDescription className="text-[9px] md:text-xs font-bold uppercase tracking-wider text-slate-400">
                   Target assets and links
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6 p-6 md:p-8 pt-0 md:pt-0">
+              <CardContent className="space-y-4 md:space-y-6 p-4 md:p-8 pt-0 md:pt-0">
                 {googleReviewUrl && (
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Google Direct Link</h4>
+                    <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Google Direct Link</h4>
                     <a
                       href={googleReviewUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-red-600 font-bold hover:underline break-all block"
+                      className="text-xs md:text-sm text-red-600 font-bold hover:underline break-all block"
                     >
                       {googleReviewUrl}
                     </a>
                   </div>
                 )}
                 <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Review Booster URL</h4>
-                  <p className="text-sm font-bold text-slate-900 break-all">{reviewUrl}</p>
+                  <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Review Booster URL</h4>
+                  <p className="text-xs md:text-sm font-bold text-slate-900 break-all">{reviewUrl}</p>
                 </div>
                 {location && (
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Linked Location</h4>
-                    <p className="text-base font-black text-slate-900 uppercase italic mb-1">{location.name}</p>
-                    {location.address && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">{location.address}</p>}
+                  <div className="bg-slate-50 p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-100">
+                    <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Linked Location</h4>
+                    <p className="text-sm md:text-base font-black text-slate-900 uppercase italic mb-1">{location.name}</p>
+                    {location.address && <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wide">{location.address}</p>}
                   </div>
                 )}
+
+                {/* QR Code Preservation Notice */}
+                <div className="bg-amber-50 border border-amber-200 p-3 md:p-4 rounded-xl">
+                  <div className="flex items-start gap-2">
+                    <QrCode className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[9px] md:text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1">QR Code Protected</p>
+                      <p className="text-[8px] md:text-[9px] text-amber-600 leading-relaxed">This QR code is actively used on printed materials. It will never be regenerated to prevent breaking existing cards in circulation.</p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Campaign Stats</CardTitle>
-              <CardDescription>
+          {/* Campaign Stats */}
+          <Card className="rounded-2xl md:rounded-[2rem] overflow-hidden">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-lg md:text-xl">Campaign Stats</CardTitle>
+              <CardDescription className="text-xs md:text-sm">
                 Overview of campaign performance
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
+              <div className="space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Total Scans</span>
-                  <span className="text-lg font-bold">{analytics.scans}</span>
+                  <span className="text-xs md:text-sm font-medium">Total Scans</span>
+                  <span className="text-base md:text-lg font-bold">{analytics.scans}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Review Clicks</span>
-                  <span className="text-lg font-bold">{analytics.click_review}</span>
+                  <span className="text-xs md:text-sm font-medium">Review Clicks</span>
+                  <span className="text-base md:text-lg font-bold">{analytics.click_review}</span>
                 </div>
                 {analytics.scans > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Conversion Rate</span>
-                    <span className="text-lg font-bold">
+                    <span className="text-xs md:text-sm font-medium">Conversion Rate</span>
+                    <span className="text-base md:text-lg font-bold">
                       {((analytics.click_review / analytics.scans) * 100).toFixed(1)}%
                     </span>
                   </div>

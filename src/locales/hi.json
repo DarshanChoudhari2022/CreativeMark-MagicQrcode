@@ -177,7 +177,20 @@
     "redirect_fail_note": "यदि रिडायरेक्ट विफल होता है तो ऊपर दिए गए बटन का उपयोग करें",
     "ai_systems": "Creative Mark AI सिस्टम",
     "syncing": "रिव्यू गेटवे सिंक्रोनाइज़ हो रहा है...",
-    "secure_enterprise_login": "सुरक्षित एंटरप्राइज लॉगिन"
+    "secure_enterprise_login": "सुरक्षित एंटरप्राइज लॉगिन",
+    "owner_response_hub": "मालिक प्रतिक्रिया केंद्र",
+    "ai_assisted_responses": "AI-सहायतित प्रतिक्रियाएँ",
+    "owner_response_management": "मालिक प्रतिक्रिया प्रबंधन",
+    "ai_assisted_badge": "AI-सहायतित प्रतिक्रिया",
+    "ai_assisted_tooltip": "ये AI-सुझावित प्रतिक्रियाएँ वास्तविक ग्राहक रिव्यू के लिए हैं। हर क्लिक एक अनोखी प्रतिक्रिया उत्पन्न करता है।",
+    "verified_reviews_note": "गूगल बिज़नेस प्रोफ़ाइल की सत्यापित समीक्षाएँ",
+    "generate_response": "प्रतिक्रिया उत्पन्न करें",
+    "regenerate_response": "प्रतिक्रिया पुनः उत्पन्न करें",
+    "response_engine": "प्रतिक्रिया इंजन",
+    "owner_reply_active": "मालिक उत्तर: AI-सहायतित",
+    "system_ready": "सिस्टम तैयार",
+    "no_reviews_yet": "अभी तक कोई रिव्यू नहीं",
+    "gen_reply": "उत्तर-तैयार"
   },
   "service": {
     "request_received": "अनुरोध प्राप्त हुआ!",

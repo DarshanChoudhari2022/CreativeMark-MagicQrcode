@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
   Star, Loader2, ExternalLink, CheckCircle2,
-  Sparkles, MessageSquare, ThumbsUp, Copy, ArrowRight,
-  Heart, Zap, Award, Smartphone, ArrowLeft
+  Sparkles, Copy, RefreshCw, ArrowRight,
+  Award, ArrowLeft, HandMetal
 } from "lucide-react";
 import { generateReviewSuggestions } from "@/services/gemini";
 import { useTranslation } from "react-i18next";
@@ -32,332 +32,412 @@ interface Location {
   logo_url: string;
 }
 
-const defaultSuggestions = [
-  "Excellent service and friendly staff! Highly recommended for everyone.",
-  "Amazing experience! The team was professional and helpful throughout.",
-  "Best in the area! Quality service and great value for money.",
-  "Outstanding quality! Will definitely visit again and recommend to friends.",
-  "Very impressed with the service. Quick, efficient, and professional!",
-];
-
-const getReviewCategories = (t: any) => [
-  { id: 'service', name: t('review.service_quality'), emoji: '⭐' },
-  { id: 'staff', name: t('review.staff_behavior'), emoji: '😊' },
-  { id: 'ambiance', name: t('review.ambiance'), emoji: '✨' },
-  { id: 'value', name: t('review.value_for_money'), emoji: '💰' },
-  { id: 'overall', name: t('review.overall_experience'), emoji: '🎯' },
-];
-
+// ─── Component ────────────────────────────────────────────────
 const ReviewLanding = () => {
   const { campaignId } = useParams();
   const { toast } = useToast();
-  const { t, i18n } = useTranslation();
-  const reviewCategories = getReviewCategories(t);
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
-  const [suggestions, setSuggestions] = useState<string[]>(defaultSuggestions);
-  const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
 
-  // Set defaults to skip steps
-  const [selectedRating, setSelectedRating] = useState(5);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>('service');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const [suggestionLanguage, setSuggestionLanguage] = useState('en');
+  const [redirecting, setRedirecting] = useState(false);
 
-  // Start directly at suggestion
-  const [step, setStep] = useState<'rating' | 'category' | 'suggestion' | 'redirect'>('suggestion');
+  // Prevent double-fetch race conditions
+  const fetchIdRef = useRef(0);
 
+  // ─── Load Campaign + Location ───────────────────────────────
   useEffect(() => {
-    loadCampaignData();
-    recordScanEvent();
-  }, [campaignId]);
-
-  const loadCampaignData = async () => {
     if (!campaignId) return;
-    try {
-      const { data: campaignData, error: campaignError } = await (supabase as any)
-        .from('campaigns')
-        .select('*')
-        .eq('id', campaignId)
-        .single();
 
-      if (campaignError) throw campaignError;
-      setCampaign(campaignData);
-
-      if (campaignData?.location_id) {
-        const { data: locationData } = await (supabase as any)
-          .from('locations')
+    const load = async () => {
+      try {
+        const { data: campaignData, error } = await (supabase as any)
+          .from('campaigns')
           .select('*')
-          .eq('id', campaignData.location_id)
+          .eq('id', campaignId)
           .single();
 
-        if (locationData) {
-          setLocation(locationData);
+        if (error) throw error;
+        setCampaign(campaignData);
+
+        if (campaignData?.location_id) {
+          const { data: locationData } = await (supabase as any)
+            .from('locations')
+            .select('*')
+            .eq('id', campaignData.location_id)
+            .single();
+
+          if (locationData) setLocation(locationData);
         }
+      } catch (err) {
+        console.error('Error loading campaign:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (error: any) {
-      console.error('Error loading campaign:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const recordScanEvent = async () => {
-    if (!campaignId) return;
-    try {
-      await (supabase as any)
-        .from('analytics_logs')
-        .insert({
-          campaign_id: campaignId,
-          event_type: 'scan',
-          metadata: {
-            user_agent: navigator.userAgent,
-            language: navigator.language
-          }
-        });
-    } catch (error) {
-      console.error('Error recording scan:', error);
-    }
-  };
+    load();
+    recordEvent('scan');
+  }, [campaignId]);
 
-  const handleRatingSubmit = () => {
-    if (selectedRating >= 4) {
-      setStep('category');
-    } else {
-      setStep('redirect');
-    }
-  };
-
-  // Fetch suggestions when language changes OR when location is loaded (initial load)
+  // ─── Fetch AI Suggestions on data ready ─────────────────────
   useEffect(() => {
-    if (step === 'suggestion' && selectedCategory && (location || campaign?.name)) {
-      fetchAISuggestions(selectedCategory, suggestionLanguage);
+    const businessName = location?.name || campaign?.name;
+    if (businessName) {
+      fetchSuggestions(businessName);
     }
-  }, [suggestionLanguage, location, campaign]);
+  }, [location, campaign]);
 
-  const fetchAISuggestions = async (categoryId: string, lang: string) => {
+  // ─── Fetch AI-Generated Suggestions (with timeout + race guard) ──
+  const fetchSuggestions = useCallback(async (businessName: string) => {
+    const id = ++fetchIdRef.current;
     setLoadingSuggestions(true);
+    setSelectedSuggestion(null);
+    setCopied(false);
+
     try {
-      const categoryName = reviewCategories.find(c => c.id === categoryId)?.name || 'service';
-      const aiSuggestions = await generateReviewSuggestions(
-        location?.name || 'this business',
-        selectedRating,
-        lang,
-        `${location?.category || 'service'} - focusing on ${categoryName}`
-      );
-      if (aiSuggestions && aiSuggestions.length > 0) {
-        setSuggestions(aiSuggestions.map(s => s.text));
+      const category = location?.category || 'service';
 
-        // Record AI suggestion event
-        await (supabase as any)
-          .from('analytics_logs')
-          .insert({
-            campaign_id: campaignId,
-            event_type: 'ai_suggestion',
-            metadata: {
-              category: categoryId,
-              language: lang,
-              count: aiSuggestions.length
-            }
-          });
+      const result = await Promise.race([
+        generateReviewSuggestions(
+          businessName,
+          5,
+          'en',
+          category
+        ),
+        // 8-second timeout — if AI is slow, bail out
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('AI_TIMEOUT')), 8000)
+        ),
+      ]);
+
+      // Only apply if this is still the latest fetch
+      if (id === fetchIdRef.current && result.length > 0) {
+        setSuggestions(result.map(s => s.text));
+        recordEvent('ai_suggestion', { count: result.length, source: 'ai' });
       }
-    } catch (error) {
-      console.error('AI Suggestion error:', error);
+    } catch (err: any) {
+      console.warn('AI suggestion failed, using smart defaults:', err.message);
+
+      // Smart fallback — business-specific defaults
+      if (id === fetchIdRef.current) {
+        const fallbacks = generateLocalFallbacks(businessName);
+        setSuggestions(fallbacks);
+        recordEvent('ai_suggestion', { count: fallbacks.length, source: 'fallback' });
+      }
     } finally {
-      setLoadingSuggestions(false);
+      if (id === fetchIdRef.current) {
+        setLoadingSuggestions(false);
+      }
     }
+  }, [location, campaign]);
+
+  // ─── Local Fallback Generator (zero API, instant) ───────────
+  const generateLocalFallbacks = (businessName: string): string[] => {
+    const templates = [
+      `Excellent experience at ${businessName}! Professional team and great quality service. Highly recommended!`,
+      `Very impressed with the service at ${businessName}. Friendly staff and outstanding results. Will definitely visit again!`,
+      `Top-notch quality! ${businessName} delivers on every promise. Great value for money and wonderful customer care.`,
+      `Had a fantastic time at ${businessName}. Everything was well-organized and the staff was very helpful. Five stars!`,
+      `Best service I've experienced in a long time! ${businessName} truly cares about their customers. Highly recommend!`,
+    ];
+    // Shuffle so it's different each time
+    for (let i = templates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [templates[i], templates[j]] = [templates[j], templates[i]];
+    }
+    return templates;
   };
 
-  const handleCategorySelect = async (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    setStep('suggestion');
-    await fetchAISuggestions(categoryId, suggestionLanguage);
-  };
+  // ─── Handle Tap on a Suggestion ─────────────────────────────
+  const handleSelectReview = async (text: string) => {
+    if (redirecting) return; // Prevent double-tap
 
-  const handleCopyAndPost = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      setSelectedSuggestion(text); // Track which one was selected
+      setSelectedSuggestion(text);
+      setRedirecting(true);
 
-      await (supabase as any)
-        .from('analytics_logs')
-        .insert({
-          campaign_id: campaignId,
-          event_type: 'review_click',
-          metadata: {
-            rating: selectedRating,
-            category: selectedCategory,
-            suggestion: text
-          }
-        });
-
-      toast({
-        title: t('review.copied'),
-        description: "Redirecting to Google Reviews...",
+      // Record the event
+      recordEvent('review_click', {
+        rating: 5,
+        suggestion: text,
       });
 
-      // Animate before redirect
+      toast({
+        title: "✅ Review copied!",
+        description: "Opening Google Reviews — just paste & post!",
+      });
+
+      // Redirect after a short delay so user sees the confirmation
       setTimeout(() => {
         const url = location?.google_review_url || campaign?.google_review_url;
         if (url) {
           window.location.href = url;
         }
-      }, 2000);
+      }, 2500);
     } catch (err) {
-      console.error('Copy failed:', err);
+      // Clipboard failed (rare on HTTPS) — show manual copy fallback
+      console.error('Clipboard failed:', err);
+      toast({
+        title: "Copy manually",
+        description: "Long-press the review text above to copy it.",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleManualRedirect = () => {
-    const url = location?.google_review_url || campaign?.google_review_url;
-    if (url) {
-      window.location.href = url;
+  // ─── Refresh (get new set) ──────────────────────────────────
+  const handleRefresh = () => {
+    const businessName = location?.name || campaign?.name || 'this business';
+    fetchSuggestions(businessName);
+  };
+
+  // ─── Analytics Helper ───────────────────────────────────────
+  const recordEvent = async (eventType: string, metadata: Record<string, any> = {}) => {
+    if (!campaignId) return;
+    try {
+      await (supabase as any)
+        .from('analytics_logs')
+        .insert({
+          campaign_id: campaignId,
+          event_type: eventType,
+          metadata: {
+            ...metadata,
+            user_agent: navigator.userAgent,
+            language: navigator.language,
+            timestamp: new Date().toISOString(),
+          }
+        });
+    } catch (e) {
+      // Silent fail — analytics should never block the user
     }
   };
 
+  // ─── Loading State ──────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white font-inter">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
         <div className="text-center">
-          <Loader2 className="h-16 w-16 animate-spin text-red-600 mx-auto mb-10" />
-          <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">{t('review.syncing')}</p>
+          <div className="relative mx-auto w-16 h-16 mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-slate-500 text-sm font-medium">Loading your review page...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50 font-inter pb-20 relative overflow-hidden">
-      {/* Immersive Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-red-50 to-transparent z-0"></div>
-      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-100/30 rounded-full blur-[120px] -z-10"></div>
+  const businessName = location?.name || campaign?.name || 'Business';
+  const googleUrl = location?.google_review_url || campaign?.google_review_url;
 
-      <div className="fixed top-4 left-4 z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
-          className="h-10 w-10 bg-white/50 backdrop-blur-md text-slate-400 hover:text-red-600 rounded-full shadow-sm hover:bg-white"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+  // ─── Render ─────────────────────────────────────────────────
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-slate-50 font-inter">
+      {/* Top bar */}
+      <div className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <div className="bg-blue-600 p-1 rounded-md">
+              <Star className="h-3 w-3 text-white fill-white" />
+            </div>
+            Google Review
+          </div>
+          <LanguageToggle />
+        </div>
       </div>
 
-      <div className="relative z-10 max-w-xl mx-auto px-4 pt-12 md:pt-20">
-        {/* Header Branding - Clean & Focused */}
-        <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
-          <div className="bg-white p-2 md:p-4 rounded-2xl md:rounded-3xl inline-block shadow-lg md:shadow-xl mb-4 md:mb-6 border border-slate-100 overflow-hidden w-24 h-24 md:w-32 md:h-32 transform transition-all duration-500 hover:shadow-2xl">
+      <div className="max-w-lg mx-auto px-4 py-8">
+        {/* ─── Business Header ────────────────────────────── */}
+        <div className="text-center mb-8" style={{ animation: 'fadeInUp 0.6s ease-out' }}>
+          <div className="inline-block mb-4">
             {location?.logo_url ? (
               <img
                 src={location.logo_url}
-                alt={location.name}
-                className="w-full h-full object-contain rounded-lg md:rounded-xl"
+                alt={businessName}
+                className="w-20 h-20 object-contain rounded-2xl shadow-lg border-2 border-white bg-white"
               />
             ) : (
-              <Award className="w-full h-full text-red-500" />
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-lg flex items-center justify-center">
+                <Award className="w-10 h-10 text-white" />
+              </div>
             )}
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-tight mb-3">
-            {location?.name || campaign?.name || t('review.we_love_to_hear')}
-          </h1>
-          <div className="inline-block">
-            <p className="text-red-600 font-bold uppercase tracking-wider text-[10px] px-5 py-2 bg-white shadow-sm rounded-full border border-red-50">
-              {campaign?.headline || t('review.how_was_experience')}
-            </p>
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">{businessName}</h1>
+          <p className="text-slate-500 text-sm">
+            {campaign?.headline || "How was your experience?"}
+          </p>
+
+          {/* 5-Star Visual */}
+          <div className="flex items-center justify-center gap-1 mt-4">
+            {[1, 2, 3, 4, 5].map(i => (
+              <Star key={i} className="h-7 w-7 fill-amber-400 text-amber-400 drop-shadow-sm" />
+            ))}
           </div>
         </div>
 
-        <main className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          {/* Main Suggestions Card */}
-          <Card className="border-0 shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white overflow-hidden">
-            <CardContent className="p-5 md:p-10 text-center">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-inner">
-                <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-red-500" />
-              </div>
-              <h2 className="text-lg md:text-2xl font-bold mb-2 text-slate-900 tracking-tight">{t('review.select_to_copy')}</h2>
-              <p className="text-slate-400 font-bold mb-6 md:mb-8 uppercase tracking-widest text-[9px] md:text-[10px]">{t('review.tap_instruction')}</p>
+        {/* ─── Main Card: Review Suggestions ───────────────── */}
+        <Card className="border border-slate-200 shadow-xl rounded-2xl overflow-hidden bg-white" style={{ animation: 'fadeInUp 0.8s ease-out' }}>
+          <CardContent className="p-0">
+            {/* Card Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-5 text-white text-center">
+              <h2 className="text-lg font-bold mb-1">Tap a review to copy & post</h2>
+              <p className="text-blue-100 text-xs">
+                Select any review below — it will be copied automatically
+              </p>
+            </div>
 
-              {/* Only English suggestions now */}
-
-
-              {loadingSuggestions ? (
-                <div className="py-20">
-                  <Loader2 className="h-10 w-10 animate-spin text-red-500 mx-auto mb-4" />
-                  <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest animate-pulse">Crafting reviews...</p>
+            {/* Instruction Banner with Animated Hand */}
+            {!selectedSuggestion && !loadingSuggestions && (
+              <div className="bg-amber-50 border-b border-amber-100 px-5 py-3 flex items-center gap-3">
+                <div className="animate-bounce">
+                  <span className="text-2xl">👇</span>
                 </div>
-              ) : (
-                <div className="space-y-4 mb-8">
-                  {suggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleCopyAndPost(suggestion)}
-                      className={`w-full p-4 md:p-6 text-left rounded-xl md:rounded-2xl border transition-all group relative overflow-hidden active:scale-[0.98] ${selectedSuggestion === suggestion
-                        ? 'bg-red-600 border-red-600 text-white shadow-lg'
-                        : 'bg-white hover:bg-slate-50 border-slate-100 hover:border-red-200 shadow-sm'
-                        }`}
-                    >
-                      <div className={`absolute top-4 right-4 transition-opacity ${selectedSuggestion === suggestion ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                        }`}>
-                        {selectedSuggestion === suggestion ? (
-                          <CheckCircle2 className="h-5 w-5 text-white animate-bounce" />
-                        ) : (
-                          <Copy className="h-4 w-4 text-red-400" />
-                        )}
-                      </div>
-                      <p className={`font-semibold leading-relaxed text-base md:text-lg pr-8 ${selectedSuggestion === suggestion ? 'text-white' : 'text-slate-800'
-                        }`}>"{suggestion}"</p>
-                      {selectedSuggestion === suggestion && (
-                        <p className="text-[10px] uppercase tracking-widest mt-2 text-white/80 font-bold">Copied! Opening Google Reviews...</p>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Enhanced Backup Redirect Button */}
-              <div className="pt-8 border-t border-slate-50 space-y-4">
-                <Button
-                  onClick={handleManualRedirect}
-                  className="w-full py-7 rounded-2xl bg-slate-900 border-0 hover:bg-slate-950 text-white font-bold uppercase tracking-widest text-[10px] flex gap-3 items-center justify-center transition-all shadow-lg hover:shadow-slate-200"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  {t('review.leave_review_button')}
-                </Button>
-
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                  {t('review.redirect_fail_note')}
+                <p className="text-amber-800 text-sm font-medium">
+                  <strong>Step 1:</strong> Tap any review below to copy it
                 </p>
               </div>
-            </CardContent>
-          </Card>
-        </main>
+            )}
 
-        <footer className="mt-12 text-center pb-12">
-          <div className="flex flex-col items-center gap-6">
-            <img src="/logo.jpg" alt="Creative Mark" className="h-16 w-auto object-contain rounded-xl shadow-lg transition-all duration-500" />
-            <div className="space-y-2">
-              <div className="flex items-center justify-center gap-2 text-red-600 font-bold uppercase tracking-widest text-[9px]">
-                <CheckCircle2 className="h-3 w-3" />
-                {t('common.powered_by')}
+            {/* Selected State Banner */}
+            {selectedSuggestion && (
+              <div className="bg-green-50 border-b border-green-100 px-5 py-3 flex items-center gap-3" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <div>
+                  <p className="text-green-800 text-sm font-bold">Review copied! ✅</p>
+                  <p className="text-green-600 text-xs">Redirecting to Google Reviews... just paste & post!</p>
+                </div>
               </div>
-              <p className="text-slate-300 text-[9px] font-bold uppercase tracking-widest">
-                &copy; {new Date().getFullYear()} {t('review.ai_systems')}
+            )}
+
+            {/* Suggestions List */}
+            <div className="p-4 space-y-3">
+              {loadingSuggestions ? (
+                <div className="py-12 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
+                  <p className="text-slate-500 text-sm font-medium">Writing fresh reviews...</p>
+                  <p className="text-slate-400 text-xs mt-1">Powered by AI ✨</p>
+                </div>
+              ) : (
+                <>
+                  {suggestions.map((text, index) => (
+                    <button
+                      key={`${text.substring(0, 20)}-${index}`}
+                      onClick={() => handleSelectReview(text)}
+                      disabled={redirecting}
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-300 group relative min-h-[60px] ${selectedSuggestion === text
+                          ? 'bg-green-50 border-green-500 shadow-lg shadow-green-100 scale-[1.02]'
+                          : redirecting
+                            ? 'opacity-40 cursor-not-allowed border-slate-100 bg-slate-50'
+                            : 'bg-white hover:bg-blue-50 border-slate-100 hover:border-blue-300 shadow-sm hover:shadow-md active:scale-[0.98]'
+                        }`}
+                      style={{ animation: `fadeInUp ${0.4 + index * 0.1}s ease-out` }}
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Review Number */}
+                        <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${selectedSuggestion === text
+                            ? 'bg-green-500 text-white'
+                            : 'bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
+                          } transition-colors`}>
+                          {selectedSuggestion === text ? '✓' : index + 1}
+                        </div>
+
+                        {/* Review Text */}
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm leading-relaxed ${selectedSuggestion === text ? 'text-green-800 font-semibold' : 'text-slate-700'
+                            }`}>
+                            {text}
+                          </p>
+                        </div>
+
+                        {/* Copy Icon */}
+                        <div className={`flex-shrink-0 mt-1 transition-opacity ${selectedSuggestion === text ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                          }`}>
+                          {selectedSuggestion === text ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4 text-blue-400" />
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+
+                  {/* Refresh Button */}
+                  {!redirecting && (
+                    <div className="pt-2 text-center">
+                      <button
+                        onClick={handleRefresh}
+                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 text-xs font-semibold py-2 px-4 rounded-full hover:bg-blue-50 transition-colors"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Show different reviews
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Direct Google Link (always visible) */}
+            {googleUrl && (
+              <div className="border-t border-slate-100 p-4">
+                <Button
+                  onClick={() => { window.location.href = googleUrl; }}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-12 font-semibold text-sm shadow-lg transition-all active:scale-[0.98] min-h-[48px]"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Write your own review on Google
+                </Button>
+                <p className="text-center text-slate-400 text-[11px] mt-2">
+                  Or write your own review directly
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ─── Footer ──────────────────────────────────────── */}
+        <footer className="mt-10 text-center pb-8">
+          <div className="flex flex-col items-center gap-3">
+            <img
+              src="/logo.jpg"
+              alt="Powered by"
+              className="h-10 w-auto object-contain rounded-lg shadow-sm"
+            />
+            <div className="space-y-1">
+              <p className="text-slate-400 text-[11px] font-medium">
+                Powered by Creative Mark
+              </p>
+              <p className="text-slate-300 text-[10px]">
+                &copy; {new Date().getFullYear()} AI Review Systems
               </p>
             </div>
           </div>
         </footer>
       </div>
 
-      {/* Language Toggle Fixed */}
-      <div className="fixed bottom-6 right-6 z-[100] transform hover:scale-110 transition-transform">
-        <div className="bg-white/80 backdrop-blur-xl border border-slate-100 p-2 rounded-full shadow-2xl">
-          <LanguageToggle />
-        </div>
-      </div>
+      {/* ─── CSS Animations (inline keyframes) ────────────── */}
+      <style>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -139,7 +139,7 @@ export default function NFCManagement() {
               variant="ghost"
               size="icon"
               onClick={() => navigate("/dashboard")}
-              className="hover:bg-red-50 text-slate-400 hover:text-red-600 h-9 w-9 md:h-10 md:w-10 rounded-xl transition-all"
+              className="hover:bg-red-50 text-slate-400 hover:text-red-600 h-10 w-10 md:h-10 md:w-10 min-h-[44px] min-w-[44px] rounded-xl transition-all"
             >
               <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
@@ -219,7 +219,7 @@ export default function NFCManagement() {
 
             {/* Usefulness Guide */}
             <Card className="bg-slate-900 border-0 text-white shadow-xl rounded-3xl relative overflow-hidden group">
-              <CardContent className="p-8">
+              <CardContent className="p-5 md:p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 bg-red-600 rounded-xl">
                     <ShieldCheck className="h-6 w-6 text-white" />
@@ -262,7 +262,7 @@ export default function NFCManagement() {
               </div>
             </div>
 
-            <Card className="border-0 shadow-xl overflow-hidden bg-white rounded-3xl min-h-[500px] border-l-4 border-l-red-600">
+            <Card className="border-0 shadow-xl overflow-hidden bg-white rounded-2xl md:rounded-3xl min-h-[300px] md:min-h-[500px] border-l-4 border-l-red-600">
               <CardContent className="p-0 overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-slate-50/50">
@@ -305,7 +305,7 @@ export default function NFCManagement() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeleteCard(card.id)}
-                              className="hover:bg-red-50 text-slate-300 hover:text-red-600 transition-all rounded-xl"
+                              className="hover:bg-red-50 text-slate-300 hover:text-red-600 transition-all rounded-xl min-h-[44px] min-w-[44px]"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -319,9 +319,9 @@ export default function NFCManagement() {
             </Card>
 
             {/* Assistance Bar */}
-            <div className="p-10 bg-white border-2 border-dashed border-slate-100 rounded-3xl text-center hover:border-red-100 transition-all group opacity-80 hover:opacity-100">
-              <Globe className="h-10 w-10 text-slate-200 group-hover:text-red-600 transition-colors mx-auto mb-6" />
-              <p className="text-[10px] font-bold text-slate-400 group-hover:text-slate-900 uppercase tracking-widest max-w-lg mx-auto transition-colors leading-relaxed">
+            <div className="p-6 md:p-10 bg-white border-2 border-dashed border-slate-100 rounded-2xl md:rounded-3xl text-center hover:border-red-100 transition-all group opacity-80 hover:opacity-100">
+              <Globe className="h-8 w-8 md:h-10 md:w-10 text-slate-200 group-hover:text-red-600 transition-colors mx-auto mb-4 md:mb-6" />
+              <p className="text-[9px] md:text-[10px] font-bold text-slate-400 group-hover:text-slate-900 uppercase tracking-widest max-w-lg mx-auto transition-colors leading-relaxed">
                 Need help with NFC card writing or mass deployment? Visit our hardware documentation or contact satellite support.
               </p>
             </div>
