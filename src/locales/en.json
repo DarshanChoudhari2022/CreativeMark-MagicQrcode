@@ -91,6 +91,7 @@
     "email": "Email",
     "home": "Home"
   },
+  "home": "Home",
   "features": {
     "ai_suggestions": "Smart Suggestions",
     "ai_suggestions_desc": "AI writes the review for them",
