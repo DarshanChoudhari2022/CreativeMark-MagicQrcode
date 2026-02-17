@@ -478,71 +478,53 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
             </div>
           </div>
 
-          {/* ── "SCAN TO REVIEW" CTA Button ── */}
+          {/* ── "SCAN TO REVIEW" CTA ── */}
           {/*
-            Using TABLE layout for icon+text centering.
-            Tables use native layout and render pixel-perfect in html2canvas,
-            unlike flexbox/inline-block which html2canvas approximates poorly.
+            DESIGN: Clean text-only pill with height + line-height centering.
+            This is the ONLY centering method that is 100% pixel-perfect
+            in html2canvas. No icons, no flexbox, no tables, no vertical-align.
+            Just a div with matching height and line-height.
           */}
           <div
             style={{
-              marginTop: '24px',
+              marginTop: '20px',
               textAlign: 'center',
             }}
           >
-            <table
-              cellPadding="0"
-              cellSpacing="0"
+            {/* Pointing indicator */}
+            <div
               style={{
-                margin: '0 auto',
-                backgroundColor: theme.ctaBg,
-                borderRadius: '14px',
-                boxShadow: `0 6px 20px -4px ${theme.shadowColor}`,
-                border: `1px solid ${theme.ctaBorder}`,
-                borderCollapse: 'separate',
+                fontSize: '10px',
+                color: theme.subtextColor,
+                letterSpacing: '0.2em',
+                marginBottom: '6px',
+                lineHeight: '1',
               }}
             >
-              <tbody>
-                <tr>
-                  <td
-                    style={{
-                      padding: '14px 16px 14px 36px',
-                      verticalAlign: 'middle',
-                      lineHeight: 0,
-                    }}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={theme.ctaText}
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                    </svg>
-                  </td>
-                  <td
-                    style={{
-                      padding: '14px 36px 14px 8px',
-                      verticalAlign: 'middle',
-                      color: theme.ctaText,
-                      fontSize: '12px',
-                      fontWeight: 800,
-                      letterSpacing: '0.14em',
-                      whiteSpace: 'nowrap',
-                      textTransform: 'uppercase',
-                      fontFamily: 'inherit',
-                      lineHeight: '16px',
-                    }}
-                  >
-                    SCAN TO REVIEW
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+              ▲
+            </div>
+            <div
+              style={{
+                backgroundColor: theme.ctaBg,
+                borderRadius: '100px',
+                height: '44px',
+                lineHeight: '44px',
+                paddingLeft: '32px',
+                paddingRight: '32px',
+                color: theme.ctaText,
+                fontSize: '11px',
+                fontWeight: 800,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                fontFamily: 'inherit',
+                whiteSpace: 'nowrap',
+                display: 'inline-block',
+                textAlign: 'center',
+                boxShadow: `0 4px 16px -2px ${theme.shadowColor}`,
+              }}
+            >
+              ✦&nbsp;&nbsp;SCAN TO REVIEW&nbsp;&nbsp;✦
+            </div>
           </div>
 
           {/* ── Footer Branding ── */}
