@@ -23,6 +23,12 @@ const CampaignDetails = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
+  const [logoInput, setLogoInput] = useState('');
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [locationName, setLocationName] = useState('');
+  const [locationAddress, setLocationAddress] = useState('');
+  const [googleUrlInput, setGoogleUrlInput] = useState('');
+  const [isEditingGoogleUrl, setIsEditingGoogleUrl] = useState(false);
 
   useEffect(() => {
     const loadCampaignData = async () => {
@@ -47,6 +53,12 @@ const CampaignDetails = () => {
             .single();
           if (locationData) {
             setLocation(locationData);
+            setLogoInput(locationData.logo_url || '');
+            setLocationName(locationData.name || '');
+            setLocationAddress(locationData.address || '');
+            setGoogleUrlInput(locationData.google_review_url || '');
+          } else {
+            setGoogleUrlInput(campaignData.google_review_url || '');
           }
         }
 
@@ -111,6 +123,96 @@ const CampaignDetails = () => {
       toast({
         title: "Error",
         description: "Failed to update campaign name",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateLogo = async () => {
+    if (!location?.id) return;
+    try {
+      const { error } = await supabase
+        .from('locations')
+        .update({ logo_url: logoInput })
+        .eq('id', location.id);
+
+      if (error) throw error;
+
+      setLocation(prev => prev ? { ...prev, logo_url: logoInput } : null);
+      toast({
+        title: "Success",
+        description: "Logo updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating logo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update logo",
+        variant: "destructive",
+      });
+    }
+  };
+
+
+  const handleUpdateLocation = async () => {
+    if (!location?.id) return;
+    try {
+      const { error } = await supabase
+        .from('locations')
+        .update({
+          name: locationName,
+          address: locationAddress
+        })
+        .eq('id', location.id);
+
+      if (error) throw error;
+
+      setLocation(prev => prev ? { ...prev, name: locationName, address: locationAddress } : null);
+      setIsEditingLocation(false);
+      toast({
+        title: "Success",
+        description: "Location details updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating location:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update location details",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateGoogleUrl = async () => {
+    try {
+      if (location?.id) {
+        // Update location if it exists
+        const { error } = await supabase
+          .from('locations')
+          .update({ google_review_url: googleUrlInput })
+          .eq('id', location.id);
+        if (error) throw error;
+        setLocation(prev => prev ? { ...prev, google_review_url: googleUrlInput } : null);
+      } else {
+        // Update campaign if no location
+        const { error } = await supabase
+          .from('campaigns')
+          .update({ google_review_url: googleUrlInput })
+          .eq('id', campaignId);
+        if (error) throw error;
+        setCampaign(prev => prev ? { ...prev, google_review_url: googleUrlInput } : null);
+      }
+
+      setIsEditingGoogleUrl(false);
+      toast({
+        title: "Success",
+        description: "Google Review Link updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating Google URL:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update Google Review Link",
         variant: "destructive",
       });
     }
@@ -251,9 +353,36 @@ const CampaignDetails = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 md:space-y-6 p-4 md:p-8 pt-0 md:pt-0">
-                {googleReviewUrl && (
-                  <div>
-                    <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Google Direct Link</h4>
+                <div>
+                  <div className="flex justify-between items-center mb-1 md:mb-2 text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-400">
+                    <h4>Google Direct Link</h4>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => isEditingGoogleUrl ? handleUpdateGoogleUrl() : setIsEditingGoogleUrl(true)}
+                      className="h-6 w-auto px-2 hover:bg-slate-100"
+                    >
+                      {isEditingGoogleUrl ? <Save className="h-3 w-3 text-green-600" /> : <Edit2 className="h-3 w-3" />}
+                    </Button>
+                  </div>
+                  {isEditingGoogleUrl ? (
+                    <div className="flex gap-2">
+                      <Input
+                        value={googleUrlInput}
+                        onChange={(e) => setGoogleUrlInput(e.target.value)}
+                        className="text-xs"
+                        placeholder="https://g.page/r/..."
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsEditingGoogleUrl(false)}
+                        className="h-9 w-9"
+                      >
+                        <X className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ) : (googleReviewUrl ? (
                     <a
                       href={googleReviewUrl}
                       target="_blank"
@@ -262,19 +391,86 @@ const CampaignDetails = () => {
                     >
                       {googleReviewUrl}
                     </a>
-                  </div>
-                )}
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">No link configured</p>
+                  ))}
+                </div>
                 <div>
                   <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Review Booster URL</h4>
                   <p className="text-xs md:text-sm font-bold text-slate-900 break-all">{reviewUrl}</p>
                 </div>
                 {location && (
-                  <div className="bg-slate-50 p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-100">
-                    <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Linked Location</h4>
-                    <p className="text-sm md:text-base font-black text-slate-900 uppercase italic mb-1">{location.name}</p>
-                    {location.address && <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wide">{location.address}</p>}
+                  <div className="bg-slate-50 p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-100 group relative">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400">Linked Location</h4>
+                      {!isEditingLocation ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setIsEditingLocation(true)}
+                        >
+                          <Edit2 className="h-3 w-3 text-slate-400" />
+                        </Button>
+                      ) : (
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            className="h-6 w-6 bg-green-600 hover:bg-green-700"
+                            onClick={handleUpdateLocation}
+                          >
+                            <Save className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-6 w-6"
+                            onClick={() => setIsEditingLocation(false)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    {!isEditingLocation ? (
+                      <>
+                        <p className="text-sm md:text-base font-black text-slate-900 uppercase italic mb-1">{location.name}</p>
+                        {location.address && <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wide">{location.address}</p>}
+                      </>
+                    ) : (
+                      <div className="space-y-2">
+                        <Input
+                          value={locationName}
+                          onChange={(e) => setLocationName(e.target.value)}
+                          placeholder="Location Name"
+                          className="font-bold text-sm"
+                        />
+                        <Input
+                          value={locationAddress}
+                          onChange={(e) => setLocationAddress(e.target.value)}
+                          placeholder="Address / Description"
+                          className="text-xs"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
+
+                <div>
+                  <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Brand Logo</h4>
+                  <div className="flex gap-2">
+                    <Input
+                      value={logoInput}
+                      onChange={(e) => setLogoInput(e.target.value)}
+                      placeholder="Paste Logo URL here"
+                      className="text-xs"
+                    />
+                    <Button size="sm" onClick={handleUpdateLogo} disabled={logoInput === (location?.logo_url || '')}>
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
 
                 {/* QR Code Preservation Notice */}
                 <div className="bg-amber-50 border border-amber-200 p-3 md:p-4 rounded-xl">

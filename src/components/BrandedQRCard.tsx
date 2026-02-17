@@ -14,9 +14,9 @@ interface BrandedQRCardProps {
 
 // Google Star Rating Component (Maps Style)
 const GoogleStars = () => (
-  <div className="flex items-center gap-0.5">
+  <div className="flex items-center justify-center mx-auto" style={{ width: 'fit-content' }}>
     {[1, 2, 3, 4, 5].map((i) => (
-      <svg key={i} className="w-6 h-6 text-[#F9AB00]" fill="currentColor" viewBox="0 0 24 24">
+      <svg key={i} className={`w-6 h-6 text-[#F9AB00] ${i !== 5 ? 'mr-0.5' : ''}`} fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
       </svg>
     ))}
@@ -101,18 +101,20 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
         </div>
 
         {/* Brand Header */}
-        <div className="mt-6 flex flex-col items-center text-center space-y-4 w-full">
+        <div className="mt-6 flex flex-col items-center justify-center text-center space-y-4 w-full">
           <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-50 mb-2">
             <GoogleG />
           </div>
 
-          <div className="space-y-1 px-4">
-            <h2 className="text-2xl font-extrabold text-[#202124] leading-tight">
+          <div className="space-y-1 px-4 w-full flex flex-col items-center justify-center">
+            <h2 className="text-2xl font-extrabold text-[#202124] leading-tight text-center w-full block" style={{ textAlign: 'center' }}>
               {businessName}
             </h2>
-            <div className="flex flex-col items-center gap-2">
-              <GoogleStars />
-              <p className="text-[#5F6368] font-bold text-sm tracking-widest uppercase mt-1">
+            <div className="w-full text-center">
+              <div className="inline-block mt-3 mb-1">
+                <GoogleStars />
+              </div>
+              <p className="text-[#5F6368] font-bold text-sm tracking-widest uppercase mt-1 text-center w-full block" style={{ textAlign: 'center' }}>
                 Review Us On Google
               </p>
             </div>
@@ -120,7 +122,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
         </div>
 
         {/* QR Code Section */}
-        <div className="relative mt-8 group">
+        <div className="relative mt-8 group w-full flex justify-center">
           {/* Subtle Glow Background */}
           <div className="absolute -inset-4 bg-gradient-to-tr from-[#4285F410] to-[#EA433510] rounded-[2rem] blur-xl opacity-50"></div>
 
@@ -143,18 +145,20 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
         </div>
 
         {/* Footer CTA */}
-        <div className="mt-8 flex flex-col items-center space-y-4">
-          <div className="bg-[#202124] text-white px-8 py-3 rounded-2xl font-bold tracking-widest text-sm shadow-xl flex items-center gap-3">
+        <div className="mt-8 w-full text-center space-y-4">
+          <div className="bg-[#202124] text-white px-8 py-3 rounded-2xl font-bold tracking-widest text-sm shadow-xl inline-flex items-center justify-center gap-3">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
             SCAN TO REVIEW
           </div>
 
-          <img src="/logo.jpg" alt="Creative Mark" className="h-8 w-auto" />
-          <p className="text-[8px] text-[#70757A] font-bold uppercase tracking-widest -mt-2">
-            ReviewBoost Technology
-          </p>
+          <div className="flex flex-col items-center justify-center w-full">
+            <img src="/logo.jpg" alt="Creative Mark" className="h-8 w-auto mx-auto" />
+            <p className="text-[8px] text-[#70757A] font-bold uppercase tracking-widest -mt-2 text-center w-full">
+              ReviewBoost Technology
+            </p>
+          </div>
         </div>
       </div>
 
