@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { QRCodeCanvas } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -101,17 +101,17 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
         </div>
 
         {/* Brand Header */}
-        <div className="mt-6 flex flex-col items-center justify-center text-center space-y-4 w-full">
-          <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-50 mb-2 min-w-[64px] min-h-[64px] flex items-center justify-center overflow-hidden">
+        <div className="mt-8 flex flex-col items-center justify-center text-center space-y-4 w-full">
+          <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-50 mb-2 min-w-[80px] min-h-[80px] flex items-center justify-center overflow-hidden">
             {logoUrl && logoLoaded ? (
-              <img src={logoUrl} alt="Logo" className="w-10 h-10 object-contain mx-auto" style={{ display: 'block' }} />
+              <img src={logoUrl} alt="Logo" className="w-16 h-16 object-contain mx-auto" style={{ display: 'block', maxWidth: '64px', maxHeight: '64px' }} />
             ) : (
-              <GoogleG />
+              <div className="scale-125"><GoogleG /></div>
             )}
           </div>
 
           <div className="space-y-1 px-4 w-full flex flex-col items-center justify-center">
-            <h2 className="text-2xl font-extrabold text-[#202124] leading-tight text-center w-full block" style={{ textAlign: 'center' }}>
+            <h2 className="text-2xl font-black text-[#202124] leading-tight text-center w-full block" style={{ textAlign: 'center', fontWeight: '900' }}>
               {businessName}
             </h2>
             <div className="w-full text-center">
@@ -131,18 +131,16 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
           <div className="absolute -inset-4 bg-gradient-to-tr from-[#4285F410] to-[#EA433510] rounded-[2rem] blur-xl opacity-50"></div>
 
           <div className="relative bg-white p-6 rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-gray-100">
-            <QRCodeCanvas
+            <QRCodeSVG
               value={value}
               size={size}
               level="H"
-              fgColor={primaryColor === '#ffffff' ? '#202124' : primaryColor}
-              bgColor="#ffffff"
-              includeMargin={false}
               imageSettings={logoUrl && logoLoaded ? {
                 src: logoUrl,
-                height: Math.floor(size * 0.22),
-                width: Math.floor(size * 0.22),
+                height: Math.floor(size * 0.25),
+                width: Math.floor(size * 0.25),
                 excavate: true,
+                crossOrigin: 'anonymous',
               } : undefined}
             />
           </div>
@@ -153,38 +151,39 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
           <div
             style={{
               backgroundColor: '#202124',
-              borderRadius: '14px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '10px 24px',
+              borderRadius: '16px',
+              display: 'inline-block',
+              padding: '12px 32px',
               color: '#ffffff',
-              boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-              minWidth: '220px'
+              boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+              minWidth: '240px',
+              position: 'relative'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: '10' }}>
               <svg
-                width="16"
-                height="16"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="#ffffff"
-                strokeWidth="3"
+                strokeWidth="3.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ marginRight: '10px', display: 'block' }}
+                style={{ marginRight: '12px', display: 'inline-block', verticalAlign: 'middle' }}
               >
                 <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
               </svg>
               <span
                 style={{
                   color: '#ffffff',
-                  fontSize: '13px',
-                  fontWeight: '800',
-                  letterSpacing: '0.12em',
+                  fontSize: '14px',
+                  fontWeight: '900',
+                  letterSpacing: '0.15em',
                   whiteSpace: 'nowrap',
-                  lineHeight: '1'
+                  lineHeight: '1',
+                  display: 'inline-block',
+                  verticalAlign: 'middle'
                 }}
               >
                 SCAN TO REVIEW
