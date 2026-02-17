@@ -102,8 +102,12 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
 
         {/* Brand Header */}
         <div className="mt-6 flex flex-col items-center justify-center text-center space-y-4 w-full">
-          <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-50 mb-2">
-            <GoogleG />
+          <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-50 mb-2 min-w-[64px] min-h-[64px] flex items-center justify-center overflow-hidden">
+            {logoUrl && logoLoaded ? (
+              <img src={logoUrl} alt="Logo" className="w-10 h-10 object-contain mx-auto" style={{ display: 'block' }} />
+            ) : (
+              <GoogleG />
+            )}
           </div>
 
           <div className="space-y-1 px-4 w-full flex flex-col items-center justify-center">
@@ -146,15 +150,11 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
 
         {/* Footer CTA */}
         <div className="mt-8 w-full text-center" style={{ textAlign: 'center' }}>
-          <div className="bg-[#202124] text-white px-8 py-3 rounded-2xl font-bold tracking-widest text-sm shadow-xl inline-block mx-auto" style={{ width: 'fit-content', textAlign: 'center' }}>
-            <span className="inline-block" style={{ verticalAlign: 'middle', marginRight: '8px' }}>
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-              </svg>
-            </span>
-            <span className="inline-block uppercase pt-[1px]" style={{ verticalAlign: 'middle' }}>
-              SCAN TO REVIEW
-            </span>
+          <div className="bg-[#202124] text-white px-6 py-2 rounded-xl font-bold tracking-widest text-[11px] shadow-lg inline-flex items-center justify-center" style={{ minWidth: '180px' }}>
+            <svg className="w-3.5 h-3.5 text-white mr-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            <span className="leading-none">SCAN TO REVIEW</span>
           </div>
 
           <div className="flex flex-col items-center justify-center w-full">
