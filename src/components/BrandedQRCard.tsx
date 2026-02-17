@@ -140,7 +140,6 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 height: Math.floor(size * 0.25),
                 width: Math.floor(size * 0.25),
                 excavate: true,
-                crossOrigin: 'anonymous',
               } : undefined}
             />
           </div>
@@ -151,16 +150,20 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
           <div
             style={{
               backgroundColor: '#202124',
-              borderRadius: '16px',
-              display: 'inline-block',
+              borderRadius: '12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               padding: '12px 32px',
               color: '#ffffff',
-              boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
-              minWidth: '240px',
-              position: 'relative'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              minWidth: '220px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              position: 'relative',
+              textAlign: 'center'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: '10' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
               <svg
                 width="18"
                 height="18"
@@ -170,20 +173,20 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 strokeWidth="3.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ marginRight: '12px', display: 'inline-block', verticalAlign: 'middle' }}
+                style={{ marginRight: '12px', flexShrink: 0 }}
               >
                 <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
               </svg>
               <span
                 style={{
                   color: '#ffffff',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: '900',
-                  letterSpacing: '0.15em',
+                  letterSpacing: '0.12em',
                   whiteSpace: 'nowrap',
                   lineHeight: '1',
-                  display: 'inline-block',
-                  verticalAlign: 'middle'
+                  textTransform: 'uppercase',
+                  fontFamily: 'inherit'
                 }}
               >
                 SCAN TO REVIEW

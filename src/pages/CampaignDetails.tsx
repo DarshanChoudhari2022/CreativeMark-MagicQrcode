@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, QrCode, TrendingUp, Eye, MousePointerClick, Sparkles, ExternalLink, Menu, X, Edit2, Save, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, QrCode, TrendingUp, Eye, MousePointerClick, Sparkles, ExternalLink, Menu, X, Edit2, Save, Upload, Loader2, Trash2 } from "lucide-react";
 import { Input } from '@/components/ui/input';
 import { BrandedQRCard } from '@/components/BrandedQRCard';
 import { v4 as uuidv4 } from "uuid";
@@ -301,6 +301,43 @@ const CampaignDetails = () => {
     }
   };
 
+  const handleRemoveLogo = async () => {
+    if (!location?.id) return;
+    try {
+      const { error } = await supabase
+        .from('locations')
+        .update({ logo_url: null })
+        .eq('id', location.id);
+      if (error) throw error;
+      setLogoInput('');
+      setLocation(prev => prev ? { ...prev, logo_url: null } : null);
+      toast({ title: "Success", description: "Logo removed successfully" });
+    } catch (error) {
+      console.error('Error removing logo:', error);
+      toast({ title: "Error", description: "Failed to remove logo", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteCampaign = async () => {
+    if (!campaignId) return;
+    if (!confirm("Are you sure you want to delete this campaign? This action cannot be undone.")) return;
+
+    try {
+      const { error } = await supabase
+        .from('campaigns')
+        .delete()
+        .eq('id', campaignId);
+
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Campaign deleted successfully" });
+      navigate("/dashboard");
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      toast({ title: "Error", description: "Failed to delete campaign", variant: "destructive" });
+    }
+  };
+
   const baseUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
   const reviewUrl = `${baseUrl}/review/${campaignId}`;
 
@@ -372,9 +409,20 @@ const CampaignDetails = () => {
                 </Button>
               </div>
             )}
-            <p className="text-muted-foreground text-sm md:text-base">
-              Status: <span className="capitalize font-medium">{campaign?.status}</span>
-            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <p className="text-muted-foreground text-sm md:text-base">
+                Status: <span className="capitalize font-medium">{campaign?.status}</span>
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDeleteCampaign}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 font-bold uppercase tracking-widest text-[9px] md:text-[10px]"
+              >
+                <Trash2 className="h-3 w-3 mr-1.5" />
+                Delete Campaign
+              </Button>
+            </div>
           </div>
 
           {/* Analytics Cards - Responsive Grid */}
@@ -554,6 +602,17 @@ const CampaignDetails = () => {
                         <Save className="h-4 w-4" />
                       </Button>
                     </div>
+                    {location?.logo_url && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveLogo}
+                        className="h-7 w-auto px-2 text-red-500 hover:text-red-600 hover:bg-red-50 font-bold uppercase tracking-widest text-[9px]"
+                      >
+                        <Trash2 className="h-3 w-3 mr-1.5" />
+                        Remove Logo
+                      </Button>
+                    )}
 
                     <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50/50 hover:bg-slate-50 hover:border-red-200 transition-all group flex flex-col items-center justify-center gap-2">
                       <input
