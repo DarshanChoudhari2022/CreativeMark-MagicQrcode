@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, QrCode, TrendingUp, Eye, MousePointerClick, Sparkles, ExternalLink, Menu, X, Edit2, Save } from "lucide-react";
+import { ArrowLeft, QrCode, TrendingUp, Eye, MousePointerClick, Sparkles, ExternalLink, Menu, X, Edit2, Save, Upload, Loader2 } from "lucide-react";
 import { Input } from '@/components/ui/input';
 import { BrandedQRCard } from '@/components/BrandedQRCard';
+import { v4 as uuidv4 } from "uuid";
+
 
 const CampaignDetails = () => {
   const { campaignId } = useParams();
@@ -29,6 +31,7 @@ const CampaignDetails = () => {
   const [locationAddress, setLocationAddress] = useState('');
   const [googleUrlInput, setGoogleUrlInput] = useState('');
   const [isEditingGoogleUrl, setIsEditingGoogleUrl] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     const loadCampaignData = async () => {
@@ -215,6 +218,75 @@ const CampaignDetails = () => {
         description: "Failed to update Google Review Link",
         variant: "destructive",
       });
+    }
+  };
+
+  const resizeImage = (file: File, maxSize: number = 500, quality: number = 0.8): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
+        } else {
+          if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Canvas toBlob failed"));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const uploadLogoToStorage = async (file: File): Promise<string | null> => {
+    try {
+      const resizedBlob = await resizeImage(file, 500, 0.8);
+      const resizedFile = new File([resizedBlob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' });
+      const fileName = `${uuidv4()}.jpg`;
+      const filePath = `${campaign?.owner_id || 'anonymous'}/${fileName}`;
+      const { error: uploadError } = await supabase.storage
+        .from('qr-logos')
+        .upload(filePath, resizedFile);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage
+        .from('qr-logos')
+        .getPublicUrl(filePath);
+      return publicUrl;
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      toast({ title: "Error", description: "Failed to process image. Please try the URL method or check bucket settings.", variant: "destructive" });
+      return null;
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0] || !location?.id) return;
+    setUploadingLogo(true);
+    try {
+      const url = await uploadLogoToStorage(e.target.files[0]);
+      if (url) {
+        const { error } = await supabase
+          .from('locations')
+          .update({ logo_url: url })
+          .eq('id', location.id);
+        if (error) throw error;
+        setLogoInput(url);
+        setLocation(prev => prev ? { ...prev, logo_url: url } : null);
+        toast({ title: "Success", description: "Logo uploaded and updated" });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
@@ -459,16 +531,37 @@ const CampaignDetails = () => {
 
                 <div>
                   <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Brand Logo</h4>
-                  <div className="flex gap-2">
-                    <Input
-                      value={logoInput}
-                      onChange={(e) => setLogoInput(e.target.value)}
-                      placeholder="Paste Logo URL here"
-                      className="text-xs"
-                    />
-                    <Button size="sm" onClick={handleUpdateLogo} disabled={logoInput === (location?.logo_url || '')}>
-                      <Save className="h-4 w-4" />
-                    </Button>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <Input
+                        value={logoInput}
+                        onChange={(e) => setLogoInput(e.target.value)}
+                        placeholder="Paste Logo URL here"
+                        className="text-xs"
+                      />
+                      <Button size="sm" onClick={handleUpdateLogo} disabled={logoInput === (location?.logo_url || '')}>
+                        <Save className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50/50 hover:bg-slate-50 hover:border-red-200 transition-all group flex flex-col items-center justify-center gap-2">
+                      <input
+                        type="file"
+                        id="logo-upload"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        disabled={uploadingLogo}
+                      />
+                      {uploadingLogo ? (
+                        <Loader2 className="h-6 w-6 text-red-600 animate-spin" />
+                      ) : (
+                        <Upload className="h-6 w-6 text-slate-400 group-hover:text-red-500 transition-colors" />
+                      )}
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-red-600 transition-colors">
+                        {uploadingLogo ? "Uploading..." : "Drag & Drop or Click to Upload"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
