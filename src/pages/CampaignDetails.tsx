@@ -251,19 +251,30 @@ const CampaignDetails = () => {
     try {
       const resizedBlob = await resizeImage(file, 500, 0.8);
       const resizedFile = new File([resizedBlob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' });
-      const fileName = `${uuidv4()}.jpg`;
-      const filePath = `${campaign?.owner_id || 'anonymous'}/${fileName}`;
+      const fileName = `logo-${uuidv4()}.jpg`;
+      const filePath = fileName; // Simplified path - just filename in root of bucket
+
       const { error: uploadError } = await supabase.storage
         .from('qr-logos')
-        .upload(filePath, resizedFile);
+        .upload(filePath, resizedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
       if (uploadError) throw uploadError;
+
       const { data: { publicUrl } } = supabase.storage
         .from('qr-logos')
         .getPublicUrl(filePath);
+
       return publicUrl;
-    } catch (error) {
-      console.error('Logo upload error:', error);
-      toast({ title: "Error", description: "Failed to process image. Please try the URL method or check bucket settings.", variant: "destructive" });
+    } catch (error: any) {
+      console.error('Logo upload detailed error:', error);
+      toast({
+        title: "Upload Failed",
+        description: error?.message || "Could not upload image. Ensure you have added 'Insert' policies to your 'qr-logos' bucket in Supabase.",
+        variant: "destructive"
+      });
       return null;
     }
   };
