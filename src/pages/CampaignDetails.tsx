@@ -32,6 +32,7 @@ const CampaignDetails = () => {
   const [googleUrlInput, setGoogleUrlInput] = useState('');
   const [isEditingGoogleUrl, setIsEditingGoogleUrl] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [qrTheme, setQrTheme] = useState('google-classic');
 
   useEffect(() => {
     const loadCampaignData = async () => {
@@ -46,6 +47,7 @@ const CampaignDetails = () => {
         if (campaignError) throw campaignError;
         setCampaign(campaignData);
         setNewName(campaignData.name);
+        if (campaignData.theme_color) setQrTheme(campaignData.theme_color);
 
         // Load location
         if (campaignData?.location_id) {
@@ -338,6 +340,18 @@ const CampaignDetails = () => {
     }
   };
 
+  const handleThemeChange = async (newThemeId: string) => {
+    setQrTheme(newThemeId);
+    try {
+      await supabase
+        .from('campaigns')
+        .update({ theme_color: newThemeId } as any)
+        .eq('id', campaignId);
+    } catch (error) {
+      console.error('Error saving theme:', error);
+    }
+  };
+
   const baseUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
   const reviewUrl = `${baseUrl}/review/${campaignId}`;
 
@@ -462,9 +476,9 @@ const CampaignDetails = () => {
                     value={reviewUrl}
                     businessName={businessName}
                     logoUrl={logoUrl}
-                    primaryColor="#4285F4"
-                    secondaryColor="#ffffff"
                     size={220}
+                    themeId={qrTheme}
+                    onThemeChange={handleThemeChange}
                   />
                 </div>
                 <Button onClick={() => window.open(reviewUrl, '_blank')} variant="outline"

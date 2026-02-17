@@ -9,9 +9,9 @@ export interface CardTheme {
   name: string;
   description: string;
   cardBg: string;
-  accentBar: string[];       // 4 colors for the top accent bar
-  qrFg: string;              // QR module color
-  qrBg: string;              // QR background
+  accentBar: string[];
+  qrFg: string;
+  qrBg: string;
   headingColor: string;
   subtextColor: string;
   ctaBg: string;
@@ -128,6 +128,9 @@ const THEMES: CardTheme[] = [
   },
 ];
 
+// Export for external use
+export { THEMES };
+
 interface BrandedQRCardProps {
   value: string;
   businessName: string;
@@ -139,20 +142,25 @@ interface BrandedQRCardProps {
   onThemeChange?: (themeId: string) => void;
 }
 
-// Google Star Rating Component (Maps Style)
+// Google Star Rating Component
 const GoogleStars = ({ color = '#F9AB00' }: { color?: string }) => (
   <div
     style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '2px',
-      width: 'fit-content',
-      margin: '0 auto',
+      display: 'block',
+      textAlign: 'center' as const,
+      width: '100%',
+      lineHeight: 0,
     }}
   >
     {[1, 2, 3, 4, 5].map((i) => (
-      <svg key={i} width="22" height="22" viewBox="0 0 24 24" fill={color}>
+      <svg
+        key={i}
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill={color}
+        style={{ display: 'inline-block', margin: '0 1px', verticalAlign: 'middle' }}
+      >
         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
       </svg>
     ))}
@@ -173,8 +181,6 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
   value,
   businessName,
   logoUrl,
-  primaryColor = '#4285F4',
-  secondaryColor = '#ffffff',
   size = 280,
   themeId = 'google-classic',
   onThemeChange,
@@ -186,6 +192,11 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
 
   const theme = THEMES.find((t) => t.id === selectedTheme) || THEMES[0];
 
+  // Sync external themeId prop changes
+  useEffect(() => {
+    setSelectedTheme(themeId);
+  }, [themeId]);
+
   useEffect(() => {
     if (logoUrl) {
       setLogoLoaded(false);
@@ -194,6 +205,8 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
       img.src = logoUrl;
       img.onload = () => setLogoLoaded(true);
       img.onerror = () => setLogoLoaded(false);
+    } else {
+      setLogoLoaded(false);
     }
   }, [logoUrl]);
 
@@ -226,7 +239,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
     });
   };
 
-  // Compute sizes based on prop
+  // Compute sizes
   const logoDisplaySize = Math.max(72, Math.floor(size * 0.32));
   const qrLogoSize = Math.floor(size * 0.22);
 
@@ -259,7 +272,6 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 }`}
               style={{ backgroundColor: t.cardBg }}
             >
-              {/* Mini accent bar preview */}
               <div className="flex rounded-full overflow-hidden h-1.5 mb-2">
                 {t.accentBar.map((c, i) => (
                   <div key={i} className="flex-1" style={{ backgroundColor: c }} />
@@ -296,10 +308,6 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
           overflow: 'hidden',
           width: '100%',
           maxWidth: '400px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '0',
           position: 'relative',
           userSelect: 'none',
         }}
@@ -310,7 +318,6 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
             display: 'flex',
             width: '100%',
             height: '5px',
-            flexShrink: 0,
           }}
         >
           {theme.accentBar.map((color, i) => (
@@ -321,10 +328,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
         {/* ── Card Inner Content ── */}
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
+            textAlign: 'center',
             padding: '32px 28px 24px',
           }}
         >
@@ -334,15 +338,14 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
               width: `${logoDisplaySize}px`,
               height: `${logoDisplaySize}px`,
               borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               overflow: 'hidden',
-              marginBottom: '16px',
+              margin: '0 auto 16px auto',
               backgroundColor: logoUrl && logoLoaded ? 'transparent' : theme.qrBg,
               border: logoUrl && logoLoaded ? 'none' : `1px solid ${theme.qrBorderColor}`,
               boxShadow: logoUrl && logoLoaded ? 'none' : `0 2px 8px ${theme.shadowColor}`,
-              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             {logoUrl && logoLoaded ? (
@@ -370,7 +373,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
               color: theme.headingColor,
               lineHeight: 1.2,
               textAlign: 'center',
-              margin: '0 0 12px 0',
+              margin: '0 auto 12px auto',
               padding: '0 8px',
               letterSpacing: '-0.01em',
               wordBreak: 'break-word',
@@ -393,18 +396,23 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
               textAlign: 'center',
-              margin: '0 0 24px 0',
+              margin: '0 auto 24px auto',
             }}
           >
             Review Us On Google
           </p>
 
           {/* ── QR Code Section ── */}
+          {/* 
+            IMPORTANT: Logo is NOT embedded via QRCodeSVG imageSettings 
+            because html2canvas cannot render SVG <image> elements with 
+            cross-origin URLs. Instead, the logo is overlaid as a separate 
+            <img> element positioned absolutely over the QR code center.
+          */}
           <div
             style={{
               position: 'relative',
-              width: 'fit-content',
-              margin: '0 auto',
+              display: 'inline-block',
             }}
           >
             {/* Subtle Glow */}
@@ -420,6 +428,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 filter: 'blur(16px)',
                 opacity: 0.7,
                 zIndex: 0,
+                pointerEvents: 'none',
               }}
             />
 
@@ -434,6 +443,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 border: `1px solid ${theme.qrBorderColor}`,
                 boxShadow: `0 4px 20px -4px ${theme.shadowColor}`,
                 lineHeight: 0,
+                display: 'inline-block',
               }}
             >
               <QRCodeSVG
@@ -442,46 +452,71 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 level="H"
                 fgColor={theme.qrFg}
                 bgColor={theme.qrBg}
-                imageSettings={
-                  logoUrl && logoLoaded
-                    ? {
-                      src: logoUrl,
-                      height: qrLogoSize,
-                      width: qrLogoSize,
-                      excavate: true,
-                    }
-                    : undefined
-                }
+              /* NO imageSettings — logo is overlaid separately for html2canvas compatibility */
               />
+
+              {/* Logo overlay on top of QR code center */}
+              {logoUrl && logoLoaded && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: `${qrLogoSize}px`,
+                    height: `${qrLogoSize}px`,
+                    backgroundColor: theme.qrBg,
+                    borderRadius: '8px',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2,
+                    boxShadow: `0 1px 4px ${theme.shadowColor}`,
+                  }}
+                >
+                  <img
+                    src={logoUrl}
+                    alt="Logo"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      display: 'block',
+                      borderRadius: '4px',
+                    }}
+                    crossOrigin="anonymous"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
           {/* ── "SCAN TO REVIEW" CTA Button ── */}
+          {/* 
+            Using display:block + margin:auto for centering.
+            This is the most reliable method for html2canvas.
+            Flexbox and inline-flex can cause misalignment in rendered output.
+          */}
           <div
             style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'center',
               marginTop: '24px',
+              textAlign: 'center',
             }}
           >
             <div
               style={{
                 backgroundColor: theme.ctaBg,
                 borderRadius: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 padding: '14px 36px',
-                gap: '10px',
                 color: theme.ctaText,
                 boxShadow: `0 6px 20px -4px ${theme.shadowColor}`,
                 border: `1px solid ${theme.ctaBorder}`,
-                width: 'auto',
-                maxWidth: '90%',
+                display: 'inline-block',
+                textAlign: 'center',
+                lineHeight: '1',
               }}
             >
-              {/* QR Scan Icon */}
               <svg
                 width="16"
                 height="16"
@@ -491,7 +526,11 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ flexShrink: 0 }}
+                style={{
+                  display: 'inline-block',
+                  verticalAlign: 'middle',
+                  marginRight: '10px',
+                }}
               >
                 <path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
               </svg>
@@ -502,9 +541,11 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                   fontWeight: 800,
                   letterSpacing: '0.14em',
                   whiteSpace: 'nowrap',
-                  lineHeight: 1,
+                  lineHeight: '1',
                   textTransform: 'uppercase',
                   fontFamily: 'inherit',
+                  display: 'inline-block',
+                  verticalAlign: 'middle',
                 }}
               >
                 SCAN TO REVIEW
@@ -515,13 +556,8 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
           {/* ── Footer Branding ── */}
           <div
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
+              textAlign: 'center',
               marginTop: '20px',
-              gap: '2px',
             }}
           >
             <img
@@ -530,7 +566,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
               style={{
                 height: '28px',
                 width: 'auto',
-                display: 'block',
+                display: 'inline-block',
                 objectFit: 'contain',
               }}
               crossOrigin="anonymous"
@@ -543,7 +579,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 textTransform: 'uppercase',
                 letterSpacing: '0.16em',
                 textAlign: 'center',
-                margin: 0,
+                margin: '2px 0 0 0',
                 lineHeight: 1.4,
               }}
             >
