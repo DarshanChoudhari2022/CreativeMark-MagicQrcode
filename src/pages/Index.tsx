@@ -62,7 +62,7 @@ const Index = () => {
               href="https://creativemarkadvertising.com/"
               className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition-colors"
             >
-              {t('nav.home')}
+              {t('home')}
             </a>
             {['overview', 'how_it_works', 'testimonials', 'pricing', 'faq'].map((section) => (
               <button
@@ -103,7 +103,7 @@ const Index = () => {
                 href="https://creativemarkadvertising.com/"
                 className="text-left py-3 border-b border-gray-50 text-sm font-bold uppercase tracking-widest text-gray-900"
               >
-                {t('nav.home')}
+                {t('home')}
               </a>
               {['overview', 'how_it_works', 'testimonials', 'pricing', 'faq'].map((section) => (
                 <button
