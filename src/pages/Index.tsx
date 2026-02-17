@@ -46,12 +46,12 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+              onClick={() => window.location.href = "https://creativemarkadvertising.com/"}
               className="lg:hidden h-10 w-10 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full shrink-0"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = "https://creative-mark.vercel.app/"}>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = "https://creativemarkadvertising.com/"}>
               <img src="/logo.jpg" alt="Creative Mark Logo" className="h-10 md:h-20 w-auto object-contain rounded-lg" />
             </div>
           </div>
@@ -59,10 +59,10 @@ const Index = () => {
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-8">
             <a
-              href="https://creative-mark.vercel.app/"
+              href="https://creativemarkadvertising.com/"
               className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-red-600 transition-colors"
             >
-              {t('nav.home_page')}
+              {t('nav.corporate_home')}
             </a>
             {['overview', 'how_it_works', 'testimonials', 'pricing', 'faq'].map((section) => (
               <button
@@ -100,10 +100,10 @@ const Index = () => {
           <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-xl animate-in slide-in-from-top-2 duration-300">
             <nav className="flex flex-col p-6 gap-4">
               <a
-                href="https://creative-mark.vercel.app/"
+                href="https://creativemarkadvertising.com/"
                 className="text-left py-3 border-b border-gray-50 text-sm font-bold uppercase tracking-widest text-gray-900"
               >
-                {t('nav.home_page')}
+                {t('nav.corporate_home')}
               </a>
               {['overview', 'how_it_works', 'testimonials', 'pricing', 'faq'].map((section) => (
                 <button
@@ -387,7 +387,7 @@ const Index = () => {
                 src="/logo.jpg"
                 alt="Logo"
                 className="h-16 w-auto object-contain transition-all cursor-pointer hover:opacity-80"
-                onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
+                onClick={() => window.location.href = "https://creativemarkadvertising.com/"}
               />
               <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
                 {t('landing.footer_tagline')}
