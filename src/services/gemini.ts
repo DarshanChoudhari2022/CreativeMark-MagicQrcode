@@ -68,6 +68,7 @@ interface BusinessSEO {
     locationHint: string;
     serviceType: string;
     naturalPhrases: string[];
+    customPromptRule?: string;
 }
 
 const BUSINESS_SEO_MAP: Record<string, BusinessSEO> = {
@@ -92,14 +93,30 @@ const BUSINESS_SEO_MAP: Record<string, BusinessSEO> = {
         ],
     },
     "poonawala travels": {
-        keywords: ["Mumbai to Pune", "taxi", "cab service"],
-        locationHint: "for Mumbai-Pune travel",
+        keywords: ["Mumbai to Pune", "Nagpur", "Maharashtra", "taxi", "outstation cab service"],
+        locationHint: "for Mumbai-Pune and outstation trips across Maharashtra",
         serviceType: "taxi and travel",
         naturalPhrases: [
             "best cab service Mumbai to Pune",
             "reliable taxi for Mumbai-Pune route",
+            "great outstation cab service in Maharashtra",
             "comfortable travel experience",
+            "excellent cab service for Maharashtra travel",
         ],
+        customPromptRule: "CRITICAL EXACT REQUIREMENT: You MUST generate exactly 5 reviews following this breakdown:\n- 3 generic reviews focusing on the safe travel experience, experienced drivers, and good condition cars.\n- 2 location-specific reviews mentioning travel specifically from Mumbai to Pune, Pune to Mumbai, or other outstation routes across Maharashtra.",
+    },
+    "poonawala cab service": {
+        keywords: ["Mumbai to Pune", "Nagpur", "Maharashtra", "taxi", "outstation cab service"],
+        locationHint: "for Mumbai-Pune and outstation trips across Maharashtra",
+        serviceType: "taxi and travel",
+        naturalPhrases: [
+            "best cab service Mumbai to Pune",
+            "reliable taxi for Mumbai-Pune route",
+            "great outstation cab service in Maharashtra",
+            "comfortable travel experience",
+            "excellent cab service for Maharashtra travel",
+        ],
+        customPromptRule: "CRITICAL EXACT REQUIREMENT: You MUST generate exactly 5 reviews following this breakdown:\n- 3 generic reviews focusing on the safe travel experience, experienced drivers, and good condition cars.\n- 2 location-specific reviews mentioning travel specifically from Mumbai to Pune, Pune to Mumbai, or other outstation routes across Maharashtra.",
     },
 };
 
@@ -147,7 +164,7 @@ export async function generateReviewSuggestions(
         if (!GROQ_API_KEY) throw new Error("No Groq key");
 
         const seoContext = seo
-            ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint}). Naturally include ONE of: ${seo.naturalPhrases.join(', ')}.`
+            ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint}).\n${seo.customPromptRule || `Naturally include ONE of: ${seo.naturalPhrases.join(', ')}.`}`
             : `Business Name: "${businessName}".\n${businessContext ? `Business Type / Industry: "${businessContext}". CRITICAL: You must generate reviews specific to this exact business type.` : ''}`;
 
         const prompt = `Generate 5 unique, authentic-sounding Google review texts for a ${rating}-star review of a business.
@@ -209,7 +226,7 @@ Output exactly 5 review lines, one per line. No numbering, no quotes, no other t
             if (!GEMINI_API_KEY) throw new Error("No Gemini key");
 
             const seoContext = seo
-                ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint}).`
+                ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint}).\n${seo.customPromptRule || ''}`
                 : `Business Name: "${businessName}".\n${businessContext ? `Business Type: "${businessContext}". CRITICAL: Generate reviews for this exact type.` : ''}`;
 
             const prompt = `Write 5 short, authentic Google review texts as a happy customer of this business.
@@ -326,9 +343,14 @@ const OWNER_BUSINESS_MAP: Record<string, OwnerBusinessContext> = {
         serviceType: "digital marketing",
     },
     "poonawala travels": {
-        keywords: ["Mumbai to Pune", "taxi service", "cab rental"],
-        locationHint: "Mumbai-Pune route",
-        serviceType: "taxi and travel",
+        keywords: ["Mumbai to Pune", "Nagpur", "Maharashtra", "taxi service", "outstation cab rental"],
+        locationHint: "Mumbai-Pune route and all over Maharashtra",
+        serviceType: "taxi and outstation travel",
+    },
+    "poonawala cab service": {
+        keywords: ["Mumbai to Pune", "Nagpur", "Maharashtra", "taxi service", "outstation cab rental"],
+        locationHint: "Mumbai-Pune route and all over Maharashtra",
+        serviceType: "taxi and outstation travel",
     },
 };
 

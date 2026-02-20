@@ -152,7 +152,7 @@ const Index = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => scrollToSection('pricing')}
+                onClick={() => scrollToSection('how_it_works')}
                 className="text-sm px-8 h-14 rounded-full border-2 border-gray-200 text-gray-600 font-bold hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all"
               >
                 {t('landing.cta_secondary')}
