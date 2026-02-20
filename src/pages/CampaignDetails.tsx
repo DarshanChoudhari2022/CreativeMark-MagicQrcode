@@ -29,6 +29,7 @@ const CampaignDetails = () => {
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [locationName, setLocationName] = useState('');
   const [locationAddress, setLocationAddress] = useState('');
+  const [locationCategory, setLocationCategory] = useState('');
   const [googleUrlInput, setGoogleUrlInput] = useState('');
   const [isEditingGoogleUrl, setIsEditingGoogleUrl] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -61,6 +62,7 @@ const CampaignDetails = () => {
             setLogoInput(locationData.logo_url || '');
             setLocationName(locationData.name || '');
             setLocationAddress(locationData.address || '');
+            setLocationCategory(locationData.category || campaignData.category || '');
             setGoogleUrlInput(locationData.google_review_url || '');
           } else {
             setGoogleUrlInput(campaignData.google_review_url || '');
@@ -166,13 +168,14 @@ const CampaignDetails = () => {
         .from('locations')
         .update({
           name: locationName,
-          address: locationAddress
+          address: locationAddress,
+          category: locationCategory
         })
         .eq('id', location.id);
 
       if (error) throw error;
 
-      setLocation(prev => prev ? { ...prev, name: locationName, address: locationAddress } : null);
+      setLocation(prev => prev ? { ...prev, name: locationName, address: locationAddress, category: locationCategory } : null);
       setIsEditingLocation(false);
       toast({
         title: "Success",
@@ -552,7 +555,7 @@ const CampaignDetails = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-6 w-6 transition-opacity"
                           onClick={() => setIsEditingLocation(true)}
                         >
                           <Edit2 className="h-3 w-3 text-slate-400" />
@@ -581,6 +584,7 @@ const CampaignDetails = () => {
                     {!isEditingLocation ? (
                       <>
                         <p className="text-sm md:text-base font-black text-slate-900 uppercase italic mb-1">{location.name}</p>
+                        {location.category && <p className="text-[10px] md:text-xs font-bold text-blue-600 mb-1">{location.category}</p>}
                         {location.address && <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wide">{location.address}</p>}
                       </>
                     ) : (
@@ -592,9 +596,15 @@ const CampaignDetails = () => {
                           className="font-bold text-sm"
                         />
                         <Input
+                          value={locationCategory}
+                          onChange={(e) => setLocationCategory(e.target.value)}
+                          placeholder="Business Category / Description (e.g., Two-Wheeler Garage)"
+                          className="text-xs font-semibold text-blue-600 border-blue-200 focus-visible:ring-blue-500"
+                        />
+                        <Input
                           value={locationAddress}
                           onChange={(e) => setLocationAddress(e.target.value)}
-                          placeholder="Address / Description"
+                          placeholder="Address"
                           className="text-xs"
                         />
                       </div>

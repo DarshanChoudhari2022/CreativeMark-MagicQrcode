@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Star, Loader2, ExternalLink, CheckCircle2,
   Sparkles, Copy, RefreshCw, ArrowRight,
-  Award, ArrowLeft, HandMetal
+  Award, ArrowLeft, HandMetal, Pencil, Check
 } from "lucide-react";
 import { generateReviewSuggestions } from "@/services/gemini";
 import { useTranslation } from "react-i18next";
@@ -47,6 +47,9 @@ const ReviewLanding = () => {
   const [copied, setCopied] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editText, setEditText] = useState<string>("");
 
   // Prevent double-fetch race conditions
   const fetchIdRef = useRef(0);
@@ -100,6 +103,7 @@ const ReviewLanding = () => {
     setLoadingSuggestions(true);
     setSelectedSuggestion(null);
     setCopied(false);
+    setEditingIndex(null);
 
     try {
       const category = location?.category || 'service';
@@ -283,9 +287,9 @@ const ReviewLanding = () => {
           <CardContent className="p-0">
             {/* Card Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-5 text-white text-center">
-              <h2 className="text-lg font-bold mb-1">Tap a review to copy & post</h2>
+              <h2 className="text-lg font-bold mb-1">Select or edit a review to post</h2>
               <p className="text-blue-100 text-xs">
-                Select any review below — it will be copied automatically
+                Tap the pencil icon to edit, or tap a review to copy it automatically
               </p>
             </div>
 
@@ -323,46 +327,97 @@ const ReviewLanding = () => {
               ) : (
                 <>
                   {suggestions.map((text, index) => (
-                    <button
+                    <div
                       key={`${text.substring(0, 20)}-${index}`}
-                      onClick={() => handleSelectReview(text)}
-                      disabled={redirecting}
                       className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-300 group relative min-h-[60px] ${selectedSuggestion === text
-                        ? 'bg-green-50 border-green-500 shadow-lg shadow-green-100 scale-[1.02]'
-                        : redirecting
-                          ? 'opacity-40 cursor-not-allowed border-slate-100 bg-slate-50'
-                          : 'bg-white hover:bg-blue-50 border-slate-100 hover:border-blue-300 shadow-sm hover:shadow-md active:scale-[0.98]'
+                          ? 'bg-green-50 border-green-500 shadow-lg shadow-green-100 scale-[1.02]'
+                          : redirecting
+                            ? 'opacity-40 border-slate-100 bg-slate-50'
+                            : 'bg-white hover:bg-blue-50 border-slate-100 hover:border-blue-300 shadow-sm hover:shadow-md cursor-pointer'
                         }`}
                       style={{ animation: `fadeInUp ${0.4 + index * 0.1}s ease-out` }}
+                      onClick={() => {
+                        if (editingIndex !== index && !redirecting && !selectedSuggestion) {
+                          handleSelectReview(text);
+                        }
+                      }}
                     >
                       <div className="flex items-start gap-3">
-                        {/* Review Number */}
+                        {/* Review Number / Status */}
                         <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${selectedSuggestion === text
-                          ? 'bg-green-500 text-white'
-                          : 'bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-blue-100 text-blue-600 ' + (editingIndex !== index ? 'group-hover:bg-blue-600 group-hover:text-white' : '')
                           } transition-colors`}>
                           {selectedSuggestion === text ? '✓' : index + 1}
                         </div>
 
-                        {/* Review Text */}
+                        {/* Review Text / Editor */}
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm leading-relaxed ${selectedSuggestion === text ? 'text-green-800 font-semibold' : 'text-slate-700'
-                            }`}>
-                            {text}
-                          </p>
+                          {editingIndex === index ? (
+                            <textarea
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              className="w-full text-sm leading-relaxed text-slate-700 bg-white border border-blue-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                              onClick={(e) => e.stopPropagation()}
+                              autoFocus
+                            />
+                          ) : (
+                            <p className={`text-sm leading-relaxed ${selectedSuggestion === text ? 'text-green-800 font-semibold' : 'text-slate-700'
+                              }`}>
+                              {text}
+                            </p>
+                          )}
                         </div>
 
-                        {/* Copy Icon */}
-                        <div className={`flex-shrink-0 mt-1 transition-opacity ${selectedSuggestion === text ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        {/* Actions */}
+                        <div className={`flex-shrink-0 mt-1 flex gap-2 transition-opacity ${selectedSuggestion === text || editingIndex === index ? 'opacity-100' : 'opacity-100 lg:opacity-0 group-hover:opacity-100'
                           }`}>
-                          {selectedSuggestion === text ? (
+                          {editingIndex === index ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newSuggestions = [...suggestions];
+                                newSuggestions[index] = editText;
+                                setSuggestions(newSuggestions);
+                                setEditingIndex(null);
+                              }}
+                              className="p-1.5 bg-blue-100 rounded-md text-blue-600 hover:bg-blue-200 shadow-sm transition-colors"
+                              title="Save Edit"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                          ) : selectedSuggestion === text ? (
                             <CheckCircle2 className="h-5 w-5 text-green-600" />
                           ) : (
-                            <Copy className="h-4 w-4 text-blue-400" />
+                            <div className="flex flex-col gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingIndex(index);
+                                  setEditText(text);
+                                }}
+                                className="p-1.5 bg-slate-100 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                title="Edit Review"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!redirecting && !selectedSuggestion) {
+                                    handleSelectReview(text);
+                                  }
+                                }}
+                                className="p-1.5 bg-slate-100 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                title="Copy & Post"
+                              >
+                                <Copy className="h-4 w-4 text-blue-400" />
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
-                    </button>
+                    </div>
                   ))}
 
                   {/* Refresh Button */}
