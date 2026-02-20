@@ -148,7 +148,7 @@ export async function generateReviewSuggestions(
 
         const seoContext = seo
             ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint}). Naturally include ONE of: ${seo.naturalPhrases.join(', ')}.`
-            : `Business: "${businessName}".`;
+            : `Business Name: "${businessName}".\n${businessContext ? `Business Type / Industry: "${businessContext}". CRITICAL: You must generate reviews specific to this exact business type.` : ''}`;
 
         const prompt = `Generate 5 unique, authentic-sounding Google review texts for a ${rating}-star review of a business.
 
@@ -210,7 +210,7 @@ Output exactly 5 review lines, one per line. No numbering, no quotes, no other t
 
             const seoContext = seo
                 ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint}).`
-                : `Business: "${businessName}".`;
+                : `Business Name: "${businessName}".\n${businessContext ? `Business Type: "${businessContext}". CRITICAL: Generate reviews for this exact type.` : ''}`;
 
             const prompt = `Write 5 short, authentic Google review texts as a happy customer of this business.
 ${seoContext}
