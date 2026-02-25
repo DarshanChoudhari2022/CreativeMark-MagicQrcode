@@ -16,7 +16,7 @@ import ReviewLanding from "./pages/ReviewLanding";
 import CampaignDetails from "./pages/CampaignDetails";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import QRDesigner from "./pages/QRDesigner";
-import NFCManagement from "./pages/NFCManagement";
+
 import Locations from "./pages/Locations";
 import AdminPanel from "./pages/AdminPanel";
 import ReviewManagement from "./pages/Reviews";
@@ -48,7 +48,7 @@ const App = () => (
             <Route path="/campaign/:campaignId" element={<ProtectedRoute><CampaignDetails /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
             <Route path="/qr-designer" element={<ProtectedRoute><QRDesigner /></ProtectedRoute>} />
-            <Route path="/nfc-management" element={<ProtectedRoute><NFCManagement /></ProtectedRoute>} />
+
             <Route path="/reviews" element={<ProtectedRoute><ReviewManagement /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
 

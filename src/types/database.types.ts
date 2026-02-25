@@ -79,7 +79,6 @@ export interface AnalyticsStats {
   conversionRate: number;
   averageRating: number;
   qrScans: number;
-  nfcTaps: number;
   averageTimeToReview: number;
   dropOffStages: {
     stage: string;

@@ -281,9 +281,7 @@ const Dashboard = () => {
         {/* Action Grid - 1 col mobile, 2 col sm, 3 col md */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-8 mb-10 md:mb-24">
           {[
-            { label: 'New Campaign', icon: Plus, sub: 'Begin Growth', path: '/create-campaign', color: 'bg-red-600', shadow: 'shadow-red-50' },
-            { label: 'NFC Center', icon: Smartphone, sub: 'Hardware Setup', path: '/nfc-management', color: 'bg-slate-900', shadow: 'shadow-slate-50' },
-            { label: 'AI Automation', icon: Bot, sub: 'Owner Responses', path: '/reviews', color: 'bg-red-600', shadow: 'shadow-red-50' }
+            { label: 'New Campaign', icon: Plus, sub: 'Begin Growth', path: '/create-campaign', color: 'bg-red-600', shadow: 'shadow-red-50' }
           ].map((item, i) => (
             <Card
               key={i}

@@ -82,7 +82,6 @@ export default function AnalyticsDashboard() {
       // 4. Calculate analytics stats
       const totalReviews = reviewsData?.length || 0;
       const qrReviews = reviewsData?.filter((r: any) => r.source === 'qr').length || 0;
-      const nfcReviews = reviewsData?.filter((r: any) => r.source === 'nfc').length || 0;
 
       // Simple conversion rate calculation
       const conversionRate = totalScans > 0 ? (totalReviews / totalScans) * 100 : 0;
@@ -102,7 +101,6 @@ export default function AnalyticsDashboard() {
         conversionRate,
         averageRating: avgRating,
         qrScans: qrReviews, // We treat source='qr' reviews as proxy if scan events not distinguished by source
-        nfcTaps: nfcReviews,
         averageTimeToReview: 0, // Not available
         dropOffStages: dropOffArray,
       });
@@ -116,7 +114,6 @@ export default function AnalyticsDashboard() {
 
   const sourceData = [
     { name: 'QR Code', value: stats?.qrScans || 0 },
-    { name: 'NFC Card', value: stats?.nfcTaps || 0 },
   ];
 
   const ratingDistribution = [1, 2, 3, 4, 5].map(rating => ({
@@ -203,34 +200,7 @@ export default function AnalyticsDashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Source Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Review Source Distribution</CardTitle>
-            <CardDescription>QR Code vs NFC Card</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={sourceData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {sourceData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+
 
         {/* Rating Distribution */}
         <Card>
