@@ -151,7 +151,7 @@ const Dashboard = () => {
             <div className="flex items-center gap-2 md:gap-3 active:scale-95 transition-transform cursor-pointer group" onClick={() => window.location.href = "https://creative-mark.vercel.app/"}>
               <img src="/logo.jpg" alt="Logo" className="h-8 md:h-16 w-auto object-contain rounded-lg md:rounded-xl shadow-md transition-all group-hover:shadow-lg" />
               <div className="hidden sm:block">
-                <h1 className="text-base md:text-xl font-bold text-slate-950 tracking-tight leading-none">ReviewBoost</h1>
+                <h1 className="text-base md:text-xl font-bold text-slate-950 tracking-tight leading-none">Smart Tap AI</h1>
                 <p className="text-[8px] md:text-[10px] font-semibold text-red-600 uppercase tracking-wider mt-0.5 md:mt-1">Dashboard</p>
               </div>
             </div>
@@ -432,10 +432,10 @@ const Dashboard = () => {
           />
           <div className="text-center px-4">
             <p className="text-sm md:text-lg font-bold uppercase tracking-widest text-slate-950 mb-2 md:mb-4">
-              ReviewBoost <span className="text-red-600 mx-1 md:mx-2">&bull;</span> Creative Mark AI
+              Smart Tap AI <span className="text-red-600 mx-1 md:mx-2">&bull;</span> Creative Mark AI
             </p>
             <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest max-w-2xl mx-auto leading-relaxed opacity-80">
-              &copy; {new Date().getFullYear()} Global Operational Authority. All protocols secured by ReviewBoost. v2.6.4 Stable.
+              &copy; {new Date().getFullYear()} Global Operational Authority. All protocols secured by Smart Tap AI. v2.6.4 Stable.
             </p>
           </div>
         </div>

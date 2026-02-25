@@ -557,7 +557,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 lineHeight: 1.4,
               }}
             >
-              ReviewBoost Technology
+              Smart Tap AI Technology
             </p>
           </div>
         </div>

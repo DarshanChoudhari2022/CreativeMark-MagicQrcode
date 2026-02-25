@@ -159,7 +159,7 @@ const Locations = () => {
             </Button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/dashboard")}>
               <Building2 className="h-6 w-6 text-blue-600" />
-              <h1 className="text-xl font-bold">ReviewBoost AI</h1>
+              <h1 className="text-xl font-bold">Smart Tap AI</h1>
             </div>
           </div>
           <div className="flex items-center gap-4">

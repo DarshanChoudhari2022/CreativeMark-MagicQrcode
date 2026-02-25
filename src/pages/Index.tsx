@@ -414,8 +414,10 @@ const Index = () => {
             ))}
           </div>
           <div className="border-t border-gray-900 pt-12 flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-700">
-              © 2026 ReviewBoost &bull; {t('common.powered_by')}
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-700 md:max-w-2xl">
+              © 2026 Smart Tap AI &bull; {t('common.powered_by')}
+              <br /><br />
+              <span className="opacity-60 normal-case tracking-normal text-xs font-normal">Disclaimer: Smart Tap AI is an independently developed solution for review collection. It is not affiliated with, endorsed by, or connected to any third-party review platforms or similar technologies unless explicitly stated. Smart Tap AI is a proprietary product of Creative Mark.</span>
             </p>
           </div>
         </div>

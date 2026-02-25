@@ -44,7 +44,7 @@ const NotFound = () => {
         </div>
 
         <p className="mt-12 text-[10px] font-bold text-slate-500 uppercase tracking-[0.5em] italic">
-          ReviewBoost Protocol Error
+          Smart Tap AI Protocol Error
         </p>
       </div>
     </div>

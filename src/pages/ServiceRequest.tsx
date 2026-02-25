@@ -32,7 +32,7 @@ const ServiceRequest = () => {
             notes: formData.get('notes')
         };
 
-        const message = `🚀 *New ReviewBoost Service Request*%0a%0a` +
+        const message = `🚀 *New Smart Tap AI Service Request*%0a%0a` +
             `*Name:* ${data.name}%0a` +
             `*Business:* ${data.business}%0a` +
             `*Phone:* ${data.whatsapp}%0a` +
@@ -102,7 +102,7 @@ const ServiceRequest = () => {
                     <div className="lg:col-span-2 space-y-6 md:space-y-8">
                         <div>
                             <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4 md:mb-6 uppercase tracking-tight italic leading-[1.1]">
-                                {t('service.get_for_business').split(' ')[0]} <span className="text-red-600">ReviewBoost</span> {t('service.get_for_business').split(' ').slice(2).join(' ')}
+                                {t('service.get_for_business').split(' ')[0]} <span className="text-red-600">Smart Tap AI</span> {t('service.get_for_business').split(' ').slice(4).join(' ')}
                             </h1>
                             <p className="text-sm md:text-base text-gray-500 font-medium leading-relaxed">
                                 {t('service.join_hundreds')}

@@ -1,4 +1,4 @@
-// Database Types for ReviewBoost AI
+// Database Types for Smart Tap AI
 // Auto-generated types matching Supabase schema
 
 export interface NFCCard {
