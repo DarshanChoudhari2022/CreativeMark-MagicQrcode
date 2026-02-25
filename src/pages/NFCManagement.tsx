@@ -154,7 +154,7 @@ export default function NFCManagement() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="Logo" className="h-10 md:h-16 w-auto object-contain rounded-lg md:rounded-xl shadow-md" />
+            <img src="/qr.jpg" alt="Logo" className="h-10 md:h-16 w-auto object-contain rounded-lg md:rounded-xl shadow-md" />
           </div>
         </div>
       </header>

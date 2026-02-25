@@ -535,7 +535,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
             }}
           >
             <img
-              src="/logo.jpg"
+              src="/qr.jpg"
               alt="Creative Mark"
               style={{
                 height: '28px',

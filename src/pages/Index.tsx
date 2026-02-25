@@ -52,7 +52,7 @@ const Index = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = "https://creativemarkadvertising.com/"}>
-              <img src="/logo.jpg" alt="Creative Mark Logo" className="h-10 md:h-20 w-auto object-contain rounded-lg" />
+              <img src="/qr.jpg" alt="Creative Mark Logo" className="h-10 md:h-20 w-auto object-contain rounded-lg" />
             </div>
           </div>
 
@@ -168,7 +168,7 @@ const Index = () => {
           <div className="text-center mb-12 px-4">
             <h2 className="text-[10px] font-bold text-red-600 tracking-[0.3em] mb-4 uppercase">{t('landing.how_it_works_title')}</h2>
             <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
-              {t('landing.reviewboost_desc').split('.')[0] + '.'}
+              {t('landing.why_businesses_love')}
             </h3>
           </div>
 
@@ -384,7 +384,7 @@ const Index = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-16">
             <div className="space-y-6">
               <img
-                src="/logo.jpg"
+                src="/qr.jpg"
                 alt="Logo"
                 className="h-16 w-auto object-contain transition-all cursor-pointer hover:opacity-80"
                 onClick={() => window.location.href = "https://creativemarkadvertising.com/"}

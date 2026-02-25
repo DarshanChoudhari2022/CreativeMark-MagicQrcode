@@ -194,7 +194,7 @@ const Auth = () => {
             <div className="flex justify-center mb-6">
               <div className="w-24 h-24 rounded-2xl bg-white flex items-center justify-center shadow-xl border border-gray-100">
                 <img
-                  src="/logo.jpg"
+                  src="/qr.jpg"
                   alt="Logo"
                   className="w-full h-full object-contain rounded-2xl"
                 />

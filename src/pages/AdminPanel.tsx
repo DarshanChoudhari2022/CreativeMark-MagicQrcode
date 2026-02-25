@@ -217,7 +217,7 @@ const AdminPanel = () => {
                             <span className="hidden md:inline">Back</span>
                         </Button>
                         <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
-                            <img src="/logo.jpg" alt="Creative Mark Logo" className="h-10 md:h-16 w-auto object-contain shrink-0" />
+                            <img src="/qr.jpg" alt="Creative Mark Logo" className="h-10 md:h-16 w-auto object-contain shrink-0" />
                             <h1 className="text-base md:text-xl font-bold border-l pl-3 md:pl-4 truncate">Admin Panel</h1>
                         </div>
                     </div>

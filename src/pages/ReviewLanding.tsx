@@ -330,10 +330,10 @@ const ReviewLanding = () => {
                     <div
                       key={`${text.substring(0, 20)}-${index}`}
                       className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-300 group relative min-h-[60px] ${selectedSuggestion === text
-                          ? 'bg-green-50 border-green-500 shadow-lg shadow-green-100 scale-[1.02]'
-                          : redirecting
-                            ? 'opacity-40 border-slate-100 bg-slate-50'
-                            : 'bg-white hover:bg-blue-50 border-slate-100 hover:border-blue-300 shadow-sm hover:shadow-md cursor-pointer'
+                        ? 'bg-green-50 border-green-500 shadow-lg shadow-green-100 scale-[1.02]'
+                        : redirecting
+                          ? 'opacity-40 border-slate-100 bg-slate-50'
+                          : 'bg-white hover:bg-blue-50 border-slate-100 hover:border-blue-300 shadow-sm hover:shadow-md cursor-pointer'
                         }`}
                       style={{ animation: `fadeInUp ${0.4 + index * 0.1}s ease-out` }}
                       onClick={() => {
@@ -345,8 +345,8 @@ const ReviewLanding = () => {
                       <div className="flex items-start gap-3">
                         {/* Review Number / Status */}
                         <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${selectedSuggestion === text
-                            ? 'bg-green-500 text-white'
-                            : 'bg-blue-100 text-blue-600 ' + (editingIndex !== index ? 'group-hover:bg-blue-600 group-hover:text-white' : '')
+                          ? 'bg-green-500 text-white'
+                          : 'bg-blue-100 text-blue-600 ' + (editingIndex !== index ? 'group-hover:bg-blue-600 group-hover:text-white' : '')
                           } transition-colors`}>
                           {selectedSuggestion === text ? '✓' : index + 1}
                         </div>
@@ -458,7 +458,7 @@ const ReviewLanding = () => {
         <footer className="mt-10 text-center pb-8">
           <div className="flex flex-col items-center gap-3">
             <img
-              src="/logo.jpg"
+              src="/qr.jpg"
               alt="Powered by"
               className="h-10 w-auto object-contain rounded-lg shadow-sm"
             />

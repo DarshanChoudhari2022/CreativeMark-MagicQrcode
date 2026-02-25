@@ -149,7 +149,7 @@ const Dashboard = () => {
           {/* Left: Logo + Brand */}
           <div className="flex items-center gap-2 md:gap-8">
             <div className="flex items-center gap-2 md:gap-3 active:scale-95 transition-transform cursor-pointer group" onClick={() => window.location.href = "https://creative-mark.vercel.app/"}>
-              <img src="/logo.jpg" alt="Logo" className="h-8 md:h-16 w-auto object-contain rounded-lg md:rounded-xl shadow-md transition-all group-hover:shadow-lg" />
+              <img src="/qr.jpg" alt="Logo" className="h-8 md:h-16 w-auto object-contain rounded-lg md:rounded-xl shadow-md transition-all group-hover:shadow-lg" />
               <div className="hidden sm:block">
                 <h1 className="text-base md:text-xl font-bold text-slate-950 tracking-tight leading-none">Smart Tap AI</h1>
                 <p className="text-[8px] md:text-[10px] font-semibold text-red-600 uppercase tracking-wider mt-0.5 md:mt-1">Dashboard</p>
@@ -425,7 +425,7 @@ const Dashboard = () => {
       <footer className="py-10 md:py-24 border-t border-slate-100 bg-slate-50 mt-12 md:mt-20">
         <div className="container mx-auto px-4 md:px-8 flex flex-col items-center gap-6 md:gap-10">
           <img
-            src="/logo.jpg"
+            src="/qr.jpg"
             alt="Creative Mark"
             className="h-10 md:h-16 w-auto object-contain rounded-xl md:rounded-2xl shadow-lg transition-all duration-500 cursor-pointer hover:scale-105"
             onClick={() => window.location.href = "https://creative-mark.vercel.app/"}
