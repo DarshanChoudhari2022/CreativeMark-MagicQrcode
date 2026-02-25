@@ -321,7 +321,7 @@ const Index = () => {
 
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8 grid grid-cols-1 md:grid-cols-2 gap-3">
                   {[
-                    t('pricing.item1'), t('pricing.item2'), t('pricing.item3'), t('pricing.item4'),
+                    t('pricing.item1'), t('pricing.item2'), t('pricing.item4'),
                     t('pricing.item5'), t('pricing.item6'), t('pricing.item7'), t('pricing.item8'),
                   ].map((feature, index) => (
                     <div key={index} className="flex items-center gap-2">
