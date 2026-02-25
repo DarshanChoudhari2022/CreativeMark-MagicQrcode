@@ -232,7 +232,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* After Card (ReviewBoost) */}
+            {/* After Card (Smart Tap AI) */}
             <Card className="bg-gradient-to-br from-red-600 to-red-700 text-white border-0 shadow-xl shadow-red-200 rounded-2xl overflow-hidden relative transform md:-rotate-1 hover:rotate-0 transition-transform duration-300">
               <div className="absolute top-0 right-0 bg-black/20 text-white text-[10px] font-bold px-5 py-1.5 rounded-bl-xl uppercase tracking-widest backdrop-blur-sm">
                 {t('common.recommended')}
