@@ -535,13 +535,14 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
             }}
           >
             <img
-              src="/qr.jpg"
+              src="/logo.jpg"
               alt="Creative Mark"
               style={{
-                height: '28px',
+                height: '36px',
                 width: 'auto',
                 display: 'inline-block',
                 objectFit: 'contain',
+                borderRadius: '6px',
               }}
               crossOrigin="anonymous"
             />
