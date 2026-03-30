@@ -586,29 +586,45 @@ const CampaignDetails = () => {
                     {!isEditingLocation ? (
                       <>
                         <p className="text-sm md:text-base font-black text-slate-900 uppercase italic mb-1">{location.name}</p>
-                        {location.category && <p className="text-[10px] md:text-xs font-bold text-blue-600 mb-1">{location.category}</p>}
-                        {location.address && <p className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wide">{location.address}</p>}
+                        {location.category && <p className="text-[10px] md:text-xs font-bold text-blue-600 mb-2">{location.category}</p>}
+                        
+                        <div className="mt-3 bg-red-50/50 p-2 md:p-3 rounded-lg border border-red-100">
+                          <p className="text-[8px] md:text-[9px] font-bold text-red-500 uppercase tracking-wider mb-1">Target SEO Location</p>
+                          <p className="text-[10px] md:text-xs font-bold text-slate-700">
+                            {location.address ? location.address : <span className="text-slate-400 font-normal italic">Not specified (Click edit to add city/area)</span>}
+                          </p>
+                        </div>
                       </>
                     ) : (
-                      <div className="space-y-2">
-                        <Input
-                          value={locationName}
-                          onChange={(e) => setLocationName(e.target.value)}
-                          placeholder="Location Name"
-                          className="font-bold text-sm"
-                        />
-                        <Input
-                          value={locationCategory}
-                          onChange={(e) => setLocationCategory(e.target.value)}
-                          placeholder="Business Category / Description (e.g., Two-Wheeler Garage)"
-                          className="text-xs font-semibold text-blue-600 border-blue-200 focus-visible:ring-blue-500"
-                        />
-                        <Input
-                          value={locationAddress}
-                          onChange={(e) => setLocationAddress(e.target.value)}
-                          placeholder="Address"
-                          className="text-xs"
-                        />
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Business Name</p>
+                          <Input
+                            value={locationName}
+                            onChange={(e) => setLocationName(e.target.value)}
+                            placeholder="Location Name"
+                            className="font-bold text-sm"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Category / Industry</p>
+                          <Input
+                            value={locationCategory}
+                            onChange={(e) => setLocationCategory(e.target.value)}
+                            placeholder="Business Category / Description (e.g., Two-Wheeler Garage)"
+                            className="text-xs font-semibold text-blue-600 border-blue-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-1">Target SEO Location / City</p>
+                          <Input
+                            value={locationAddress}
+                            onChange={(e) => setLocationAddress(e.target.value)}
+                            placeholder="e.g. Khed Shivapur, Pune"
+                            className="text-xs border-red-200 focus-visible:ring-red-500"
+                          />
+                          <p className="text-[9px] text-slate-400 mt-1 font-medium">This exact location will be forced into AI generated reviews to boost Maps ranking.</p>
+                        </div>
                       </div>
                     )}
                   </div>
