@@ -466,7 +466,7 @@ const ReviewLanding = () => {
               <img
                 src={campaign?.theme_color === 'pramod' ? '/PR.png' : '/qr.jpg'}
                 alt="Branding"
-                className="h-12 w-auto object-contain rounded-lg transition-all"
+                className={`${campaign?.theme_color === 'pramod' ? 'h-24' : 'h-12'} w-auto object-contain rounded-lg transition-all`}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/qr.jpg';
                 }}

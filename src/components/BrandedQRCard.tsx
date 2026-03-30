@@ -529,7 +529,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                   src={brandingType === 'pramod' ? '/PR.png' : '/logo.jpg'}
                   alt={brandingType === 'pramod' ? 'Pramod Digital Marketing' : 'Creative Mark'}
                   style={{
-                    height: '40px',
+                    height: brandingType === 'pramod' ? '80px' : '40px',
                     width: 'auto',
                     display: 'inline-block',
                     objectFit: 'contain',
