@@ -115,7 +115,8 @@ const ReviewLanding = () => {
           5,
           'en',
           category,
-          location?.address || ''
+          location?.address || '',
+          location?.google_review_url || campaign?.google_review_url || ''
         ),
         // 8-second timeout — if AI is slow, bail out
         new Promise<never>((_, reject) =>
@@ -463,7 +464,7 @@ const ReviewLanding = () => {
             {/* Simple selection toggle (for demo/choice since we don't save to DB yet) */}
             <div className="flex flex-col items-center gap-3">
               <img
-                src={campaign?.theme_color === 'pramod' ? '/pramod_logo.png' : '/qr.jpg'}
+                src={campaign?.theme_color === 'pramod' ? '/PR.png' : '/qr.jpg'}
                 alt="Branding"
                 className="h-12 w-auto object-contain rounded-lg transition-all"
                 onError={(e) => {

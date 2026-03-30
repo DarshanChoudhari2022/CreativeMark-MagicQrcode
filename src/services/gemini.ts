@@ -148,6 +148,7 @@ export async function generateReviewSuggestions(
     language: string = 'en',
     businessContext: string = '',
     businessLocation: string = '',
+    mapUrl: string = '',
     tone: string = 'Professional'
 ): Promise<ReviewSuggestion[]> {
     const seo = getBusinessSEO(businessName);
@@ -166,7 +167,7 @@ export async function generateReviewSuggestions(
 
         const seoContext = seo
             ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint || businessLocation || ''}).\n${seo.customPromptRule || `Naturally include ONE of: ${seo.naturalPhrases.join(', ')}.`}`
-            : `Business Name: "${businessName}".\n${businessLocation ? `Location: "${businessLocation}". CRITICAL: You must include "${businessLocation}" naturally in at least 2 reviews.` : ''}\n${businessContext ? `Business Type / Industry: "${businessContext}".` : ''}`;
+            : `Business Name: "${businessName}".\n${businessLocation ? `Location: "${businessLocation}". CRITICAL: You must include "${businessLocation}" naturally in at least 2 reviews.` : ''}\n${mapUrl ? `Map URL: "${mapUrl}". IF this URL contains a city or location name, use that location naturally in at least 2 reviews. IF NOT, DO NOT mention ANY specific city/location.` : ''}\n${businessContext ? `Business Type / Industry: "${businessContext}".` : ''}`;
 
         const prompt = `Generate 5 unique, authentic-sounding Google review texts for a ${rating}-star review of a business.
 
@@ -180,6 +181,7 @@ STRICT RULES:
 - Sound natural and genuine, like a real person wrote it
 - Each review must be different in structure and wording
 - Naturally mention the location "${businessLocation}" if provided
+- IF a location is NOT provided or cannot be found in the Map URL, DO NOT make up a city like Bengaluru. Skip mentioning location.
 - Do NOT include phrases like "drive real results", "exceed expectations", "game-changer"
 - Do NOT mention "digital marketing" unless the business is specifically about that
 - Use exclamation marks naturally, not excessively
@@ -228,7 +230,7 @@ Output exactly 5 review lines, one per line. No numbering, no quotes, no other t
 
             const seoContext = seo
                 ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint || businessLocation || ''}).\n${seo.customPromptRule || ''}`
-                : `Business Name: "${businessName}".\n${businessLocation ? `Location: "${businessLocation}". Naturally mention this location.` : ''}\n${businessContext ? `Business Type: "${businessContext}".` : ''}`;
+                : `Business Name: "${businessName}".\n${businessLocation ? `Location: "${businessLocation}". Naturally mention this location.` : ''}\n${mapUrl ? `Map URL: "${mapUrl}". Try to extract and use the city from here. If none found, DO NOT make up a city like Bengaluru.` : ''}\n${businessContext ? `Business Type: "${businessContext}".` : ''}`;
 
             const prompt = `Write 5 short, authentic Google review texts as a happy customer of this business.
 ${seoContext}

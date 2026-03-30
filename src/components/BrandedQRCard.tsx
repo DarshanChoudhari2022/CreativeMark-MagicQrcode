@@ -526,7 +526,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
             >
               <div className="flex flex-col items-center gap-1.5">
                 <img
-                  src={brandingType === 'pramod' ? '/pramod_logo.png' : '/logo.jpg'}
+                  src={brandingType === 'pramod' ? '/PR.png' : '/logo.jpg'}
                   alt={brandingType === 'pramod' ? 'Pramod Digital Marketing' : 'Creative Mark'}
                   style={{
                     height: '40px',
