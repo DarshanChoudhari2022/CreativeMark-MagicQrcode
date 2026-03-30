@@ -31,6 +31,7 @@ const campaignSchema = z.object({
   businessCategory: z.string().min(1, "Please select a business category"),
   theme: z.enum(['lightBlue', 'darkNavy', 'blackGold', 'whiteBlue']).default('lightBlue'),
   logoUrl: z.string().optional(),
+  businessLocation: z.string().optional(),
 });
 
 const CreateCampaign = () => {
@@ -44,6 +45,7 @@ const CreateCampaign = () => {
   const [customMessage, setCustomMessage] = useState("");
   const [businessCategory, setBusinessCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
+  const [businessLocation, setBusinessLocation] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#4285F4");
   const [secondaryColor, setSecondaryColor] = useState("#ffffff");
   const [theme, setTheme] = useState("lightBlue");
@@ -190,6 +192,7 @@ const CreateCampaign = () => {
         customMessage: customMessage || undefined,
         businessCategory: businessCategory === 'Other' ? customCategory : businessCategory,
         theme,
+        businessLocation: businessLocation || undefined,
       });
 
       if (!user) throw new Error("User not authenticated");
@@ -211,6 +214,7 @@ const CreateCampaign = () => {
           category: validated.businessCategory,
           google_review_url: validated.googleReviewUrl,
           logo_url: logoUrl,
+          address: validated.businessLocation,
         }]);
 
       if (locationError) throw locationError;
@@ -349,6 +353,21 @@ const CreateCampaign = () => {
                     required
                   />
                 )}
+              </div>
+
+              {/* Business Location */}
+              <div>
+                <Label htmlFor="businessLocation" className="font-bold text-slate-700 text-sm md:text-base">Business Location / City (Optional)</Label>
+                <Input
+                  id="businessLocation"
+                  placeholder="e.g., Pune, Mumbai, Khed Shivapur"
+                  value={businessLocation}
+                  onChange={(e) => setBusinessLocation(e.target.value)}
+                  className="mt-1.5 h-11 md:h-12 rounded-xl border-slate-200 focus:border-red-500 focus:ring-red-500 text-sm md:text-base"
+                />
+                <p className="text-[10px] md:text-xs text-slate-400 mt-1.5 font-medium">
+                  Add this to help AI generate location-specific reviews (e.g., "Best service in Pune")
+                </p>
               </div>
 
               {/* Logo Upload */}

@@ -182,6 +182,7 @@ STRICT RULES:
 - Each review must be different in structure and wording
 - Naturally mention the location "${businessLocation}" if provided
 - IF a location is NOT provided or cannot be found in the Map URL, DO NOT make up a city like Bengaluru. Skip mentioning location.
+- **CRITICAL:** NEVER output a URL linking inside the review text!
 - Do NOT include phrases like "drive real results", "exceed expectations", "game-changer"
 - Do NOT mention "digital marketing" unless the business is specifically about that
 - Use exclamation marks naturally, not excessively
@@ -235,7 +236,7 @@ Output exactly 5 review lines, one per line. No numbering, no quotes, no other t
             const prompt = `Write 5 short, authentic Google review texts as a happy customer of this business.
 ${seoContext}
 Category focus: ${category}. Rating: ${rating} stars.
-Each review: 15-30 words, natural tone, specific details.
+Each review: 15-30 words, natural tone, specific details. NEVER output the map link or any URL in the review text.
 Output only the 5 review lines, one per line.`;
 
             const result = await geminiModel.generateContent(prompt);
