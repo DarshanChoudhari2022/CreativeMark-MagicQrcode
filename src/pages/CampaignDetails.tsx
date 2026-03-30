@@ -34,6 +34,7 @@ const CampaignDetails = () => {
   const [isEditingGoogleUrl, setIsEditingGoogleUrl] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [qrTheme, setQrTheme] = useState('google-classic');
+  const [brandingType, setBrandingType] = useState<'creative-mark' | 'pramod' | 'none'>('creative-mark');
 
   useEffect(() => {
     const loadCampaignData = async () => {
@@ -482,6 +483,7 @@ const CampaignDetails = () => {
                     size={220}
                     themeId={qrTheme}
                     onThemeChange={handleThemeChange}
+                    brandingType={brandingType}
                   />
                 </div>
                 <Button onClick={() => window.open(reviewUrl, '_blank')} variant="outline"
@@ -657,6 +659,31 @@ const CampaignDetails = () => {
                       </p>
                     </div>
                   </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100">
+                  <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Footer Branding</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={brandingType === 'creative-mark' ? 'default' : 'outline'}
+                      onClick={() => setBrandingType('creative-mark')}
+                      className="h-10 text-[10px] font-bold uppercase tracking-widest rounded-xl"
+                    >
+                      Creative Mark
+                    </Button>
+                    <Button
+                      variant={brandingType === 'pramod' ? 'default' : 'outline'}
+                      onClick={() => setBrandingType('pramod')}
+                      className="h-10 text-[10px] font-bold uppercase tracking-widest rounded-xl"
+                    >
+                      Pramod Digital
+                    </Button>
+                  </div>
+                  {brandingType === 'pramod' && (
+                    <p className="text-[10px] text-blue-600 font-bold mt-2 text-center uppercase tracking-wider">
+                      Includes Buszyhub.in Link
+                    </p>
+                  )}
                 </div>
 
                 {/* QR Code Preservation Notice */}

@@ -30,6 +30,7 @@ interface Location {
   google_review_url: string;
   category: string;
   logo_url: string;
+  address: string;
 }
 
 // ─── Component ────────────────────────────────────────────────
@@ -113,7 +114,8 @@ const ReviewLanding = () => {
           businessName,
           5,
           'en',
-          category
+          category,
+          location?.address || ''
         ),
         // 8-second timeout — if AI is slow, bail out
         new Promise<never>((_, reject) =>
@@ -144,12 +146,13 @@ const ReviewLanding = () => {
 
   // ─── Local Fallback Generator (zero API, instant) ───────────
   const generateLocalFallbacks = (businessName: string): string[] => {
+    const locStr = location?.address ? ` in ${location.address}` : "";
     const templates = [
-      `Excellent experience at ${businessName}! Professional team and great quality service. Highly recommended!`,
-      `Very impressed with the service at ${businessName}. Friendly staff and outstanding results. Will definitely visit again!`,
-      `Top-notch quality! ${businessName} delivers on every promise. Great value for money and wonderful customer care.`,
-      `Had a fantastic time at ${businessName}. Everything was well-organized and the staff was very helpful. Five stars!`,
-      `Best service I've experienced in a long time! ${businessName} truly cares about their customers. Highly recommend!`,
+      `Excellent experience at ${businessName}${locStr}! Professional team and great quality service. Highly recommended!`,
+      `Very impressed with the service at ${businessName}. Friendly staff and outstanding results${locStr}. Will definitely visit again!`,
+      `Top-notch quality! ${businessName}${locStr} delivers on every promise. Great value for money and wonderful customer care.`,
+      `Had a fantastic time at ${businessName}. Everything was well-organized and the staff${locStr} was very helpful. Five stars!`,
+      `Best service I've experienced in a long time! ${businessName} truly cares about their customers${locStr}. Highly recommend!`,
     ];
     // Shuffle so it's different each time
     for (let i = templates.length - 1; i > 0; i--) {
@@ -455,21 +458,37 @@ const ReviewLanding = () => {
         </Card>
 
         {/* ─── Footer ──────────────────────────────────────── */}
-        <footer className="mt-10 text-center pb-8">
-          <div className="flex flex-col items-center gap-3">
-            <img
-              src="/qr.jpg"
-              alt="Powered by"
-              className="h-10 w-auto object-contain rounded-lg shadow-sm"
-            />
-            <div className="space-y-1">
-              <p className="text-slate-400 text-[11px] font-medium">
-                Powered by Creative Mark
-              </p>
-              <p className="text-slate-300 text-[10px]">
-                &copy; {new Date().getFullYear()} AI Review Systems
-              </p>
+        <footer className="mt-10 text-center pb-8 border-t border-slate-100 pt-8 mt-12 bg-white">
+          <div className="flex flex-col items-center gap-4">
+            {/* Simple selection toggle (for demo/choice since we don't save to DB yet) */}
+            <div className="flex flex-col items-center gap-3">
+              <img
+                src={campaign?.theme_color === 'pramod' ? '/pramod_logo.png' : '/qr.jpg'}
+                alt="Branding"
+                className="h-12 w-auto object-contain rounded-lg transition-all"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/qr.jpg';
+                }}
+              />
+              <div className="space-y-1">
+                <p className="text-slate-400 text-[11px] font-medium tracking-widest uppercase">
+                  Powered by {campaign?.theme_color === 'pramod' ? 'Pramod Digital Marketing' : 'Creative Mark'}
+                </p>
+                {campaign?.theme_color === 'pramod' ? (
+                  <a href="https://buszyhub.in" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold text-sm hover:underline">
+                    Buszyhub.in
+                  </a>
+                ) : (
+                  <p className="text-slate-300 text-[10px]">
+                    &copy; {new Date().getFullYear()} AI Review Systems
+                  </p>
+                )}
+              </div>
             </div>
+            
+            <p className="text-[9px] text-slate-300 italic px-6 mt-4 opacity-10">
+              Disclaimer: Provided as an AI assistance tool for review generation.
+            </p>
           </div>
         </footer>
       </div>

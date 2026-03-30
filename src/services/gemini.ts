@@ -147,6 +147,7 @@ export async function generateReviewSuggestions(
     rating: number,
     language: string = 'en',
     businessContext: string = '',
+    businessLocation: string = '',
     tone: string = 'Professional'
 ): Promise<ReviewSuggestion[]> {
     const seo = getBusinessSEO(businessName);
@@ -164,8 +165,8 @@ export async function generateReviewSuggestions(
         if (!GROQ_API_KEY) throw new Error("No Groq key");
 
         const seoContext = seo
-            ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint}).\n${seo.customPromptRule || `Naturally include ONE of: ${seo.naturalPhrases.join(', ')}.`}`
-            : `Business Name: "${businessName}".\n${businessContext ? `Business Type / Industry: "${businessContext}". CRITICAL: You must generate reviews specific to this exact business type.` : ''}`;
+            ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint || businessLocation || ''}).\n${seo.customPromptRule || `Naturally include ONE of: ${seo.naturalPhrases.join(', ')}.`}`
+            : `Business Name: "${businessName}".\n${businessLocation ? `Location: "${businessLocation}". CRITICAL: You must include "${businessLocation}" naturally in at least 2 reviews.` : ''}\n${businessContext ? `Business Type / Industry: "${businessContext}".` : ''}`;
 
         const prompt = `Generate 5 unique, authentic-sounding Google review texts for a ${rating}-star review of a business.
 
@@ -177,8 +178,8 @@ STRICT RULES:
 - Write AS A CUSTOMER, not as the business owner
 - Each review should be 15-30 words
 - Sound natural and genuine, like a real person wrote it
-- Include specific positive details about ${category}
 - Each review must be different in structure and wording
+- Naturally mention the location "${businessLocation}" if provided
 - Do NOT include phrases like "drive real results", "exceed expectations", "game-changer"
 - Do NOT mention "digital marketing" unless the business is specifically about that
 - Use exclamation marks naturally, not excessively
@@ -226,8 +227,8 @@ Output exactly 5 review lines, one per line. No numbering, no quotes, no other t
             if (!GEMINI_API_KEY) throw new Error("No Gemini key");
 
             const seoContext = seo
-                ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint}).\n${seo.customPromptRule || ''}`
-                : `Business Name: "${businessName}".\n${businessContext ? `Business Type: "${businessContext}". CRITICAL: Generate reviews for this exact type.` : ''}`;
+                ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint || businessLocation || ''}).\n${seo.customPromptRule || ''}`
+                : `Business Name: "${businessName}".\n${businessLocation ? `Location: "${businessLocation}". Naturally mention this location.` : ''}\n${businessContext ? `Business Type: "${businessContext}".` : ''}`;
 
             const prompt = `Write 5 short, authentic Google review texts as a happy customer of this business.
 ${seoContext}

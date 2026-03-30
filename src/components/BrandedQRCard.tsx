@@ -140,6 +140,7 @@ interface BrandedQRCardProps {
   size?: number;
   themeId?: string;
   onThemeChange?: (themeId: string) => void;
+  brandingType?: 'creative-mark' | 'pramod' | 'none';
 }
 
 // Google Star Rating Component
@@ -184,6 +185,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
   size = 280,
   themeId = 'google-classic',
   onThemeChange,
+  brandingType = 'creative-mark',
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [logoLoaded, setLogoLoaded] = useState(false);
@@ -329,7 +331,7 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
         <div
           style={{
             textAlign: 'center',
-            padding: '32px 28px 24px',
+            padding: '32px 28px 20px',
           }}
         >
           {/* ── Brand Logo ── */}
@@ -403,12 +405,6 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
           </p>
 
           {/* ── QR Code Section ── */}
-          {/* 
-            IMPORTANT: Logo is NOT embedded via QRCodeSVG imageSettings 
-            because html2canvas cannot render SVG <image> elements with 
-            cross-origin URLs. Instead, the logo is overlaid as a separate 
-            <img> element positioned absolutely over the QR code center.
-          */}
           <div
             style={{
               position: 'relative',
@@ -452,10 +448,9 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                 level="H"
                 fgColor={theme.qrFg}
                 bgColor={theme.qrBg}
-              /* NO imageSettings — logo is overlaid separately for html2canvas compatibility */
               />
 
-              {/* Logo overlay — transparent, no background box */}
+              {/* Logo overlay */}
               {logoUrl && logoLoaded && (
                 <img
                   src={logoUrl}
@@ -471,7 +466,6 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
                     objectFit: 'contain',
                     display: 'block',
                     zIndex: 2,
-                    /* No background, no padding, no shadow — logo floats cleanly */
                   }}
                 />
               )}
@@ -479,19 +473,12 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
           </div>
 
           {/* ── "SCAN TO REVIEW" CTA ── */}
-          {/*
-            DESIGN: Clean text-only pill with height + line-height centering.
-            This is the ONLY centering method that is 100% pixel-perfect
-            in html2canvas. No icons, no flexbox, no tables, no vertical-align.
-            Just a div with matching height and line-height.
-          */}
           <div
             style={{
-              marginTop: '20px',
+              marginTop: '16px',
               textAlign: 'center',
             }}
           >
-            {/* Pointing indicator */}
             <div
               style={{
                 fontSize: '10px',
@@ -528,43 +515,70 @@ export const BrandedQRCard: React.FC<BrandedQRCardProps> = ({
           </div>
 
           {/* ── Footer Branding ── */}
-          <div
-            style={{
-              textAlign: 'center',
-              marginTop: '20px',
-            }}
-          >
-            <img
-              src="/logo.jpg"
-              alt="Creative Mark"
+          {brandingType !== 'none' && (
+            <div
               style={{
-                height: '36px',
-                width: 'auto',
-                display: 'inline-block',
-                objectFit: 'contain',
-                borderRadius: '6px',
-              }}
-              crossOrigin="anonymous"
-            />
-            <p
-              style={{
-                fontSize: '7px',
-                color: theme.footerTextColor,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.16em',
                 textAlign: 'center',
-                margin: '2px 0 0 0',
-                lineHeight: 1.4,
+                marginTop: '16px',
+                borderTop: `1px solid ${theme.qrBorderColor}`,
+                paddingTop: '16px',
               }}
             >
-              Smart Tap AI Technology
-            </p>
-          </div>
+              <div className="flex flex-col items-center gap-1.5">
+                <img
+                  src={brandingType === 'pramod' ? '/pramod_logo.png' : '/logo.jpg'}
+                  alt={brandingType === 'pramod' ? 'Pramod Digital Marketing' : 'Creative Mark'}
+                  style={{
+                    height: '40px',
+                    width: 'auto',
+                    display: 'inline-block',
+                    objectFit: 'contain',
+                    borderRadius: '6px',
+                  }}
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    // Fallback to text if image missing
+                    (e.target as HTMLImageElement).parentElement!.style.display = 'none';
+                  }}
+                />
+                
+                {brandingType === 'pramod' ? (
+                  <p
+                    style={{
+                      fontSize: '10px',
+                      color: theme.ctaBg,
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      textAlign: 'center',
+                      margin: '0',
+                    }}
+                  >
+                    Buszyhub.in
+                  </p>
+                ) : (
+                  <p
+                    style={{
+                      fontSize: '7px',
+                      color: theme.footerTextColor,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.16em',
+                      textAlign: 'center',
+                      margin: '2px 0 0 0',
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    Smart Tap AI Technology
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ── Action Buttons (Outside the printable area) ── */}
+      {/* ── Action Buttons ── */}
       <Button
         onClick={downloadQRCard}
         className="w-full max-w-sm bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 gap-3 text-lg"
