@@ -55,6 +55,30 @@ const ReviewLanding = () => {
   // Prevent double-fetch race conditions
   const fetchIdRef = useRef(0);
 
+  const normalizeReviewText = (text: string) =>
+    text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const getUniqueReviews = (items: string[], count: number): string[] => {
+    const seen = new Set<string>();
+    const unique: string[] = [];
+
+    for (const item of items) {
+      const clean = item?.trim();
+      if (!clean) continue;
+      const key = normalizeReviewText(clean);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      unique.push(clean);
+      if (unique.length >= count) break;
+    }
+
+    return unique;
+  };
+
   // ─── Load Campaign + Location ───────────────────────────────
   useEffect(() => {
     if (!campaignId) return;
@@ -126,8 +150,13 @@ const ReviewLanding = () => {
 
       // Only apply if this is still the latest fetch
       if (id === fetchIdRef.current && result.length > 0) {
-        setSuggestions(result.map(s => s.text));
-        recordEvent('ai_suggestion', { count: result.length, source: 'ai' });
+        const aiTexts = getUniqueReviews(result.map(s => s.text), 5);
+        const finalSuggestions = aiTexts.length >= 5
+          ? aiTexts
+          : [...aiTexts, ...generateLocalFallbacks(businessName, aiTexts, 5 - aiTexts.length)];
+
+        setSuggestions(finalSuggestions);
+        recordEvent('ai_suggestion', { count: finalSuggestions.length, source: 'ai' });
       }
     } catch (err: any) {
       console.warn('AI suggestion failed, using smart defaults:', err.message);
@@ -146,21 +175,52 @@ const ReviewLanding = () => {
   }, [location, campaign]);
 
   // ─── Local Fallback Generator (zero API, instant) ───────────
-  const generateLocalFallbacks = (businessName: string): string[] => {
+  const generateLocalFallbacks = (
+    businessName: string,
+    existing: string[] = [],
+    count: number = 5
+  ): string[] => {
     const locStr = location?.address ? ` in ${location.address}` : "";
-    const templates = [
-      `Excellent experience at ${businessName}${locStr}! Professional team and great quality service. Highly recommended!`,
-      `Very impressed with the service at ${businessName}. Friendly staff and outstanding results${locStr}. Will definitely visit again!`,
-      `Top-notch quality! ${businessName}${locStr} delivers on every promise. Great value for money and wonderful customer care.`,
-      `Had a fantastic time at ${businessName}. Everything was well-organized and the staff${locStr} was very helpful. Five stars!`,
-      `Best service I've experienced in a long time! ${businessName} truly cares about their customers${locStr}. Highly recommend!`,
+    const openingPhrases = [
+      `Great experience at ${businessName}${locStr}`,
+      `${businessName}${locStr} exceeded my expectations`,
+      `Really happy with my visit to ${businessName}${locStr}`,
+      `Super smooth experience with ${businessName}${locStr}`,
+      `${businessName}${locStr} was a fantastic choice`,
+      `I had an excellent experience at ${businessName}${locStr}`,
     ];
-    // Shuffle so it's different each time
-    for (let i = templates.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [templates[i], templates[j]] = [templates[j], templates[i]];
+    const qualityPhrases = [
+      "the team was professional and friendly",
+      "service was quick and very well-organized",
+      "staff was polite, attentive, and helpful",
+      "quality and attention to detail were impressive",
+      "everything was handled perfectly from start to finish",
+      "the overall service quality was outstanding",
+    ];
+    const closingPhrases = [
+      "Highly recommended.",
+      "Will definitely come back.",
+      "Would gladly suggest this to friends and family.",
+      "Five stars from my side.",
+      "Great value and great customer care.",
+      "Definitely worth trying.",
+    ];
+
+    const generated: string[] = [];
+    for (const opening of openingPhrases) {
+      for (const quality of qualityPhrases) {
+        for (const closing of closingPhrases) {
+          generated.push(`${opening}. ${quality}. ${closing}`);
+        }
+      }
     }
-    return templates;
+
+    for (let i = generated.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [generated[i], generated[j]] = [generated[j], generated[i]];
+    }
+
+    return getUniqueReviews([...existing, ...generated], existing.length + count).slice(existing.length);
   };
 
   // ─── Handle Tap on a Suggestion ─────────────────────────────
