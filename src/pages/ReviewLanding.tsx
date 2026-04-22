@@ -184,6 +184,10 @@ const ReviewLanding = () => {
     existing: string[] = [],
     count: number = 5
   ): string[] => {
+    const MIN_GENERATION_ATTEMPTS = 40;
+    const ATTEMPT_MULTIPLIER = 12;
+    const CANDIDATE_MULTIPLIER = 3;
+
     const locStr = location?.address ? ` in ${location.address}` : "";
     const openingPhrases = [
       `Great experience at ${businessName}${locStr}`,
@@ -212,12 +216,15 @@ const ReviewLanding = () => {
 
     const existingSeen = new Set(existing.map(normalizeReviewText));
     const generated: string[] = [];
-    const maxAttempts = Math.max(40, count * 12);
+    const maxAttempts = Math.max(MIN_GENERATION_ATTEMPTS, count * ATTEMPT_MULTIPLIER);
+    const openingCount = openingPhrases.length;
+    const qualityCount = qualityPhrases.length;
+    const closingCount = closingPhrases.length;
 
-    for (let i = 0; i < maxAttempts && generated.length < count * 3; i++) {
-      const opening = openingPhrases[Math.floor(Math.random() * openingPhrases.length)];
-      const quality = qualityPhrases[Math.floor(Math.random() * qualityPhrases.length)];
-      const closing = closingPhrases[Math.floor(Math.random() * closingPhrases.length)];
+    for (let i = 0; i < maxAttempts && generated.length < count * CANDIDATE_MULTIPLIER; i++) {
+      const opening = openingPhrases[Math.floor(Math.random() * openingCount)];
+      const quality = qualityPhrases[Math.floor(Math.random() * qualityCount)];
+      const closing = closingPhrases[Math.floor(Math.random() * closingCount)];
       generated.push(`${opening}. ${quality}. ${closing}`);
     }
 
