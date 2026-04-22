@@ -62,8 +62,12 @@ const ReviewLanding = () => {
       .replace(/\s+/g, " ")
       .trim();
 
-  const getUniqueReviews = (items: string[], count: number): string[] => {
-    const seen = new Set<string>();
+  const getUniqueReviews = (
+    items: string[],
+    count: number,
+    initialSeen: Set<string> = new Set<string>()
+  ): string[] => {
+    const seen = new Set<string>(initialSeen);
     const unique: string[] = [];
 
     for (const item of items) {
@@ -206,21 +210,18 @@ const ReviewLanding = () => {
       "Definitely worth trying.",
     ];
 
+    const existingSeen = new Set(existing.map(normalizeReviewText));
     const generated: string[] = [];
-    for (const opening of openingPhrases) {
-      for (const quality of qualityPhrases) {
-        for (const closing of closingPhrases) {
-          generated.push(`${opening}. ${quality}. ${closing}`);
-        }
-      }
+    const maxAttempts = Math.max(40, count * 12);
+
+    for (let i = 0; i < maxAttempts && generated.length < count * 3; i++) {
+      const opening = openingPhrases[Math.floor(Math.random() * openingPhrases.length)];
+      const quality = qualityPhrases[Math.floor(Math.random() * qualityPhrases.length)];
+      const closing = closingPhrases[Math.floor(Math.random() * closingPhrases.length)];
+      generated.push(`${opening}. ${quality}. ${closing}`);
     }
 
-    for (let i = generated.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [generated[i], generated[j]] = [generated[j], generated[i]];
-    }
-
-    return getUniqueReviews([...existing, ...generated], existing.length + count).slice(existing.length);
+    return getUniqueReviews(generated, count, existingSeen);
   };
 
   // ─── Handle Tap on a Suggestion ─────────────────────────────
