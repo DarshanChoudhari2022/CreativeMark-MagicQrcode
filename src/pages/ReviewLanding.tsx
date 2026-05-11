@@ -7,7 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Star, Loader2, ExternalLink, CheckCircle2,
   Sparkles, Copy, RefreshCw, ArrowRight,
-  Award, ArrowLeft, HandMetal, Pencil, Check
+  Award, ArrowLeft, HandMetal, Pencil, Check,
+  Camera, ImagePlus
 } from "lucide-react";
 import { generateReviewSuggestions } from "@/services/gemini";
 import { useTranslation } from "react-i18next";
@@ -51,6 +52,11 @@ const ReviewLanding = () => {
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editText, setEditText] = useState<string>("");
+
+  // Star rating selection (customer picks their rating)
+  const [selectedRating, setSelectedRating] = useState<number>(5);
+  // Photo tip visibility
+  const [showPhotoTip, setShowPhotoTip] = useState(false);
 
   // Prevent double-fetch race conditions
   const fetchIdRef = useRef(0);
@@ -112,7 +118,7 @@ const ReviewLanding = () => {
       const result = await Promise.race([
         generateReviewSuggestions(
           businessName,
-          5,
+          selectedRating,
           'en',
           category,
           location?.address || '',
@@ -175,22 +181,25 @@ const ReviewLanding = () => {
 
       // Record the event
       recordEvent('review_click', {
-        rating: 5,
+        rating: selectedRating,
         suggestion: text,
       });
 
+      // Show photo tip before redirecting
+      setShowPhotoTip(true);
+
       toast({
         title: "✅ Review copied!",
-        description: "Opening Google Reviews — just paste & post!",
+        description: "Opening Google Reviews — paste your review & add a photo!",
       });
 
-      // Redirect after a short delay so user sees the confirmation
+      // Redirect after delay — give time to see photo tip
       setTimeout(() => {
         const url = location?.google_review_url || campaign?.google_review_url;
         if (url) {
           window.location.href = url;
         }
-      }, 2500);
+      }, 5000);
     } catch (err) {
       // Clipboard failed (rare on HTTPS) — show manual copy fallback
       console.error('Clipboard failed:', err);
@@ -283,7 +292,37 @@ const ReviewLanding = () => {
             {campaign?.headline || "How was your experience?"}
           </p>
 
-
+          {/* ─── Star Rating Picker ────────────────────────── */}
+          <div className="mt-5 flex flex-col items-center gap-2">
+            <p className="text-slate-400 text-xs font-medium">Your rating</p>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => {
+                    setSelectedRating(star);
+                    // Refresh suggestions when rating changes significantly
+                    if (Math.abs(star - selectedRating) >= 1) {
+                      const bName = location?.name || campaign?.name;
+                      if (bName) fetchSuggestions(bName);
+                    }
+                  }}
+                  className="transition-all duration-200 active:scale-90"
+                >
+                  <Star
+                    className={`h-8 w-8 transition-colors ${
+                      star <= selectedRating
+                        ? 'text-amber-400 fill-amber-400 drop-shadow-sm'
+                        : 'text-slate-200'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className="text-slate-400 text-[11px]">
+              {selectedRating === 5 ? 'Excellent!' : selectedRating === 4 ? 'Great!' : selectedRating === 3 ? 'Good' : selectedRating === 2 ? 'Fair' : 'Poor'}
+            </p>
+          </div>
         </div>
 
         {/* ─── Main Card: Review Suggestions ───────────────── */}
@@ -291,9 +330,9 @@ const ReviewLanding = () => {
           <CardContent className="p-0">
             {/* Card Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-5 text-white text-center">
-              <h2 className="text-lg font-bold mb-1">Select or edit a review to post</h2>
+              <h2 className="text-lg font-bold mb-1">Pick a review you like</h2>
               <p className="text-blue-100 text-xs">
-                Tap the pencil icon to edit, or tap a review to copy it automatically
+                Edit it to make it your own, or tap to copy & post on Google
               </p>
             </div>
 
@@ -309,14 +348,32 @@ const ReviewLanding = () => {
               </div>
             )}
 
-            {/* Selected State Banner */}
+            {/* Selected State — Photo Tip + Redirect */}
             {selectedSuggestion && (
-              <div className="bg-green-50 border-b border-green-100 px-5 py-3 flex items-center gap-3" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
-                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
-                <div>
-                  <p className="text-green-800 text-sm font-bold">Review copied! ✅</p>
-                  <p className="text-green-600 text-xs">Redirecting to Google Reviews... just paste & post!</p>
+              <div className="border-b border-green-100" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
+                {/* Copied confirmation */}
+                <div className="bg-green-50 px-5 py-3 flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                  <div>
+                    <p className="text-green-800 text-sm font-bold">Review copied! ✅</p>
+                    <p className="text-green-600 text-xs">Redirecting to Google Reviews...</p>
+                  </div>
                 </div>
+                {/* Photo tip banner */}
+                {showPhotoTip && (
+                  <div className="bg-blue-50 px-5 py-4 flex items-start gap-3" style={{ animation: 'fadeInUp 0.5s ease-out' }}>
+                    <div className="bg-blue-100 p-2 rounded-lg shrink-0">
+                      <Camera className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-blue-800 text-sm font-bold">📸 Pro tip: Add a photo!</p>
+                      <p className="text-blue-600 text-xs leading-relaxed mt-0.5">
+                        Reviews with photos get <strong>3x more views</strong> on Google.
+                        Snap a quick pic of the place, your purchase, or the team!
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -457,6 +514,37 @@ const ReviewLanding = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* ─── Photo Tips Card ─────────────────────────────── */}
+        {!redirecting && (
+          <Card className="border border-slate-200 shadow-lg rounded-2xl overflow-hidden bg-white mt-4" style={{ animation: 'fadeInUp 1s ease-out' }}>
+            <CardContent className="p-0">
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-4 text-white flex items-center gap-3">
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <ImagePlus className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Add a photo for extra impact!</h3>
+                  <p className="text-emerald-100 text-[11px]">Reviews with photos get noticed more on Google</p>
+                </div>
+              </div>
+              <div className="p-4 grid grid-cols-2 gap-3">
+                {[
+                  { emoji: '📍', label: 'Photo of the place', desc: 'Entrance, interior, or signboard' },
+                  { emoji: '🛍️', label: 'Your purchase', desc: 'Product, bill, or packaging' },
+                  { emoji: '✨', label: 'Before & After', desc: 'Show the results you got' },
+                  { emoji: '👥', label: 'The team', desc: 'Staff who helped you' },
+                ].map((tip, i) => (
+                  <div key={i} className="bg-slate-50 rounded-xl p-3 text-center">
+                    <span className="text-xl">{tip.emoji}</span>
+                    <p className="text-slate-700 text-xs font-semibold mt-1">{tip.label}</p>
+                    <p className="text-slate-400 text-[10px] mt-0.5">{tip.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* ─── Footer ──────────────────────────────────────── */}
         <footer className="mt-10 text-center pb-8 border-t border-slate-100 pt-8 mt-12 bg-white">

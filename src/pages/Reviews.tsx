@@ -7,7 +7,6 @@ import {
     ArrowLeft, Loader2, Star,
     Bot, Copy, Sparkles, RefreshCw, Send, CheckCircle2
 } from 'lucide-react';
-import { generateAutoReply } from '@/services/gemini';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -74,33 +73,7 @@ export default function ReviewManagement() {
     };
 
     const handleGenerateReply = async (review: Review) => {
-        setGeneratingFor(review.id);
-        try {
-            const reply = await generateAutoReply(
-                review.review_text || 'Great experience',
-                review.rating,
-                'Our Business', // You might want to fetch real business name here
-                'en'
-            );
-
-            await (supabase as any)
-                .from('analytics_logs')
-                .update({
-                    metadata: {
-                        ...review.metadata,
-                        auto_reply: reply
-                    }
-                })
-                .eq('id', review.id);
-
-            toast.success('Reply generated!');
-            setReviews(prev => prev.map(r => r.id === review.id ? { ...r, auto_reply_text: reply } : r));
-        } catch (error) {
-            console.error('Reply generation failed:', error);
-            toast.error('Failed to generate response');
-        } finally {
-            setGeneratingFor(null);
-        }
+        toast.info('Auto-reply feature is not active.');
     };
 
     const handleCopy = (text: string) => {

@@ -1,11 +1,16 @@
-// AI Service — Two distinct functions:
-// 1. generateReviewSuggestions() — Customer-facing: AI-crafted review TEXT that customers can copy & post
-// 2. generateAutoReply() — Owner-facing: AI-assisted OWNER REPLIES to real customer reviews
+﻿// AI Service â€” Customer Review Suggestions
+// generateReviewSuggestions() â€” Customer-facing: AI-crafted review TEXT that customers can copy & post
 //
-// API Priority: Groq (primary) → Gemini (fallback) → Hugging Face (fallback) → Static templates
+// API Priority: Groq (primary) â†’ Gemini (fallback) â†’ Static templates
+//
+// ANTI-DETECTION STRATEGY:
+// - Reviews mimic real human writing patterns (varied length, casual grammar, personal stories)
+// - No keyword stuffing â€” location/service mentioned organically like a real customer would
+// - Each call generates completely unique reviews using random persona + style seeds
+// - Reviews vary between 15-80 words (real reviews have huge length variance)
+// - Some reviews have minor imperfections (informal grammar, abbreviations) for authenticity
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { generateAutoReply as generateHFReply } from './huggingface';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
@@ -18,115 +23,50 @@ export interface ReviewSuggestion {
     rating: number;
 }
 
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SECTION 1: CUSTOMER REVIEW SUGGESTIONS (ReviewLanding page)
-// These are SEO-rich review lines that CUSTOMERS select and post
-// ═══════════════════════════════════════════════════════════════
+// These are natural-sounding review lines that CUSTOMERS select and post
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// Category-specific review templates that customers would naturally write
-const CUSTOMER_REVIEW_TEMPLATES: Record<string, string[]> = {
-    'service': [
-        "Outstanding service quality! The team was professional, thorough, and attentive to every detail. Highly recommended!",
-        "Really impressed with the level of service. Quick turnaround, friendly staff, and excellent results. Will definitely come back!",
-        "Top-quality service from start to finish. They truly care about their customers and it shows in every interaction.",
-        "Professional and efficient service. The team went above expectations and delivered exceptional work. Five stars!",
-        "Excellent service experience! The staff was knowledgeable, helpful, and made the entire process seamless.",
-    ],
-    'staff': [
-        "The staff here is incredibly friendly and professional. They made me feel welcome from the moment I walked in. Great experience!",
-        "Amazing team! Everyone was so helpful and knowledgeable. They took the time to answer all my questions patiently.",
-        "Wonderful staff — courteous, efficient, and genuinely caring. It's rare to find such dedicated professionals. Highly recommend!",
-        "The team members are fantastic! Very attentive and skilled. They really know their craft and deliver quality work.",
-        "Friendly and professional staff. They go out of their way to make sure you're satisfied. Truly a great team!",
-    ],
-    'ambiance': [
-        "Beautiful place with a great atmosphere! Clean, well-maintained, and very welcoming. Perfect experience every time.",
-        "Love the ambiance here! Modern, clean, and comfortable. It's clear they put thought into creating a great environment.",
-        "The place looks fantastic — neat, well-organized, and inviting. Really adds to the overall great experience!",
-        "Great vibe and very clean. The attention to detail in how the place is maintained is impressive. Will visit again!",
-        "Wonderful atmosphere — bright, clean, and calming. Makes you feel right at home. Highly recommended!",
-    ],
-    'value': [
-        "Excellent value for money! High quality work at very reasonable prices. You won't find a better deal in town.",
-        "Great pricing for the quality offered. I was pleasantly surprised by how much value I got. Totally worth it!",
-        "Very affordable and the quality is outstanding. Best value I've found. Will definitely recommend to friends and family.",
-        "Fair pricing with premium quality. No hidden charges or surprises. Transparent and honest service — highly recommend!",
-        "Incredible value — the quality of work far exceeded my expectations for the price. Really impressed!",
-    ],
-    'overall': [
-        "Absolutely fantastic experience! Everything from start to finish was perfect. Would highly recommend to everyone!",
-        "One of the best experiences I've had. Professional, friendly, and great results. Definitely coming back!",
-        "Excellent all around — great service, wonderful staff, and amazing results. This place deserves all the five-star reviews!",
-        "Highly recommend this place! They deliver on every promise. Consistent quality and great customer care.",
-        "Had a wonderful experience. Everything was top-quality and the team is fantastic. Will definitely be a regular!",
-    ],
-};
+// Random persona pool â€” each review is written from a different "type" of person
+const PERSONA_POOL = [
+    "a busy working professional who rarely writes reviews",
+    "a first-time customer who was pleasantly surprised",
+    "a regular who has visited multiple times",
+    "a parent who brought their family along",
+    "someone who was recommended this place by a friend",
+    "a customer who compared this with competitors before choosing",
+    "a local resident from the neighbourhood",
+    "someone visiting the area for the first time",
+    "a senior citizen who values good service",
+    "a young college student on a budget",
+    "someone who had a bad experience elsewhere and tried this place",
+    "a person who initially had low expectations but was impressed",
+];
 
-// Business-specific keyword injections for SEO
-interface BusinessSEO {
-    keywords: string[];
-    locationHint: string;
-    serviceType: string;
-    naturalPhrases: string[];
-    customPromptRule?: string;
-}
+// Writing style variations â€” makes each review structurally different
+const STYLE_POOL = [
+    "very brief and to-the-point (10-15 words max)",
+    "medium length with one specific detail (20-30 words)",
+    "slightly longer with a mini personal story (30-50 words)",
+    "enthusiastic and emoji-friendly with 1-2 emojis naturally placed",
+    "calm and factual, listing what went well",
+    "casual and conversational, like texting a friend about it",
+    "includes a small constructive note but overall very positive",
+    "mentions comparing prices/quality with alternatives",
+];
 
-const BUSINESS_SEO_MAP: Record<string, BusinessSEO> = {
-    "creative mark": {
-        keywords: ["Pune", "branding", "advertising"],
-        locationHint: "in Pune",
-        serviceType: "advertising and branding",
-        naturalPhrases: [
-            "best advertising agency in Pune",
-            "creative branding solutions in Pune",
-            "top marketing agency in Pune",
-        ],
-    },
-    "creative mark advertising": {
-        keywords: ["Pune", "branding", "advertising"],
-        locationHint: "in Pune",
-        serviceType: "advertising and branding",
-        naturalPhrases: [
-            "best advertising agency in Pune",
-            "creative branding solutions in Pune",
-            "top marketing agency in Pune",
-        ],
-    },
-    "poonawala travels": {
-        keywords: ["Mumbai to Pune", "Nagpur", "Maharashtra", "taxi", "outstation cab service"],
-        locationHint: "for Mumbai-Pune and outstation trips across Maharashtra",
-        serviceType: "taxi and travel",
-        naturalPhrases: [
-            "best cab service Mumbai to Pune",
-            "reliable taxi for Mumbai-Pune route",
-            "great outstation cab service in Maharashtra",
-            "comfortable travel experience",
-            "excellent cab service for Maharashtra travel",
-        ],
-        customPromptRule: "CRITICAL EXACT REQUIREMENT: You MUST generate exactly 5 reviews following this breakdown:\n- 3 generic reviews focusing on the safe travel experience, experienced drivers, and good condition cars.\n- 2 location-specific reviews mentioning travel specifically from Mumbai to Pune, Pune to Mumbai, or other outstation routes across Maharashtra.",
-    },
-    "poonawala cab service": {
-        keywords: ["Mumbai to Pune", "Nagpur", "Maharashtra", "taxi", "outstation cab service"],
-        locationHint: "for Mumbai-Pune and outstation trips across Maharashtra",
-        serviceType: "taxi and travel",
-        naturalPhrases: [
-            "best cab service Mumbai to Pune",
-            "reliable taxi for Mumbai-Pune route",
-            "great outstation cab service in Maharashtra",
-            "comfortable travel experience",
-            "excellent cab service for Maharashtra travel",
-        ],
-        customPromptRule: "CRITICAL EXACT REQUIREMENT: You MUST generate exactly 5 reviews following this breakdown:\n- 3 generic reviews focusing on the safe travel experience, experienced drivers, and good condition cars.\n- 2 location-specific reviews mentioning travel specifically from Mumbai to Pune, Pune to Mumbai, or other outstation routes across Maharashtra.",
-    },
-};
-
-function getBusinessSEO(businessName: string): BusinessSEO | null {
-    const lower = businessName.toLowerCase();
-    for (const [key, value] of Object.entries(BUSINESS_SEO_MAP)) {
-        if (lower.includes(key)) return value;
-    }
-    return null;
-}
+// Human imperfection patterns to inject realism
+const IMPERFECTION_HINTS = [
+    "Use casual grammar like 'gonna', 'gotta', 'tbh', or 'ngl' once if it fits naturally.",
+    "Start the review mid-thought, like 'So I went here...' or 'Finally tried this place...'",
+    "Use '...' or a dash mid-sentence like real people do when typing quickly.",
+    "Skip capitalization at the start like many mobile users do.",
+    "Use a common abbreviation like 'def', 'prob', 'obv', or 'esp' once.",
+    "Write completely normally â€” this reviewer is articulate.",
+    "Write completely normally â€” this reviewer is articulate.",
+    "Write completely normally â€” this reviewer is articulate.",
+];
 
 // Shuffle array helper
 function shuffleArray<T>(arr: T[]): T[] {
@@ -138,9 +78,46 @@ function shuffleArray<T>(arr: T[]): T[] {
     return shuffled;
 }
 
+// Pick N random unique items from an array
+function pickRandom<T>(arr: T[], count: number): T[] {
+    return shuffleArray(arr).slice(0, count);
+}
+
+// Generate a unique seed to prevent caching/repetition across calls
+function generateSessionSeed(): string {
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+}
+
+/**
+ * Build the business context string for AI prompts.
+ * Focuses on natural, organic information â€” no keyword stuffing.
+ */
+function buildBusinessContext(
+    businessName: string,
+    businessContext: string,
+    businessLocation: string,
+    mapUrl: string
+): string {
+    const parts: string[] = [`Business: "${businessName}"`];
+
+    if (businessContext) {
+        parts.push(`Type: ${businessContext}`);
+    }
+    if (businessLocation) {
+        parts.push(`Located in: ${businessLocation}`);
+    }
+
+    // Extract city hint from Google Maps URL if present (but don't force it)
+    if (mapUrl && !businessLocation) {
+        parts.push(`The customer visited this business (Maps link available â€” if you can infer a city/area from context, mention it once naturally. If not, skip location entirely.)`);
+    }
+
+    return parts.join('. ') + '.';
+}
+
 /**
  * CUSTOMER-FACING: Generate review suggestions that customers can copy & post on Google.
- * These are SEO-rich, natural-sounding customer reviews (NOT owner replies).
+ * Each call produces completely unique, human-sounding reviews using random personas and styles.
  */
 export async function generateReviewSuggestions(
     businessName: string,
@@ -151,44 +128,49 @@ export async function generateReviewSuggestions(
     mapUrl: string = '',
     tone: string = 'Professional'
 ): Promise<ReviewSuggestion[]> {
-    const seo = getBusinessSEO(businessName);
+    const sessionSeed = generateSessionSeed();
+    const contextStr = buildBusinessContext(businessName, businessContext, businessLocation, mapUrl);
 
-    // Determine category from business context
-    let category = 'overall';
-    const contextLower = (businessContext || '').toLowerCase();
-    if (contextLower.includes('service')) category = 'service';
-    else if (contextLower.includes('staff') || contextLower.includes('behavior')) category = 'staff';
-    else if (contextLower.includes('ambiance') || contextLower.includes('atmosphere')) category = 'ambiance';
-    else if (contextLower.includes('value') || contextLower.includes('money')) category = 'value';
+    // Pick random personas and styles for this batch
+    const personas = pickRandom(PERSONA_POOL, 5);
+    const styles = pickRandom(STYLE_POOL, 5);
+    const imperfections = pickRandom(IMPERFECTION_HINTS, 5);
+
+    // Generate random star ratings for variety (mostly 5, some 4)
+    const ratings = shuffleArray([5, 5, 5, 4, 5]).slice(0, 5);
+
+    // Build the per-review instructions
+    const reviewInstructions = personas.map((persona, i) => {
+        return `Review ${i + 1} (${ratings[i]} stars): Written by ${persona}. Style: ${styles[i]}. ${imperfections[i]}`;
+    }).join('\n');
 
     // 1. Try AI-generated customer reviews via Groq
     try {
         if (!GROQ_API_KEY) throw new Error("No Groq key");
 
-        const seoContext = seo
-            ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint || businessLocation || ''}).\n${seo.customPromptRule || `Naturally include ONE of: ${seo.naturalPhrases.join(', ')}.`}`
-            : `Business Name: "${businessName}".\n${businessLocation ? `Location: "${businessLocation}". CRITICAL: You must include "${businessLocation}" naturally in at least 2 reviews.` : ''}\n${mapUrl ? `Map URL: "${mapUrl}". IF this URL contains a city or location name, use that location naturally in at least 2 reviews. IF NOT, DO NOT mention ANY specific city/location.` : ''}\n${businessContext ? `Business Type / Industry: "${businessContext}".` : ''}`;
+        const prompt = `You are generating 5 sample Google review texts that a real customer might write after a good experience.
 
-        const prompt = `Generate 5 unique, authentic-sounding Google review texts for a ${rating}-star review of a business.
+${contextStr}
+Language: ${language === 'en' ? 'English' : language === 'hi' ? 'Hindi' : language === 'mr' ? 'Marathi' : 'English'}
+Session: ${sessionSeed}
 
-${seoContext}
-Review focus: ${category}
-Language: ${language}
+Each review must be written from a DIFFERENT perspective:
+${reviewInstructions}
 
-STRICT RULES:
-- Write AS A CUSTOMER, not as the business owner
-- Each review should be 15-30 words
-- Sound natural and genuine, like a real person wrote it
-- Each review must be different in structure and wording
-- Naturally mention the location "${businessLocation}" if provided
-- IF a location is NOT provided or cannot be found in the Map URL, DO NOT make up a city like Bengaluru. Skip mentioning location.
-- **CRITICAL:** NEVER output a URL linking inside the review text!
-- Do NOT include phrases like "drive real results", "exceed expectations", "game-changer"
-- Do NOT mention "digital marketing" unless the business is specifically about that
-- Use exclamation marks naturally, not excessively
-- Do NOT start every review with the same word
+CRITICAL RULES FOR NATURAL REVIEWS:
+- Write exactly as a REAL customer would type on their phone â€” not like marketing copy
+- Each review MUST be completely different in structure, tone, length, and opening word
+- Vary lengths naturally: some reviews are 10 words, some are 50+ words. Real people write differently.
+- ${businessLocation ? `Only 1-2 reviews should casually mention "${businessLocation}" â€” the way a real person would (e.g., "this place near [area]" or just mentioning the locality once). The other reviews should NOT mention any location at all.` : 'Do NOT mention any specific city or location â€” the customer is just reviewing the experience.'}
+- NEVER use these phrases: "highly recommended", "top-notch", "exceeded expectations", "game-changer", "second to none", "unparalleled", "world-class", "best in class", "cutting-edge"
+- NEVER start multiple reviews the same way
+- NEVER use more than one exclamation mark per review
+- Some reviews should mention something SPECIFIC (a person's name like "Rahul at the counter", a specific service/product, waiting time, pricing observation, comparison with alternatives)
+- 1-2 reviews can have a tiny constructive note (e.g., "parking was tricky but..." or "wish they had more options but...") â€” this makes reviews look dramatically more real
+- Do NOT output any URLs, links, hashtags, or @mentions
+- Do NOT use the word "SEO" or reference search optimization in any way
 
-Output exactly 5 review lines, one per line. No numbering, no quotes, no other text.`;
+Output exactly 5 reviews, one per line. No numbering, no quotes, no labels, no extra text. Just the 5 review lines.`;
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: 'POST',
@@ -201,12 +183,12 @@ Output exactly 5 review lines, one per line. No numbering, no quotes, no other t
                 messages: [
                     {
                         role: "system",
-                        content: "You are a helpful assistant that writes authentic, natural-sounding Google review texts from a customer's perspective. Output only the review text lines."
+                        content: "You write authentic Google reviews from a real customer's perspective. You mimic how real humans type on phones â€” casual, genuine, sometimes imperfect. You never write marketing copy or SEO-optimized text. Output only the review lines, nothing else."
                     },
                     { role: "user", content: prompt }
                 ],
-                temperature: 0.9,
-                max_tokens: 400,
+                temperature: 1.0,
+                max_tokens: 600,
             })
         });
 
@@ -214,363 +196,112 @@ Output exactly 5 review lines, one per line. No numbering, no quotes, no other t
 
         const data = await response.json();
         const content = data.choices?.[0]?.message?.content || '';
-        const lines = content.split('\n').map((l: string) => l.replace(/^\d+[\.\)]\s*/, '').replace(/^["']|["']$/g, '').trim()).filter((l: string) => l.length > 10 && l.length < 200);
+        const lines = content
+            .split('\n')
+            .map((l: string) => l.replace(/^\d+[\.\)]\s*/, '').replace(/^["']|["']$/g, '').replace(/^[-â€¢]\s*/, '').trim())
+            .filter((l: string) => l.length > 8 && l.length < 300);
 
         if (lines.length >= 3) {
-            console.log("✅ Customer review suggestions generated via Groq");
-            return lines.slice(0, 5).map((text: string) => ({ text, rating }));
+            console.log("âœ… Natural review suggestions generated via Groq");
+            return lines.slice(0, 5).map((text: string, i: number) => ({
+                text,
+                rating: ratings[i] || 5
+            }));
         }
         throw new Error("Insufficient Groq results");
 
     } catch (groqError) {
-        console.warn("🔻 Groq failed for customer reviews, trying Gemini:", groqError);
+        console.warn("ðŸ”» Groq failed for customer reviews, trying Gemini:", groqError);
 
         // 2. Try Gemini
         try {
             if (!GEMINI_API_KEY) throw new Error("No Gemini key");
 
-            const seoContext = seo
-                ? `Business: "${businessName}" (${seo.serviceType} ${seo.locationHint || businessLocation || ''}).\n${seo.customPromptRule || ''}`
-                : `Business Name: "${businessName}".\n${businessLocation ? `Location: "${businessLocation}". Naturally mention this location.` : ''}\n${mapUrl ? `Map URL: "${mapUrl}". Try to extract and use the city from here. If none found, DO NOT make up a city like Bengaluru.` : ''}\n${businessContext ? `Business Type: "${businessContext}".` : ''}`;
+            const prompt = `Write 5 authentic Google reviews as if 5 different real customers typed them on their phones after visiting this business.
 
-            const prompt = `Write 5 short, authentic Google review texts as a happy customer of this business.
-${seoContext}
-Category focus: ${category}. Rating: ${rating} stars.
-Each review: 15-30 words, natural tone, specific details. NEVER output the map link or any URL in the review text.
-Output only the 5 review lines, one per line.`;
+${contextStr}
+Session: ${sessionSeed}
+
+Perspectives:
+${reviewInstructions}
+
+Rules:
+- Each review must sound completely different from the others (different length, tone, opening)
+- Write like real people, not like AI or marketing. Include casual language where appropriate.
+- Vary lengths: mix of short (10-15 words), medium (20-35 words), and one longer review (40-60 words)
+- ${businessLocation ? `Mention "${businessLocation}" casually in maximum 1-2 reviews only.` : 'Skip mentioning any location.'}
+- NEVER use: "highly recommended", "exceeded expectations", "top-notch", "world-class", "game-changer"
+- 1 review should include a tiny constructive note (but overall positive)
+- Include 1-2 specific details (staff name, wait time, specific service used, price observation)
+- NEVER output URLs or links
+- Output 5 review lines only, one per line. No numbering or formatting.`;
 
             const result = await geminiModel.generateContent(prompt);
             const content = result.response.text();
-            const lines = content.split('\n').map(l => l.replace(/^\d+[\.\)]\s*/, '').replace(/^["']|["']$/g, '').trim()).filter(l => l.length > 10 && l.length < 200);
+            const lines = content
+                .split('\n')
+                .map(l => l.replace(/^\d+[\.\)]\s*/, '').replace(/^["']|["']$/g, '').replace(/^[-â€¢]\s*/, '').trim())
+                .filter(l => l.length > 8 && l.length < 300);
 
             if (lines.length >= 3) {
-                console.log("✅ Customer review suggestions generated via Gemini");
-                return lines.slice(0, 5).map(text => ({ text, rating }));
+                console.log("âœ… Natural review suggestions generated via Gemini");
+                return lines.slice(0, 5).map((text, i) => ({
+                    text,
+                    rating: ratings[i] || 5
+                }));
             }
             throw new Error("Insufficient Gemini results");
 
         } catch (geminiError) {
-            console.warn("🔻 Gemini failed for customer reviews, using templates:", geminiError);
+            console.warn("ðŸ”» Gemini failed for customer reviews, using natural templates:", geminiError);
         }
     }
 
-    // 3. Fallback: Use static customer review templates
-    const templates = CUSTOMER_REVIEW_TEMPLATES[category] || CUSTOMER_REVIEW_TEMPLATES['overall'];
-    const shuffled = shuffleArray(templates);
-
-    // Inject business name/SEO naturally into some templates
-    const suggestions = shuffled.slice(0, 5).map(text => {
-        let enhancedText = text;
-        if (seo && Math.random() > 0.5) {
-            // Append a natural SEO phrase to some reviews
-            const seoPhrases = [
-                ` Truly the ${seo.naturalPhrases[Math.floor(Math.random() * seo.naturalPhrases.length)]}!`,
-                ` Great experience ${seo.locationHint}.`,
-            ];
-            enhancedText += seoPhrases[Math.floor(Math.random() * seoPhrases.length)];
-        }
-        return { text: enhancedText, rating };
-    });
-
-    console.log("📋 Customer review suggestions generated from templates");
-    return suggestions;
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-// SECTION 2: OWNER AUTO-REPLY (Reviews.tsx management page)
-// These are AI-assisted OWNER RESPONSES to real customer reviews
-// ═══════════════════════════════════════════════════════════════
-
-// --- BANNED PHRASES for owner replies ---
-const BANNED_PHRASES = [
-    "drive real results",
-    "exceed expectations",
-    "game-changer",
-    "exceptional service quality",
-    "creative mark advertising",
-    "digital marketing",
-    "go above and beyond",
-    "cutting-edge",
-    "revolutionary",
-    "best in class",
-    "second to none",
-    "unparalleled",
-    "world-class",
-    "top-notch",
-];
-
-// --- OWNER RESPONSE VARIATION SYSTEM ---
-let lastResponseIndex = -1;
-let lastOpeningIndex = -1;
-
-const OWNER_OPENINGS = [
-    "Thank you for",
-    "We appreciate",
-    "Thanks for",
-    "We're grateful for",
-    "Much appreciated —",
-    "We value",
-    "It means a lot —",
-    "How kind of you —",
-    "We're glad to hear",
-    "We truly appreciate",
-];
-
-const OWNER_CLOSINGS = [
-    "We look forward to serving you again.",
-    "Hope to see you again soon.",
-    "Your support means a lot to our team.",
-    "We're here whenever you need us.",
-    "Thank you for being a valued customer.",
-    "Wishing you all the best.",
-    "Feel free to reach out anytime.",
-    "We're always happy to help.",
-];
-
-// Business-specific context for owner responses
-interface OwnerBusinessContext {
-    keywords: string[];
-    locationHint: string;
-    serviceType: string;
-}
-
-const OWNER_BUSINESS_MAP: Record<string, OwnerBusinessContext> = {
-    "creative mark": {
-        keywords: ["Pune", "branding", "advertising services"],
-        locationHint: "Pune-based",
-        serviceType: "digital marketing",
-    },
-    "creative mark advertising": {
-        keywords: ["Pune", "branding", "advertising services"],
-        locationHint: "Pune-based",
-        serviceType: "digital marketing",
-    },
-    "poonawala travels": {
-        keywords: ["Mumbai to Pune", "Nagpur", "Maharashtra", "taxi service", "outstation cab rental"],
-        locationHint: "Mumbai-Pune route and all over Maharashtra",
-        serviceType: "taxi and outstation travel",
-    },
-    "poonawala cab service": {
-        keywords: ["Mumbai to Pune", "Nagpur", "Maharashtra", "taxi service", "outstation cab rental"],
-        locationHint: "Mumbai-Pune route and all over Maharashtra",
-        serviceType: "taxi and outstation travel",
-    },
-};
-
-function getOwnerBusinessContext(businessName: string): OwnerBusinessContext | null {
-    const lower = businessName.toLowerCase();
-    for (const [key, value] of Object.entries(OWNER_BUSINESS_MAP)) {
-        if (lower.includes(key)) return value;
-    }
-    return null;
-}
-
-interface OwnerResponseTemplate {
-    generate: (params: {
-        reviewDetail: string;
-        benefitMentioned: string;
-        businessName: string;
-        serviceHighlight: string;
-        businessCtx: OwnerBusinessContext | null;
-    }) => string;
-}
-
-const OWNER_RESPONSE_TEMPLATES: OwnerResponseTemplate[] = [
-    {
-        generate: ({ reviewDetail, benefitMentioned, businessName, businessCtx }) => {
-            const opening = getNextOwnerOpening();
-            const locationStr = businessCtx ? `our ${businessCtx.locationHint} ` : "";
-            return `${opening} ${reviewDetail}. We're pleased that ${benefitMentioned}. ${businessName} remains committed to ${locationStr}quality service.`;
-        },
-    },
-    {
-        generate: ({ reviewDetail, businessName, serviceHighlight, businessCtx }) => {
-            const opening = getNextOwnerOpening();
-            const keyword = businessCtx ? ` in ${businessCtx.keywords[0]}` : "";
-            return `${opening} your kind words about ${serviceHighlight}. Our team's commitment to professional and reliable service${keyword} is what drives us at ${businessName}.`;
-        },
-    },
-    {
-        generate: ({ businessName, businessCtx }) => {
-            const opening = getNextOwnerOpening();
-            const serviceType = businessCtx?.serviceType || "quality service";
-            const closing = getNextOwnerClosing();
-            return `${opening} choosing ${businessName} for ${serviceType}. ${closing}`;
-        },
-    },
-    {
-        generate: ({ reviewDetail, businessName, businessCtx }) => {
-            const opening = getNextOwnerOpening();
-            const keyword = businessCtx ? ` Our ${businessCtx.locationHint} team` : " Our team";
-            return `${opening} ${reviewDetail}.${keyword} at ${businessName} works hard to deliver a positive experience every time. ${getNextOwnerClosing()}`;
-        },
-    },
-    {
-        generate: ({ businessName, benefitMentioned, businessCtx }) => {
-            const opening = getNextOwnerOpening();
-            const serviceType = businessCtx?.serviceType || "our services";
-            return `${opening} trusting ${businessName} with ${serviceType}. Glad to know ${benefitMentioned}. ${getNextOwnerClosing()}`;
-        },
-    },
-];
-
-function getNextOwnerOpening(): string {
-    let idx: number;
-    do {
-        idx = Math.floor(Math.random() * OWNER_OPENINGS.length);
-    } while (idx === lastOpeningIndex);
-    lastOpeningIndex = idx;
-    return OWNER_OPENINGS[idx];
-}
-
-function getNextOwnerClosing(): string {
-    return OWNER_CLOSINGS[Math.floor(Math.random() * OWNER_CLOSINGS.length)];
-}
-
-function getNextOwnerTemplate(): OwnerResponseTemplate {
-    let idx: number;
-    do {
-        idx = Math.floor(Math.random() * OWNER_RESPONSE_TEMPLATES.length);
-    } while (idx === lastResponseIndex);
-    lastResponseIndex = idx;
-    return OWNER_RESPONSE_TEMPLATES[idx];
-}
-
-function sanitizeResponse(text: string): string {
-    let cleaned = text;
-    for (const phrase of BANNED_PHRASES) {
-        const regex = new RegExp(phrase, 'gi');
-        cleaned = cleaned.replace(regex, '');
-    }
-    cleaned = cleaned.replace(/\s{2,}/g, ' ').replace(/\s\./g, '.').replace(/\s,/g, ',').trim();
-    cleaned = cleaned.replace(/^["']|["']$/g, '').trim();
-    return cleaned;
-}
-
-function extractReviewDetails(reviewText: string): { detail: string; benefit: string; highlight: string } {
-    const sentences = reviewText.split(/[.!?]+/).filter(s => s.trim().length > 3);
-    const firstSentence = sentences[0]?.trim() || 'your feedback';
-
-    const positiveWords = ['great', 'excellent', 'good', 'fast', 'quick', 'helpful', 'professional', 'friendly', 'amazing', 'wonderful', 'clean', 'nice'];
-    let benefit = 'you had a positive experience';
-    let highlight = 'our service';
-
-    for (const word of positiveWords) {
-        if (reviewText.toLowerCase().includes(word)) {
-            benefit = `you found our service ${word}`;
-            highlight = `our ${word} service`;
-            break;
-        }
-    }
-
-    return {
-        detail: firstSentence.length > 60 ? firstSentence.substring(0, 57) + '...' : firstSentence,
-        benefit,
-        highlight,
-    };
+    // 3. Fallback: Natural-sounding static templates (rewritten to sound human)
+    return generateNaturalFallbacks(businessName, businessLocation, ratings);
 }
 
 /**
- * OWNER-FACING: Generate AI-assisted owner response to a real customer review.
- * Each call produces a DIFFERENT response using the variation system.
+ * Generate natural-sounding fallback reviews when AI APIs are unavailable.
+ * These are designed to sound like real human reviews, not marketing copy.
  */
-export async function generateAutoReply(
-    reviewText: string,
-    rating: number,
+function generateNaturalFallbacks(
     businessName: string,
-    language: string = 'en'
-): Promise<string> {
-    const businessCtx = getOwnerBusinessContext(businessName);
-    const { detail, benefit, highlight } = extractReviewDetails(reviewText);
+    location: string,
+    ratings: number[]
+): ReviewSuggestion[] {
+    const loc = location ? ` near ${location}` : '';
 
-    const uniqueSessionId = Math.random().toString(36).substring(7);
-    const sentimentLabel = rating >= 4 ? 'positive' : rating === 3 ? 'neutral' : 'negative';
+    // Large pool of natural-sounding templates with varied styles
+    const allTemplates = [
+        // Short and sweet (10-20 words)
+        `Really happy with the service. Clean place, quick work, fair price. Will be back for sure.`,
+        `Good experience overall. The staff was friendly and got things done fast.`,
+        `Visited for the first time and wasn't disappointed at all. Solid work.`,
+        `Pretty good${loc}. Went with a friend's recommendation and it was worth it.`,
+        `They know what they're doing here. No complaints from my side.`,
+        `Decent place, decent pricing. Nothing fancy but gets the job done well.`,
 
-    const locationContext = businessCtx
-        ? `Business location: ${businessCtx.locationHint}. Service type: ${businessCtx.serviceType}. Use ONE of these naturally: ${businessCtx.keywords.join(', ')}.`
-        : '';
+        // Medium with specific details (20-35 words)
+        `${businessName} was a pleasant surprise. I was skeptical at first but the team really took care of everything professionally. Would go again.`,
+        `Went here last week${loc} and had a great experience. The person who helped me was really patient and explained everything clearly.`,
+        `Third time coming here and the quality has been consistent every single time. That says a lot about how they run things.`,
+        `A friend dragged me here saying it was the best${loc}. Honestly, she wasn't wrong. The attention to detail is impressive.`,
+        `Compared this with a couple of other options before deciding. Glad I chose ${businessName} â€” definitely better value.`,
 
-    const prompt = `You are the owner of "${businessName}". Write a SHORT professional owner reply to this ${rating}-star customer review.
+        // Longer with mini stories (35-60 words)
+        `I was looking for something reliable${loc} and stumbled upon ${businessName}. From the moment I walked in, the vibe was just... comfortable? The staff didn't pressure me at all, answered all my questions, and the final result was exactly what I wanted. Really refreshing experience.`,
+        `So I finally tried ${businessName} after seeing good reviews online. Not gonna lie, I had high expectations and they actually delivered. The only thing I'd say is parking can be a bit tricky, but the service more than makes up for it.`,
+        `Had tried two other places before coming here and the difference is night and day. The team at ${businessName} actually listens to what you want instead of just pushing their own thing. Pricing was reasonable too.`,
 
-Customer review: "${reviewText}"
-Sentiment: ${sentimentLabel}
-Session: ${uniqueSessionId}
-${locationContext}
+        // With constructive notes (authentic feel)
+        `Good service and friendly staff. Only wish they had slightly longer working hours â€” I had to rush to get there before closing. But the work itself? No complaints.`,
+        `${businessName} does solid work${loc}. The wait was about 20 minutes which felt a bit long, but the end result made it worth it. Will probably book ahead next time.`,
+    ];
 
-STRICT RULES:
-- Maximum 35 words
-- DO NOT use these phrases: "drive real results", "exceed expectations", "game-changer", "exceptional service quality"
-- Maximum 1 service keyword per response
-- Be warm and genuine, not corporate
-- Vary sentence structure — mix short and medium sentences
-- DO NOT start with "Dear" — use casual professional tone
-- Output ONLY the reply text, no quotes, no formatting`;
-
-    // 1. Try Groq
-    try {
-        if (!GROQ_API_KEY) throw new Error("Groq Key Missing");
-
-        console.log("🚀 Generating owner response via Groq...");
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: "llama-3.1-8b-instant",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a business owner writing short, genuine replies to customer reviews. Never generate fake reviews. Output only the reply text."
-                    },
-                    { role: "user", content: prompt }
-                ],
-                temperature: 0.95,
-                max_tokens: 100,
-            })
-        });
-
-        if (!response.ok) throw new Error(`Groq API Error: ${response.status}`);
-
-        const data = await response.json();
-        const reply = data.choices?.[0]?.message?.content;
-
-        if (reply) {
-            return sanitizeResponse(reply);
-        }
-        throw new Error("Empty Groq response");
-
-    } catch (groqError) {
-        console.warn("🔻 Groq failed, switching to Gemini:", groqError);
-
-        // 2. Try Gemini
-        try {
-            const result = await geminiModel.generateContent(prompt);
-            const reply = result.response.text();
-            return sanitizeResponse(reply);
-        } catch (geminiError) {
-
-            // 3. Try Hugging Face
-            try {
-                console.log("⚠️ Falling back to Hugging Face for owner response...");
-                const hfReply = await generateHFReply(reviewText, rating, businessName, language);
-                return sanitizeResponse(hfReply);
-            } catch (hfError) {
-
-                // 4. Dynamic template fallback
-                console.error("❌ All AI APIs failed. Using template variation fallback.", hfError);
-                const template = getNextOwnerTemplate();
-                const fallbackReply = template.generate({
-                    reviewDetail: detail,
-                    benefitMentioned: benefit,
-                    businessName,
-                    serviceHighlight: highlight,
-                    businessCtx,
-                });
-                return sanitizeResponse(fallbackReply);
-            }
-        }
-    }
+    const shuffled = shuffleArray(allTemplates);
+    return shuffled.slice(0, 5).map((text, i) => ({
+        text,
+        rating: ratings[i] || 5
+    }));
 }
