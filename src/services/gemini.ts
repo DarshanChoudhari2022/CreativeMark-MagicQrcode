@@ -1,4 +1,4 @@
-﻿// AI Service â€” Customer Review Suggestions
+// AI Service â€” Customer Review Suggestions
 // generateReviewSuggestions() â€” Customer-facing: AI-crafted review TEXT that customers can copy & post
 //
 // API Priority: Groq (primary) â†’ Gemini (fallback) â†’ Static templates
@@ -148,16 +148,19 @@ export async function generateReviewSuggestions(
     try {
         if (!GROQ_API_KEY) throw new Error("No Groq key");
 
-        const prompt = `You are generating 5 sample Google review texts that a real customer might write after a good experience.
+        const langLabel = language === 'en' ? 'English' : language === 'hi' ? 'Hindi' : language === 'mr' ? 'Marathi' : 'English';
+        const categoryHint = businessContext ? `\nBUSINESS CATEGORY: ${businessContext}\nIMPORTANT: Every review MUST reference something specific to a "${businessContext}" business. For restaurants mention dishes/taste/portions. For salons mention haircut/styling/products. For clinics mention doctor/treatment. For gyms mention equipment/trainer.` : '';
 
-${contextStr}
-Language: ${language === 'en' ? 'English' : language === 'hi' ? 'Hindi' : language === 'mr' ? 'Marathi' : 'English'}
+        const prompt = `You are generating 5 sample Google review texts that a real customer might write after visiting a ${businessContext || 'local'} business.
+
+${contextStr}${categoryHint}
+Language: ${langLabel}
 Session: ${sessionSeed}
 
 Each review must be written from a DIFFERENT perspective:
 ${reviewInstructions}
 
-CRITICAL RULES FOR NATURAL REVIEWS:
+CRITICAL ANTI-DETECTION RULES (Google flags AI reviews):
 - Write exactly as a REAL customer would type on their phone â€” not like marketing copy
 - Each review MUST be completely different in structure, tone, length, and opening word
 - Vary lengths naturally: some reviews are 10 words, some are 50+ words. Real people write differently.
@@ -217,24 +220,26 @@ Output exactly 5 reviews, one per line. No numbering, no quotes, no labels, no e
         try {
             if (!GEMINI_API_KEY) throw new Error("No Gemini key");
 
-            const prompt = `Write 5 authentic Google reviews as if 5 different real customers typed them on their phones after visiting this business.
+            const categoryHint = businessContext ? `\nThis is a "${businessContext}" business. Each review MUST reference something specific to this category (e.g., food items for restaurants, treatments for salons, equipment for gyms, doctors for clinics).` : '';
 
-${contextStr}
+            const prompt = `Write 5 authentic Google reviews as if 5 different real customers typed them on their phones after visiting this ${businessContext || 'local'} business.
+
+${contextStr}${categoryHint}
 Session: ${sessionSeed}
 
 Perspectives:
 ${reviewInstructions}
 
-Rules:
-- Each review must sound completely different from the others (different length, tone, opening)
-- Write like real people, not like AI or marketing. Include casual language where appropriate.
-- Vary lengths: mix of short (10-15 words), medium (20-35 words), and one longer review (40-60 words)
-- ${businessLocation ? `Mention "${businessLocation}" casually in maximum 1-2 reviews only.` : 'Skip mentioning any location.'}
-- NEVER use: "highly recommended", "exceeded expectations", "top-notch", "world-class", "game-changer"
-- 1 review should include a tiny constructive note (but overall positive)
-- Include 1-2 specific details (staff name, wait time, specific service used, price observation)
-- NEVER output URLs or links
-- Output 5 review lines only, one per line. No numbering or formatting.`;
+Strict rules:
+- Each review must sound completely different (length, tone, opening word)
+- Write like real people on mobile — casual, genuine, sometimes grammatically imperfect
+- Mix lengths: 1 short (under 15 words), 2 medium (20-35 words), 2 longer (40-55 words)
+- ${businessLocation ? `Mention "${businessLocation}" in maximum 1 review only.` : 'Do NOT mention any location.'}
+- BANNED phrases: "highly recommended", "exceeded expectations", "top-notch", "world-class", "game-changer", "hidden gem", "exceptional", "phenomenal", "impeccable", "seamless", "above and beyond"
+- 1 review MUST have a small constructive note (parking, timing, menu variety etc.)
+- 2 reviews MUST mention a specific detail (staff name, specific service, wait time, price)
+- NEVER output URLs, links, or formatting
+- Output 5 review lines only, one per line. No numbering.`;
 
             const result = await geminiModel.generateContent(prompt);
             const content = result.response.text();
@@ -257,49 +262,75 @@ Rules:
         }
     }
 
-    // 3. Fallback: Natural-sounding static templates (rewritten to sound human)
-    return generateNaturalFallbacks(businessName, businessLocation, ratings);
+    // 3. Fallback: Category-aware humanized templates
+    return generateNaturalFallbacks(businessName, businessContext, businessLocation, ratings);
 }
 
 /**
  * Generate natural-sounding fallback reviews when AI APIs are unavailable.
- * These are designed to sound like real human reviews, not marketing copy.
+ * Category-aware: reviews reference details relevant to the business type.
  */
 function generateNaturalFallbacks(
     businessName: string,
+    category: string,
     location: string,
     ratings: number[]
 ): ReviewSuggestion[] {
     const loc = location ? ` near ${location}` : '';
+    const cat = category.toLowerCase();
 
-    // Large pool of natural-sounding templates with varied styles
-    const allTemplates = [
-        // Short and sweet (10-20 words)
-        `Really happy with the service. Clean place, quick work, fair price. Will be back for sure.`,
-        `Good experience overall. The staff was friendly and got things done fast.`,
-        `Visited for the first time and wasn't disappointed at all. Solid work.`,
-        `Pretty good${loc}. Went with a friend's recommendation and it was worth it.`,
-        `They know what they're doing here. No complaints from my side.`,
-        `Decent place, decent pricing. Nothing fancy but gets the job done well.`,
+    const pools: Record<string, string[]> = {
+        restaurant: [
+            `Finally tried ${businessName}${loc} and the food was genuinely good. Paneer was the best I've had in a while.`,
+            `Went for lunch with colleagues. Quick service, tasty food, fair prices.`,
+            `Good food, clean place. Waited 10 mins for a table on Saturday but worth it.`,
+            `My family comes here regularly. Kids love it, portions are generous. Parking is tight though.`,
+            `Ordered delivery twice this week. Food came hot both times. The biryani is legit.`,
+            `Decent spot for a quick meal${loc}. Taste is consistent every time.`,
+            `Tried on a friend's suggestion. Starters were amazing, mains were okay. Will come back.`,
+        ],
+        salon: [
+            `Got a haircut yesterday. Stylist actually listened to what I wanted. Happy with the result.`,
+            `Clean salon, good products. Prices are fair for the quality${loc}.`,
+            `Been coming to ${businessName} for 6 months. Consistent quality every time.`,
+            `The facial was relaxing. Skin felt great the next day. Will def book again.`,
+            `Walked in without appointment and they still took me. Neat work, maybe 30 mins total.`,
+        ],
+        clinic: [
+            `Doctor was thorough with the checkup. Didn't rush, explained everything clearly.`,
+            `Clean clinic, minimal wait time${loc}. Receptionist was helpful with booking.`,
+            `Visited for a dental issue. Treatment was painless. Good experience overall.`,
+            `Staff is genuinely caring. Follow-up calls after the visit was a nice touch.`,
+            `Well-equipped place. Doctors take time with each patient, unlike rushed consultations elsewhere.`,
+        ],
+        gym: [
+            `Joined ${businessName} two months ago. Good equipment, trainers correct your form. Worth it.`,
+            `Clean gym with proper ventilation${loc}. Not crowded in the mornings.`,
+            `Trainer made a custom plan based on my goals. Lost 4 kgs first month.`,
+            `Best vibe of any gym I've tried. Friendly people, no ego nonsense.`,
+            `Has everything I need - good machines, clean washrooms, flexible timings.`,
+        ],
+    };
 
-        // Medium with specific details (20-35 words)
-        `${businessName} was a pleasant surprise. I was skeptical at first but the team really took care of everything professionally. Would go again.`,
-        `Went here last week${loc} and had a great experience. The person who helped me was really patient and explained everything clearly.`,
-        `Third time coming here and the quality has been consistent every single time. That says a lot about how they run things.`,
-        `A friend dragged me here saying it was the best${loc}. Honestly, she wasn't wrong. The attention to detail is impressive.`,
-        `Compared this with a couple of other options before deciding. Glad I chose ${businessName} â€” definitely better value.`,
-
-        // Longer with mini stories (35-60 words)
-        `I was looking for something reliable${loc} and stumbled upon ${businessName}. From the moment I walked in, the vibe was just... comfortable? The staff didn't pressure me at all, answered all my questions, and the final result was exactly what I wanted. Really refreshing experience.`,
-        `So I finally tried ${businessName} after seeing good reviews online. Not gonna lie, I had high expectations and they actually delivered. The only thing I'd say is parking can be a bit tricky, but the service more than makes up for it.`,
-        `Had tried two other places before coming here and the difference is night and day. The team at ${businessName} actually listens to what you want instead of just pushing their own thing. Pricing was reasonable too.`,
-
-        // With constructive notes (authentic feel)
-        `Good service and friendly staff. Only wish they had slightly longer working hours â€” I had to rush to get there before closing. But the work itself? No complaints.`,
-        `${businessName} does solid work${loc}. The wait was about 20 minutes which felt a bit long, but the end result made it worth it. Will probably book ahead next time.`,
+    const generic = [
+        `Really happy with ${businessName}${loc}. Team was professional, got everything done on time.`,
+        `Visited first time based on a friend's rec. Wasn't disappointed. Good service.`,
+        `${businessName} does solid work. Compared other options, glad I chose here.`,
+        `Third time coming and quality is still consistent. Says a lot about how they run things.`,
+        `The person who helped me was patient and explained everything. Will come back.`,
+        `Good experience overall${loc}. Clean place, fair pricing, they care about the work.`,
+        `Tried ${businessName} after seeing reviews online. They delivered. Parking was tricky but service made up for it.`,
+        `Tried two other places before this. The difference is night and day. They actually listen.`,
+        `Good service, friendly staff. Only wish they had longer hours - had to rush before closing.`,
+        `${businessName} does solid work${loc}. Wait was about 20 mins but the result was worth it.`,
     ];
 
-    const shuffled = shuffleArray(allTemplates);
+    let pool = generic;
+    for (const [key, reviews] of Object.entries(pools)) {
+        if (cat.includes(key)) { pool = reviews; break; }
+    }
+
+    const shuffled = shuffleArray(pool);
     return shuffled.slice(0, 5).map((text, i) => ({
         text,
         rating: ratings[i] || 5

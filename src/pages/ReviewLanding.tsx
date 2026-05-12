@@ -151,22 +151,87 @@ const ReviewLanding = () => {
     }
   }, [location, campaign]);
 
-  // ─── Local Fallback Generator (zero API, instant) ───────────
+  // ─── Local Fallback Generator (zero API, instant, category-aware) ───
   const generateLocalFallbacks = (businessName: string): string[] => {
-    const locStr = location?.address ? ` in ${location.address}` : "";
-    const templates = [
-      `Excellent experience at ${businessName}${locStr}! Professional team and great quality service. Highly recommended!`,
-      `Very impressed with the service at ${businessName}. Friendly staff and outstanding results${locStr}. Will definitely visit again!`,
-      `Top-notch quality! ${businessName}${locStr} delivers on every promise. Great value for money and wonderful customer care.`,
-      `Had a fantastic time at ${businessName}. Everything was well-organized and the staff${locStr} was very helpful. Five stars!`,
-      `Best service I've experienced in a long time! ${businessName} truly cares about their customers${locStr}. Highly recommend!`,
+    const loc = location?.address ? ` near ${location.address}` : "";
+    const cat = (location?.category || "").toLowerCase();
+
+    // Category-specific review pools — sound like real customers
+    const categoryReviews: Record<string, string[]> = {
+      restaurant: [
+        `Finally tried ${businessName}${loc} and the food was genuinely good. The paneer dish was probably the best I've had in a while.`,
+        `Went here for lunch with colleagues. Quick service, tasty food, reasonable prices. The staff remembered our order from last time which was nice.`,
+        `Good food, clean place. Waited about 10 mins for a table on a Saturday but worth it. The thali was filling and fresh.`,
+        `My family's been coming to ${businessName} for months now. Kids love it, portions are generous. Only thing - parking is a bit tight.`,
+        `Ordered delivery from here twice this week. Food arrived hot both times. The biryani is legit.`,
+        `Decent place for a quick meal${loc}. Nothing too fancy but the taste is consistent every time.`,
+        `Tried ${businessName} on a friend's suggestion. The starters were amazing, mains were okay. Will come back to try more items.`,
+      ],
+      salon: [
+        `Got a haircut at ${businessName} yesterday. The stylist actually listened to what I wanted instead of doing their own thing. Really happy with how it turned out.`,
+        `Clean salon, good products, and the staff doesn't rush you. Prices are fair for the quality${loc}.`,
+        `Been going to ${businessName} for about 6 months now. Consistent quality every time. My go-to place for grooming.`,
+        `The facial I got here was really relaxing. Skin felt great the next day too. Will def book again.`,
+        `Walked in without appointment and they still took me in. Friendly team, neat work. Took maybe 30 mins total.`,
+        `${businessName}${loc} does good work. I was nervous about trying a new salon but the stylist was skilled and patient.`,
+        `Brought my mom here for a hair treatment. She loved it. The place is well-maintained and hygienic.`,
+      ],
+      clinic: [
+        `Dr. at ${businessName} was very thorough with the checkup. Didn't rush at all, explained everything clearly.`,
+        `Clean clinic, minimal wait time. The receptionist was helpful with the appointment booking${loc}.`,
+        `Visited ${businessName} for a dental issue. Treatment was painless and the doctor was very reassuring. Good experience overall.`,
+        `The staff here is genuinely caring. Follow-up calls after the visit was a nice touch.`,
+        `${businessName}${loc} is well-equipped and the doctors take time with each patient. Not like those rushed 2-min consultations elsewhere.`,
+        `Brought my kid here for a checkup. The doc was great with children, made the whole experience stress-free.`,
+        `Reasonable consultation fee for the quality of care. The pharmacy inside is convenient too.`,
+      ],
+      gym: [
+        `Joined ${businessName} two months ago. Good equipment, trainers actually correct your form. Worth the membership.`,
+        `Clean gym with proper ventilation${loc}. Not too crowded in the mornings which I appreciate.`,
+        `The trainer at ${businessName} made a custom plan for me based on my goals. Lost 4 kgs in the first month. Solid place.`,
+        `Been trying different gyms and this one has the best vibe. People are friendly, no ego lifting nonsense.`,
+        `${businessName} has everything I need — good machines, clean washrooms, and flexible timings. No complaints.`,
+        `Started going here after a friend recommended it. The trial session convinced me to sign up.`,
+      ],
+      shop: [
+        `Good selection and fair prices at ${businessName}${loc}. The owner helped me pick the right product for my budget.`,
+        `Bought a few things from here last week. Quality was good and they even offered home delivery.`,
+        `${businessName} has become my regular shop. They stock genuine products and don't overprice anything.`,
+        `Went in just to browse but the staff was so helpful I ended up buying. No pushy sales tactics.`,
+        `Decent shop with good variety. The billing was quick and they packed everything neatly.`,
+        `Compared prices with online and ${businessName} was actually cheaper for the same brand. Plus you can see the product before buying.`,
+      ],
+    };
+
+    // Generic pool — used when category doesn't match or is empty
+    const genericReviews = [
+      `Really happy with ${businessName}${loc}. The team was professional and got everything done on time.`,
+      `Visited for the first time based on a friend's recommendation. Wasn't disappointed at all. Good service, friendly people.`,
+      `${businessName} does solid work. I compared with other options before choosing and glad I went with them.`,
+      `Third time coming here and the quality has been consistent. That says a lot about how they run things.`,
+      `The person who helped me at ${businessName} was patient and explained everything clearly. Will come back for sure.`,
+      `Good experience overall${loc}. Clean place, reasonable pricing, and they actually care about doing a good job.`,
+      `${businessName} is my go-to now. Tried a couple other places before but this one is consistently better.`,
+      `Went here last week and had a smooth experience. No unnecessary upselling, just honest service.`,
+      `A friend dragged me here saying it was good${loc}. She was right. The attention to detail is impressive.`,
+      `Decent place, fair pricing. Nothing fancy but they get the job done well. The staff is polite.`,
     ];
-    // Shuffle so it's different each time
-    for (let i = templates.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [templates[i], templates[j]] = [templates[j], templates[i]];
+
+    // Pick the right pool based on category keywords
+    let pool = genericReviews;
+    for (const [key, reviews] of Object.entries(categoryReviews)) {
+      if (cat.includes(key)) {
+        pool = reviews;
+        break;
+      }
     }
-    return templates;
+
+    // Shuffle and pick 5
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, 5);
   };
 
   // ─── Handle Tap on a Suggestion ─────────────────────────────
