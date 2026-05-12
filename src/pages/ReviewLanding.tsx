@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
   Star, Loader2, ExternalLink, CheckCircle2,
-  Sparkles, Copy, RefreshCw, ArrowRight,
+  Sparkles, RefreshCw, ArrowRight,
   Award, ArrowLeft, HandMetal, Pencil, Check,
   Camera, ImagePlus
 } from "lucide-react";
@@ -46,7 +46,6 @@ const ReviewLanding = () => {
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
@@ -109,7 +108,6 @@ const ReviewLanding = () => {
     const id = ++fetchIdRef.current;
     setLoadingSuggestions(true);
     setSelectedSuggestion(null);
-    setCopied(false);
     setEditingIndex(null);
 
     try {
@@ -234,46 +232,34 @@ const ReviewLanding = () => {
     return pool.slice(0, 5);
   };
 
-  // ─── Handle Tap on a Suggestion ─────────────────────────────
+  // ─── Handle Tap on a Suggestion (Google-Compliant: NO clipboard copy) ───
   const handleSelectReview = async (text: string) => {
     if (redirecting) return; // Prevent double-tap
 
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setSelectedSuggestion(text);
-      setRedirecting(true);
+    setSelectedSuggestion(text);
+    setRedirecting(true);
 
-      // Record the event
-      recordEvent('review_click', {
-        rating: selectedRating,
-        suggestion: text,
-      });
+    // Record the event
+    recordEvent('review_click', {
+      rating: selectedRating,
+      suggestion: text,
+    });
 
-      // Show photo tip before redirecting
-      setShowPhotoTip(true);
+    // Show photo tip before redirecting
+    setShowPhotoTip(true);
 
-      toast({
-        title: "✅ Review copied!",
-        description: "Opening Google Reviews — paste your review & add a photo!",
-      });
+    toast({
+      title: "✅ Great choice!",
+      description: "Opening Google — type your review in your own words!",
+    });
 
-      // Redirect after delay — give time to see photo tip
-      setTimeout(() => {
-        const url = location?.google_review_url || campaign?.google_review_url;
-        if (url) {
-          window.location.href = url;
-        }
-      }, 5000);
-    } catch (err) {
-      // Clipboard failed (rare on HTTPS) — show manual copy fallback
-      console.error('Clipboard failed:', err);
-      toast({
-        title: "Copy manually",
-        description: "Long-press the review text above to copy it.",
-        variant: "destructive",
-      });
-    }
+    // Redirect after delay — give time to read the idea
+    setTimeout(() => {
+      const url = location?.google_review_url || campaign?.google_review_url;
+      if (url) {
+        window.location.href = url;
+      }
+    }, 6000);
   };
 
   // ─── Refresh (get new set) ──────────────────────────────────
@@ -390,25 +376,25 @@ const ReviewLanding = () => {
           </div>
         </div>
 
-        {/* ─── Main Card: Review Suggestions ───────────────── */}
+        {/* ─── Main Card: Review Inspiration (Google-Compliant) ── */}
         <Card className="border border-slate-200 shadow-xl rounded-2xl overflow-hidden bg-white" style={{ animation: 'fadeInUp 0.8s ease-out' }}>
           <CardContent className="p-0">
             {/* Card Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-5 text-white text-center">
-              <h2 className="text-lg font-bold mb-1">Pick a review you like</h2>
+              <h2 className="text-lg font-bold mb-1">What would you like to mention?</h2>
               <p className="text-blue-100 text-xs">
-                Edit it to make it your own, or tap to copy & post on Google
+                Pick an idea below, then write your review in your own words on Google
               </p>
             </div>
 
-            {/* Instruction Banner with Animated Hand */}
+            {/* Instruction Banner */}
             {!selectedSuggestion && !loadingSuggestions && (
               <div className="bg-amber-50 border-b border-amber-100 px-5 py-3 flex items-center gap-3">
                 <div className="animate-bounce">
-                  <span className="text-2xl">👇</span>
+                  <span className="text-2xl">💡</span>
                 </div>
                 <p className="text-amber-800 text-sm font-medium">
-                  <strong>Step 1:</strong> Tap any review below to copy it
+                  <strong>Step 1:</strong> Tap an idea that matches your experience
                 </p>
               </div>
             )}
@@ -416,26 +402,38 @@ const ReviewLanding = () => {
             {/* Selected State — Photo Tip + Redirect */}
             {selectedSuggestion && (
               <div className="border-b border-green-100" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
-                {/* Copied confirmation */}
+                {/* Selection confirmation */}
                 <div className="bg-green-50 px-5 py-3 flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
                   <div>
-                    <p className="text-green-800 text-sm font-bold">Review copied! ✅</p>
-                    <p className="text-green-600 text-xs">Redirecting to Google Reviews...</p>
+                    <p className="text-green-800 text-sm font-bold">Great choice! ✅</p>
+                    <p className="text-green-600 text-xs">Opening Google — write this in your own words!</p>
                   </div>
                 </div>
-                {/* Photo tip banner */}
+                {/* Typing guidance + Photo tip */}
                 {showPhotoTip && (
-                  <div className="bg-blue-50 px-5 py-4 flex items-start gap-3" style={{ animation: 'fadeInUp 0.5s ease-out' }}>
-                    <div className="bg-blue-100 p-2 rounded-lg shrink-0">
-                      <Camera className="h-5 w-5 text-blue-600" />
+                  <div style={{ animation: 'fadeInUp 0.5s ease-out' }}>
+                    <div className="bg-amber-50 px-5 py-3 flex items-start gap-3 border-b border-amber-100">
+                      <div className="bg-amber-100 p-2 rounded-lg shrink-0">
+                        <Pencil className="h-4 w-4 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-amber-800 text-sm font-bold">✍️ Type it in your own words</p>
+                        <p className="text-amber-600 text-xs leading-relaxed mt-0.5">
+                          Use the idea above as inspiration — Google values <strong>genuine, unique reviews</strong> written by you!
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-blue-800 text-sm font-bold">📸 Pro tip: Add a photo!</p>
-                      <p className="text-blue-600 text-xs leading-relaxed mt-0.5">
-                        Reviews with photos get <strong>3x more views</strong> on Google.
-                        Snap a quick pic of the place, your purchase, or the team!
-                      </p>
+                    <div className="bg-blue-50 px-5 py-3 flex items-start gap-3">
+                      <div className="bg-blue-100 p-2 rounded-lg shrink-0">
+                        <Camera className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-blue-800 text-sm font-bold">📸 Add a photo for more impact!</p>
+                        <p className="text-blue-600 text-xs leading-relaxed mt-0.5">
+                          Reviews with photos are <strong>more trusted</strong> on Google.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -447,8 +445,8 @@ const ReviewLanding = () => {
               {loadingSuggestions ? (
                 <div className="py-12 text-center">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
-                  <p className="text-slate-500 text-sm font-medium">Writing fresh reviews...</p>
-                  <p className="text-slate-400 text-xs mt-1">Powered by AI ✨</p>
+                  <p className="text-slate-500 text-sm font-medium">Finding review ideas...</p>
+                  <p className="text-slate-400 text-xs mt-1">Based on your experience ✨</p>
                 </div>
               ) : (
                 <>
@@ -519,25 +517,14 @@ const ReviewLanding = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setEditingIndex(index);
-                                  setEditText(text);
-                                }}
-                                className="p-1.5 bg-slate-100 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                title="Edit Review"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
                                   if (!redirecting && !selectedSuggestion) {
                                     handleSelectReview(text);
                                   }
                                 }}
-                                className="p-1.5 bg-slate-100 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                title="Copy & Post"
+                                className="p-1.5 bg-blue-100 rounded-md text-blue-600 hover:bg-blue-200 transition-colors"
+                                title="Use this idea"
                               >
-                                <Copy className="h-4 w-4 text-blue-400" />
+                                <ArrowRight className="h-4 w-4" />
                               </button>
                             </div>
                           )}
@@ -554,7 +541,7 @@ const ReviewLanding = () => {
                         className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 text-xs font-semibold py-2 px-4 rounded-full hover:bg-blue-50 transition-colors"
                       >
                         <RefreshCw className="h-3.5 w-3.5" />
-                        Show different reviews
+                        Show different ideas
                       </button>
                     </div>
                   )}
@@ -641,7 +628,7 @@ const ReviewLanding = () => {
             </div>
             
             <p className="text-[9px] text-slate-300 italic px-6 mt-4 opacity-10">
-              Disclaimer: Provided as an AI assistance tool for review generation.
+              Review ideas for inspiration only. Customers write their own reviews.
             </p>
           </div>
         </footer>
