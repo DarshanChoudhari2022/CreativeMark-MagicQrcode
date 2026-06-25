@@ -31,8 +31,11 @@ export async function generateReviewSuggestions(
     const businessContext = businessType ? ` for a ${businessType} business` : '';
     const toneContext = tone ? ` with a ${tone} tone` : '';
 
+    const uniquenessSeed = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
     const systemPrompt = `Create 3 short editable Google Maps review ideas for a customer who genuinely visited "${businessName}"${businessContext}${toneContext}. The language must be ${languageMap[language] || 'English'}.
+  Unique request seed: ${uniquenessSeed}.
   Keep each idea between 12 and 35 words. Do not invent facts, staff names, menu items, prices, offers, or visit details. Do not ask for a specific rating or only positive content. Avoid SEO and exaggerated phrases like "highly recommended" or "must visit".
+  Each idea must have a different opening, sentence structure, and topic angle. Do not output duplicate or closely paraphrased ideas.
   Return strictly a JSON array of strings. Do not include any explanation or markdown.`;
 
     try {
@@ -43,7 +46,7 @@ export async function generateReviewSuggestions(
                 { role: "user", content: "Generate the reviews now." }
             ],
             max_tokens: 250,
-            temperature: 0.7,
+            temperature: 0.8,
         });
 
         const text = response.choices[0].message.content || '[]';

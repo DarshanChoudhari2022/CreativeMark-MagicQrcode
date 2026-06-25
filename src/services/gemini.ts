@@ -63,6 +63,10 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled;
 }
 
+function createUniquenessSeed(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function isBhairaveeRestaurant(businessName: string, businessContext: string): boolean {
   const haystack = `${businessName} ${businessContext}`.toLowerCase();
   return haystack.includes("bhairavee") || haystack.includes("bhairavi");
@@ -138,10 +142,20 @@ function sanitizeSuggestion(text: string, allowedDetails: string[], isSpecificMe
 }
 
 function parseSuggestions(content: string, allowedDetails: string[], isSpecificMenu: boolean): string[] {
+  const seen = new Set<string>();
+
   return content
     .split("\n")
     .map((line) => sanitizeSuggestion(line, allowedDetails, isSpecificMenu))
-    .filter((line) => line.length >= 20 && line.length <= 260)
+    .filter((line) => {
+      if (line.length < 20 || line.length > 260) return false;
+      const normalized = line.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+      const opening = normalized.split(" ").slice(0, 4).join(" ");
+      if (seen.has(normalized) || seen.has(opening)) return false;
+      seen.add(normalized);
+      seen.add(opening);
+      return true;
+    })
     .slice(0, 5);
 }
 
@@ -155,6 +169,7 @@ function buildPrompt(
   isSpecificMenu: boolean
 ): string {
   const langLabel = language === "hi" ? "Hindi" : language === "mr" ? "Marathi" : "English";
+  const uniquenessSeed = createUniquenessSeed();
   const detailRule = isSpecificMenu
     ? `Only mention menu items from this exact menu list: ${allowedDetails.join(", ")}. Do not invent dishes, prices, offers, staff names, or facts.`
     : `Use only broad experience details from this list when useful: ${allowedDetails.join(", ")}. Do not invent product names, dish names, staff names, prices, offers, or facts.`;
@@ -166,6 +181,7 @@ Category/context: ${businessContext || "local business"}
 Customer selected rating: ${rating}/5
 ${businessLocation ? `Area/city context: ${businessLocation}` : ""}
 Language: ${langLabel}
+Unique request seed: ${uniquenessSeed}
 
 Compliance rules:
 - The customer must be able to edit the text into their own words before posting.
@@ -177,6 +193,10 @@ Compliance rules:
 - Avoid SEO language and exaggerated phrases such as "highly recommended", "must visit", "top-notch", "hidden gem", "best ever", "world class", or "five star".
 - Keep each idea between 12 and 35 words.
 - Mix the angle: some can mention food/service/cleanliness generally, and some can mention one specific allowed detail.
+- Avoid repetitive content: every line must use a different opening, sentence structure, topic angle, and wording.
+- Do not reuse common template phrases across lines such as "good overall experience", "nice experience overall", or "staff were polite" more than once.
+- Create this batch as if it is for a new customer session. Do not copy or closely paraphrase examples from previous generations.
+- Prefer varied human review patterns: short direct comment, family/friend visit, specific item/detail, service/cleanliness note, balanced minor caveat.
 - ${detailRule}
 
 Output exactly 5 lines. No numbering, bullets, quotes, labels, or extra explanation.`;
@@ -218,11 +238,11 @@ export async function generateReviewSuggestions(
           {
             role: "system",
             content:
-              "You help customers draft honest, editable Google review ideas based only on their real experience. Never invent menu items, incentives, employee names, or promotional claims.",
+              "You help customers draft honest, editable Google review ideas based only on their real experience. Never invent menu items, incentives, employee names, or promotional claims. Avoid repetitive wording and produce unique phrasing for every request.",
           },
           { role: "user", content: prompt },
         ],
-        temperature: 0.55,
+        temperature: 0.75,
         max_tokens: 350,
       }),
     });

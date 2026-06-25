@@ -14,6 +14,7 @@ serve(async (req) => {
   try {
     const { campaignId, businessName, customPrompt, businessCategory } = await req.json();
     console.log("Generating review ideas for campaign:", campaignId);
+    const uniquenessSeed = `${Date.now()}-${crypto.randomUUID()}`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -21,6 +22,8 @@ serve(async (req) => {
     }
 
     const systemPrompt = `You help customers create short editable Google Maps review ideas for ${businessName}${businessCategory ? `, a ${businessCategory}` : ""}.
+
+Unique request seed: ${uniquenessSeed}
 
 Guidelines:
 - The customer must edit the idea in their own words before posting.
@@ -30,6 +33,9 @@ Guidelines:
 - Do not include incentives, discounts, rewards, links, hashtags, or promotional language.
 - Keep each idea between 12 and 35 words.
 - Mix generic experience angles with allowed specific details when context is provided.
+- Avoid repetitive content: every line must use a different opening, sentence structure, topic angle, and wording.
+- Do not reuse common template phrases across lines such as "good overall experience", "nice experience overall", or "staff were polite" more than once.
+- Create this batch as if it is for a new customer session. Do not copy or closely paraphrase examples from previous generations.
 - Avoid SEO language and exaggerated phrases like "highly recommended", "must visit", "top-notch", "hidden gem", or "best ever".
 ${customPrompt ? `\nAdditional context: ${customPrompt}` : ""}`;
 
@@ -42,7 +48,7 @@ ${customPrompt ? `\nAdditional context: ${customPrompt}` : ""}`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [{ role: "system", content: systemPrompt }],
-        temperature: 0.55,
+        temperature: 0.75,
       }),
     });
 
