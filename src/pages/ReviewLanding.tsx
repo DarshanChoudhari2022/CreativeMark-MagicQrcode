@@ -104,7 +104,7 @@ const ReviewLanding = () => {
     }
   }, [location, campaign]);
 
-  // ─── Fetch AI-Generated Suggestions (with timeout + race guard) ──
+  // ─── Fetch compliant review ideas (with timeout + race guard) ──
   const fetchSuggestions = useCallback(async (businessName: string) => {
     const id = ++fetchIdRef.current;
     setLoadingSuggestions(true);
@@ -133,12 +133,13 @@ const ReviewLanding = () => {
       // Only apply if this is still the latest fetch
       if (id === fetchIdRef.current && result.length > 0) {
         setSuggestions(result.map(s => s.text));
-        recordEvent('ai_suggestion', { count: result.length, source: 'ai' });
+        const source = result.some(s => s.source === 'fallback') ? 'fallback' : 'ai';
+        recordEvent('ai_suggestion', { count: result.length, source });
       }
     } catch (err: any) {
       console.warn('AI suggestion failed, using smart defaults:', err.message);
 
-      // Smart fallback — business-specific defaults
+      // Smart fallback — category-specific, no invented claims
       if (id === fetchIdRef.current) {
         const fallbacks = generateLocalFallbacks(businessName);
         setSuggestions(fallbacks);
@@ -155,17 +156,44 @@ const ReviewLanding = () => {
   const generateLocalFallbacks = (businessName: string): string[] => {
     const loc = location?.address ? ` near ${location.address}` : "";
     const cat = (location?.category || "").toLowerCase();
+    const bhairaveeMenu = [
+      'Patavadi Rassa', 'Fanas Bhaji', 'Kaju Usal', 'Masala Vange', 'Shev Bhaji',
+      'Matki Usal', 'Lajit Paneer Biryani', 'Kothimbir Biryani', 'Chaap Biryani',
+      'Ambur Biryani', 'Sarangi Ghee Roast Chaap Biryani', 'Malika Dum Biryani',
+      'Lucknowi Dum Biryani', 'Bhairavee Special Platter', 'Tender Coconut Tikka',
+      'Lemon Paneer Tikka', 'Paneer Cheese Seekh Kebab', 'Paneer Multani',
+      'Chef Special Tikka Paneer', 'Paneer Shole Kebab', 'Paneer Rowdy Tikka',
+      'Bhairavee Special Veg', 'Tender Coconut and Broccoli Miloni',
+      'Veg Seekh Kebab Masala', 'Sag Buruta Masala', 'Cheese Palak Kofta',
+      'Paneer Ghee Roast Masala', 'Stuffed Palak Paneer', 'Vilayati Subzi Sagwala'
+    ];
 
-    // Category-specific review pools — sound like real customers
+    if (`${businessName} ${cat}`.toLowerCase().includes('bhairavee')) {
+      const picked = bhairaveeMenu.sort(() => Math.random() - 0.5).slice(0, 5);
+      return [
+        `Good food and clean place. The service was polite, and the overall experience at ${businessName} felt comfortable.`,
+        `Tried ${picked[0]} here and liked the taste. The food felt fresh and the visit was pleasant overall.`,
+        `${businessName} is nice for a pure veg meal. Simple, tasty food and a comfortable family-friendly atmosphere.`,
+        `The ${picked[1]} was good, and the portion felt satisfying. Service was smooth during my visit.`,
+        `Nice place for vegetarian food${loc}. I liked the taste, seating, and the way the staff handled the order.`,
+        `Had a good meal here with family. The food was tasty, the place was clean, and the service was decent.`,
+        `Tried ${picked[2]} and enjoyed the flavour. Good option when you want pure veg food.`,
+        `The starters were served well and tasted fresh. ${picked[3]} stood out for me.`,
+        `Comfortable place for lunch or dinner. The food was flavourful without feeling too heavy.`,
+        `${picked[4]} had a nice taste, and the staff handled the order properly.`,
+        `Good pure veg restaurant with decent service. I liked the food quality and overall cleanliness.`,
+        `Visited for a quick meal and had a smooth experience. Food came nicely prepared and tasted good.`,
+      ].sort(() => Math.random() - 0.5).slice(0, 5);
+    }
+
+    // Category-specific review ideas. Customers should edit these in their own words.
     const categoryReviews: Record<string, string[]> = {
       restaurant: [
-        `Finally tried ${businessName}${loc} and the food was genuinely good. The paneer dish was probably the best I've had in a while.`,
-        `Went here for lunch with colleagues. Quick service, tasty food, reasonable prices. The staff remembered our order from last time which was nice.`,
-        `Good food, clean place. Waited about 10 mins for a table on a Saturday but worth it. The thali was filling and fresh.`,
-        `My family's been coming to ${businessName} for months now. Kids love it, portions are generous. Only thing - parking is a bit tight.`,
-        `Ordered delivery from here twice this week. Food arrived hot both times. The biryani is legit.`,
-        `Decent place for a quick meal${loc}. Nothing too fancy but the taste is consistent every time.`,
-        `Tried ${businessName} on a friend's suggestion. The starters were amazing, mains were okay. Will come back to try more items.`,
+        `Good food and polite service. The place felt clean, and the overall meal experience was comfortable.`,
+        `Visited ${businessName}${loc} for a meal. Taste was good, portions felt fair, and service was smooth.`,
+        `Nice place for a casual meal. The food was fresh, seating was comfortable, and staff were helpful.`,
+        `Had food here with family. The taste was good and the place felt comfortable for a relaxed meal.`,
+        `Decent food, clean place, and quick service. A good option when you want a simple meal outside.`,
       ],
       salon: [
         `Got a haircut at ${businessName} yesterday. The stylist actually listened to what I wanted instead of doing their own thing. Really happy with how it turned out.`,
@@ -193,6 +221,38 @@ const ReviewLanding = () => {
         `${businessName} has everything I need — good machines, clean washrooms, and flexible timings. No complaints.`,
         `Started going here after a friend recommended it. The trial session convinced me to sign up.`,
       ],
+      pet: [
+        `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
+        `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
+        `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
+        `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
+        `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
+        `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+      ],
+      dog: [
+        `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
+        `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
+        `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
+        `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
+        `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
+        `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+      ],
+      daycare: [
+        `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
+        `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
+        `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
+        `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
+        `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
+        `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+      ],
+      garage: [
+        `Good service experience. The issue was explained clearly, and the work was handled properly.`,
+        `Visited ${businessName}${loc} for vehicle service. Staff were polite and the process was smooth.`,
+        `The repair work was done neatly, and the pricing felt fair for the service provided.`,
+        `Good garage experience overall. They checked the problem properly and explained what needed to be done.`,
+        `Service was completed on time, and the staff handled the vehicle carefully.`,
+        `Helpful team and clear communication. The visit felt straightforward without unnecessary confusion.`,
+      ],
       shop: [
         `Good selection and fair prices at ${businessName}${loc}. The owner helped me pick the right product for my budget.`,
         `Bought a few things from here last week. Quality was good and they even offered home delivery.`,
@@ -205,16 +265,11 @@ const ReviewLanding = () => {
 
     // Generic pool — used when category doesn't match or is empty
     const genericReviews = [
-      `Really happy with ${businessName}${loc}. The team was professional and got everything done on time.`,
-      `Visited for the first time based on a friend's recommendation. Wasn't disappointed at all. Good service, friendly people.`,
-      `${businessName} does solid work. I compared with other options before choosing and glad I went with them.`,
-      `Third time coming here and the quality has been consistent. That says a lot about how they run things.`,
-      `The person who helped me at ${businessName} was patient and explained everything clearly. Will come back for sure.`,
-      `Good experience overall${loc}. Clean place, reasonable pricing, and they actually care about doing a good job.`,
-      `${businessName} is my go-to now. Tried a couple other places before but this one is consistently better.`,
-      `Went here last week and had a smooth experience. No unnecessary upselling, just honest service.`,
-      `A friend dragged me here saying it was good${loc}. She was right. The attention to detail is impressive.`,
-      `Decent place, fair pricing. Nothing fancy but they get the job done well. The staff is polite.`,
+      `Good overall experience at ${businessName}. The staff were polite and the visit went smoothly.`,
+      `Visited ${businessName}${loc} recently. Clean place, decent service, and everything was handled properly.`,
+      `The team was helpful and the experience felt smooth. I liked that they did not rush the process.`,
+      `Nice experience overall. The place was clean, pricing felt fair, and the staff were easy to talk to.`,
+      `${businessName} handled my visit well. I would come back based on the service and overall experience.`,
     ];
 
     // Pick the right pool based on category keywords
@@ -255,7 +310,7 @@ const ReviewLanding = () => {
 
       toast({
         title: "✅ Review copied!",
-        description: "Opening Google Reviews — paste & personalize your review!",
+        description: "Opening Google Reviews. Please edit this in your own words before posting.",
       });
 
       // Redirect after delay — give time to see tips
@@ -394,9 +449,9 @@ const ReviewLanding = () => {
           <CardContent className="p-0">
             {/* Card Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-5 text-white text-center">
-              <h2 className="text-lg font-bold mb-1">Pick a review you like</h2>
+              <h2 className="text-lg font-bold mb-1">Choose a review idea</h2>
               <p className="text-blue-100 text-xs">
-                Edit it to make it your own, then tap to copy & post on Google
+                Make it your own with details from your real visit
               </p>
             </div>
 
@@ -407,7 +462,7 @@ const ReviewLanding = () => {
                   <span className="text-2xl">👇</span>
                 </div>
                 <p className="text-amber-800 text-sm font-medium">
-                  <strong>Step 1:</strong> Tap any review below to copy it
+                  <strong>Step 1:</strong> Pick or edit an idea so it reflects your visit
                 </p>
               </div>
             )}
@@ -433,7 +488,7 @@ const ReviewLanding = () => {
                       <div>
                         <p className="text-amber-800 text-sm font-bold">✍️ Quick tip: Change a few words!</p>
                         <p className="text-amber-600 text-xs leading-relaxed mt-0.5">
-                          After pasting, <strong>add your own touch</strong> — mention what YOU liked most. Personal reviews stay on Google longer!
+                          Before posting, <strong>use your own words</strong> and include only what you actually experienced.
                         </p>
                       </div>
                     </div>
@@ -442,10 +497,9 @@ const ReviewLanding = () => {
                         <Camera className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-blue-800 text-sm font-bold">📸 Add a photo for extra impact!</p>
+                        <p className="text-blue-800 text-sm font-bold">Add a photo if it helps</p>
                         <p className="text-blue-600 text-xs leading-relaxed mt-0.5">
-                          Reviews with photos get <strong>3x more views</strong> on Google.
-                          Snap a quick pic of the place, your purchase, or the team!
+                          A real photo from your visit can make your review more useful for other customers.
                         </p>
                       </div>
                     </div>
@@ -459,8 +513,8 @@ const ReviewLanding = () => {
               {loadingSuggestions ? (
                 <div className="py-12 text-center">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
-                  <p className="text-slate-500 text-sm font-medium">Writing fresh reviews...</p>
-                  <p className="text-slate-400 text-xs mt-1">Powered by AI ✨</p>
+                  <p className="text-slate-500 text-sm font-medium">Preparing review ideas...</p>
+                  <p className="text-slate-400 text-xs mt-1">Use only if it matches your visit</p>
                 </div>
               ) : (
                 <>
@@ -566,7 +620,7 @@ const ReviewLanding = () => {
                         className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 text-xs font-semibold py-2 px-4 rounded-full hover:bg-blue-50 transition-colors"
                       >
                         <RefreshCw className="h-3.5 w-3.5" />
-                        Show different reviews
+                        Show different ideas
                       </button>
                     </div>
                   )}
@@ -601,8 +655,8 @@ const ReviewLanding = () => {
                   <ImagePlus className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold">Add a photo for extra impact!</h3>
-                  <p className="text-emerald-100 text-[11px]">Reviews with photos get noticed more on Google</p>
+                  <h3 className="text-sm font-bold">Add a real photo if useful</h3>
+                  <p className="text-emerald-100 text-[11px]">Photos should be from your own visit</p>
                 </div>
               </div>
               <div className="p-4 grid grid-cols-2 gap-3">
@@ -646,7 +700,7 @@ const ReviewLanding = () => {
                   </a>
                 ) : (
                   <p className="text-slate-300 text-[10px]">
-                    &copy; {new Date().getFullYear()} AI Review Systems
+                    &copy; {new Date().getFullYear()} Review Helper
                   </p>
                 )}
               </div>

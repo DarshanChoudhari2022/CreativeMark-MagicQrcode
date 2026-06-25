@@ -589,7 +589,7 @@ const CampaignDetails = () => {
                         {location.category && <p className="text-[10px] md:text-xs font-bold text-blue-600 mb-2">{location.category}</p>}
                         
                         <div className="mt-3 bg-red-50/50 p-2 md:p-3 rounded-lg border border-red-100">
-                          <p className="text-[8px] md:text-[9px] font-bold text-red-500 uppercase tracking-wider mb-1">Target SEO Location</p>
+                          <p className="text-[8px] md:text-[9px] font-bold text-red-500 uppercase tracking-wider mb-1">Location Context</p>
                           <p className="text-[10px] md:text-xs font-bold text-slate-700">
                             {location.address ? location.address : <span className="text-slate-400 font-normal italic">Not specified (Click edit to add city/area)</span>}
                           </p>
@@ -616,14 +616,14 @@ const CampaignDetails = () => {
                           />
                         </div>
                         <div>
-                          <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-1">Target SEO Location / City</p>
+                          <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-1">Location / City Context</p>
                           <Input
                             value={locationAddress}
                             onChange={(e) => setLocationAddress(e.target.value)}
                             placeholder="e.g. Khed Shivapur, Pune"
                             className="text-xs border-red-200 focus-visible:ring-red-500"
                           />
-                          <p className="text-[9px] text-slate-400 mt-1 font-medium">This exact location will be forced into AI generated reviews to boost Maps ranking.</p>
+                          <p className="text-[9px] text-slate-400 mt-1 font-medium">Used as optional context only. Customers should write honest reviews from their own visit.</p>
                         </div>
                       </div>
                     )}

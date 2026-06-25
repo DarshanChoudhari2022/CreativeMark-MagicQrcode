@@ -31,10 +31,9 @@ export async function generateReviewSuggestions(
     const businessContext = businessType ? ` for a ${businessType} business` : '';
     const toneContext = tone ? ` with a ${tone} tone` : '';
 
-    // Prompt engineered for instruction-tuned models like Mistral/Zephyr
-    const systemPrompt = `You are a helpful assistant. Generate 3 authentic, natural-sounding Google review suggestions for a ${rating}-star experience at "${businessName}"${businessContext}${toneContext}. The language must be ${languageMap[language] || 'English'}.
-  Return strictly a JSON array of strings. Example: ["Great service!", "Highly recommended."].
-  Do not include any explanation, markdown formatting, or valid notes. Just the JSON array.`;
+    const systemPrompt = `Create 3 short editable Google Maps review ideas for a customer who genuinely visited "${businessName}"${businessContext}${toneContext}. The language must be ${languageMap[language] || 'English'}.
+  Keep each idea between 12 and 35 words. Do not invent facts, staff names, menu items, prices, offers, or visit details. Do not ask for a specific rating or only positive content. Avoid SEO and exaggerated phrases like "highly recommended" or "must visit".
+  Return strictly a JSON array of strings. Do not include any explanation or markdown.`;
 
     try {
         const response = await hf.chatCompletion({
