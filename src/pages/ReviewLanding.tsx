@@ -317,9 +317,9 @@ const ReviewLanding = () => {
       setTimeout(() => {
         const url = location?.google_review_url || campaign?.google_review_url;
         if (url) {
-          window.location.href = url;
+          window.location.assign(url);
         }
-      }, 5000);
+      }, 650);
     } catch (err) {
       console.error('Clipboard failed:', err);
       toast({
