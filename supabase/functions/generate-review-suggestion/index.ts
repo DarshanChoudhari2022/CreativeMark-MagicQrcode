@@ -12,9 +12,18 @@ serve(async (req) => {
   }
 
   try {
-    const { campaignId, businessName, customPrompt, businessCategory } = await req.json();
+    const { campaignId, businessName, customPrompt, businessCategory, rating = 5 } = await req.json();
     console.log("Generating review ideas for campaign:", campaignId);
     const uniquenessSeed = `${Date.now()}-${crypto.randomUUID()}`;
+    const ratingTone = rating >= 5
+      ? "5-star: clearly positive but not exaggerated."
+      : rating === 4
+        ? "4-star: mostly positive with one small constructive caveat."
+        : rating === 3
+          ? "3-star: mixed and fair, with one good point and one improvement."
+          : rating === 2
+            ? "2-star: disappointed but respectful and constructive."
+            : "1-star: negative but calm, factual, and respectful.";
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -24,6 +33,8 @@ serve(async (req) => {
     const systemPrompt = `You help customers create short editable Google Maps review ideas for ${businessName}${businessCategory ? `, a ${businessCategory}` : ""}.
 
 Unique request seed: ${uniquenessSeed}
+Customer selected rating: ${rating}/5
+Rating tone: ${ratingTone}
 
 Guidelines:
 - The customer must edit the idea in their own words before posting.

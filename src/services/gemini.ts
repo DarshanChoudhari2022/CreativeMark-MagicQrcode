@@ -54,6 +54,22 @@ const GENERIC_RESTAURANT_DETAILS = [
   "family-friendly seating",
 ];
 
+function getRatingTone(rating: number): string {
+  if (rating >= 5) {
+    return "5-star tone: clearly positive, warm, and appreciative, but still natural and not exaggerated.";
+  }
+  if (rating === 4) {
+    return "4-star tone: mostly positive with one small constructive caveat or balanced note. Do not sound perfect or overly promotional.";
+  }
+  if (rating === 3) {
+    return "3-star tone: mixed and fair. Mention one thing that was okay or good and one thing that could improve.";
+  }
+  if (rating === 2) {
+    return "2-star tone: disappointed but respectful. Mention what did not work and one possible improvement.";
+  }
+  return "1-star tone: negative but calm and factual. Avoid insults, threats, or exaggerated claims.";
+}
+
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -179,6 +195,7 @@ function buildPrompt(
 Business: ${businessName}
 Category/context: ${businessContext || "local business"}
 Customer selected rating: ${rating}/5
+Rating tone: ${getRatingTone(rating)}
 ${businessLocation ? `Area/city context: ${businessLocation}` : ""}
 Language: ${langLabel}
 Unique request seed: ${uniquenessSeed}
@@ -189,7 +206,7 @@ Compliance rules:
 - Do not ask for a specific rating or only positive content.
 - Do not include incentives, discounts, rewards, pressure, staff-name requests, hashtags, URLs, or promotional claims.
 - Keep each idea natural, modest, and based on a real customer experience.
-- Match the selected rating honestly. For 1-3 star ratings, include neutral or constructive wording.
+- Match the selected rating honestly. A 4-star idea must be positive but slightly less glowing than 5-star, with a small constructive caveat when natural. For 1-3 star ratings, use neutral or constructive wording.
 - Avoid SEO language and exaggerated phrases such as "highly recommended", "must visit", "top-notch", "hidden gem", "best ever", "world class", or "five star".
 - Keep each idea between 12 and 35 words.
 - Mix the angle: some can mention food/service/cleanliness generally, and some can mention one specific allowed detail.
@@ -314,6 +331,22 @@ function generateCompliantFallbacks(
       ];
 
   const lowerCategory = category.toLowerCase();
+  const fourStar = isSpecificMenu
+    ? shuffleArray([
+        `Good pure veg food overall. ${details[0]} tasted nice, though service could be a little quicker during rush time.`,
+        `Liked the food and clean seating at ${businessName}. The ${details[1] || details[0]} was good, but parking can be a bit tight.`,
+        `Nice meal with family. The taste was good and portions were fair, though the wait felt slightly long.`,
+        `${details[2] || details[0]} was tasty and fresh. Overall good visit, just wish the service was a little faster.`,
+        `Good vegetarian food and polite staff. The place was comfortable, though a bit crowded when we visited.`,
+      ])
+    : shuffleArray([
+        `Good experience overall at ${businessName}. The staff were helpful, though the waiting time could be a little better.`,
+        `The service was smooth and the place was clean. A small improvement in timing would make it even better.`,
+        `Mostly happy with the visit. The team handled things well, but communication could be slightly clearer.`,
+        `Good service and a comfortable experience. There is still a little room to improve speed during busy times.`,
+        `Nice visit overall. Staff were polite and helpful, though a few small things could be smoother.`,
+      ]);
+
   const petCare = shuffleArray([
     `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
     `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
@@ -342,12 +375,34 @@ function generateCompliantFallbacks(
     `Average experience for me. The staff were helpful, but I expected the visit to be a little smoother.`,
   ];
 
-  let source = rating >= 4 ? positive : constructive;
-  if (rating >= 4 && (lowerCategory.includes("pet") || lowerCategory.includes("dog") || lowerCategory.includes("daycare") || lowerCategory.includes("resort"))) {
+  const petCareFourStar = shuffleArray([
+    `Good pet care experience overall. The place felt safe and clean, though updates could be a little more frequent.`,
+    `My pet seemed comfortable here. Staff were polite, but the drop-off process could be slightly quicker.`,
+    `Nice daycare setup and caring staff. A little more communication during the stay would make it even better.`,
+    `Good option for boarding or daycare. The space looked maintained, though pickup timing could be smoother.`,
+    `Overall good care and a clean setup. I would just like slightly clearer updates during longer stays.`,
+  ]);
+
+  const automotiveFourStar = shuffleArray([
+    `Good service overall. The repair work was handled properly, though the waiting time could be improved.`,
+    `The issue was explained clearly and the work was neat. A little faster delivery would make it better.`,
+    `Helpful team and fair service. The process was smooth, though updates during the job could improve.`,
+    `Good garage experience. Staff handled the vehicle carefully, but timing could be a bit more predictable.`,
+    `The service quality was good. A clearer estimate of completion time would make the experience smoother.`,
+  ]);
+
+  let source = rating >= 5 ? positive : rating === 4 ? fourStar : constructive;
+  if (rating >= 5 && (lowerCategory.includes("pet") || lowerCategory.includes("dog") || lowerCategory.includes("daycare") || lowerCategory.includes("resort"))) {
     source = petCare;
   }
-  if (rating >= 4 && (lowerCategory.includes("garage") || lowerCategory.includes("automotive") || lowerCategory.includes("vehicle") || lowerCategory.includes("bike"))) {
+  if (rating === 4 && (lowerCategory.includes("pet") || lowerCategory.includes("dog") || lowerCategory.includes("daycare") || lowerCategory.includes("resort"))) {
+    source = petCareFourStar;
+  }
+  if (rating >= 5 && (lowerCategory.includes("garage") || lowerCategory.includes("automotive") || lowerCategory.includes("vehicle") || lowerCategory.includes("bike"))) {
     source = automotive;
+  }
+  if (rating === 4 && (lowerCategory.includes("garage") || lowerCategory.includes("automotive") || lowerCategory.includes("vehicle") || lowerCategory.includes("bike"))) {
+    source = automotiveFourStar;
   }
   return source.slice(0, 5).map((text) => ({
     text,

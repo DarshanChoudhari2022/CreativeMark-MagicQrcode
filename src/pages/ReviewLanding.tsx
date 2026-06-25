@@ -105,8 +105,9 @@ const ReviewLanding = () => {
   }, [location, campaign]);
 
   // ─── Fetch compliant review ideas (with timeout + race guard) ──
-  const fetchSuggestions = useCallback(async (businessName: string) => {
+  const fetchSuggestions = useCallback(async (businessName: string, ratingOverride?: number) => {
     const id = ++fetchIdRef.current;
+    const ratingForRequest = ratingOverride ?? selectedRating;
     setLoadingSuggestions(true);
     setSelectedSuggestion(null);
     setCopied(false);
@@ -118,7 +119,7 @@ const ReviewLanding = () => {
       const result = await Promise.race([
         generateReviewSuggestions(
           businessName,
-          selectedRating,
+          ratingForRequest,
           'en',
           category,
           location?.address || '',
@@ -141,7 +142,7 @@ const ReviewLanding = () => {
 
       // Smart fallback — category-specific, no invented claims
       if (id === fetchIdRef.current) {
-        const fallbacks = generateLocalFallbacks(businessName);
+        const fallbacks = generateLocalFallbacks(businessName, ratingForRequest);
         setSuggestions(fallbacks);
         recordEvent('ai_suggestion', { count: fallbacks.length, source: 'fallback' });
       }
@@ -153,7 +154,7 @@ const ReviewLanding = () => {
   }, [location, campaign]);
 
   // ─── Local Fallback Generator (zero API, instant, category-aware) ───
-  const generateLocalFallbacks = (businessName: string): string[] => {
+  const generateLocalFallbacks = (businessName: string, rating = selectedRating): string[] => {
     const loc = location?.address ? ` near ${location.address}` : "";
     const cat = (location?.category || "").toLowerCase();
     const bhairaveeMenu = [
@@ -170,6 +171,15 @@ const ReviewLanding = () => {
 
     if (`${businessName} ${cat}`.toLowerCase().includes('bhairavee')) {
       const picked = bhairaveeMenu.sort(() => Math.random() - 0.5).slice(0, 5);
+      if (rating === 4) {
+        return [
+          `Good pure veg food overall. ${picked[0]} tasted nice, though service could be a little quicker during rush time.`,
+          `Liked the food and clean seating at ${businessName}. The ${picked[1]} was good, but parking can be a bit tight.`,
+          `Nice meal with family. The taste was good and portions were fair, though the wait felt slightly long.`,
+          `${picked[2]} was tasty and fresh. Overall good visit, just wish the service was a little faster.`,
+          `Good vegetarian food and polite staff. The place was comfortable, though a bit crowded when we visited.`,
+        ].sort(() => Math.random() - 0.5).slice(0, 5);
+      }
       return [
         `Good food and clean place. The service was polite, and the overall experience at ${businessName} felt comfortable.`,
         `Tried ${picked[0]} here and liked the taste. The food felt fresh and the visit was pleasant overall.`,
@@ -189,11 +199,19 @@ const ReviewLanding = () => {
     // Category-specific review ideas. Customers should edit these in their own words.
     const categoryReviews: Record<string, string[]> = {
       restaurant: [
-        `Good food and polite service. The place felt clean, and the overall meal experience was comfortable.`,
-        `Visited ${businessName}${loc} for a meal. Taste was good, portions felt fair, and service was smooth.`,
-        `Nice place for a casual meal. The food was fresh, seating was comfortable, and staff were helpful.`,
-        `Had food here with family. The taste was good and the place felt comfortable for a relaxed meal.`,
-        `Decent food, clean place, and quick service. A good option when you want a simple meal outside.`,
+        ...(rating === 4 ? [
+          `Good food overall. The place was clean and comfortable, though service could be a little quicker during rush time.`,
+          `Taste and portions were nice. A small improvement in waiting time would make the experience even better.`,
+          `Had a good meal here with family. Food was tasty, but the place felt slightly crowded when we visited.`,
+          `Nice restaurant for a casual meal. Staff were polite, though the order took a little time.`,
+          `Good experience overall. Food was fresh and seating was comfortable, with a little room to improve speed.`,
+        ] : [
+          `Good food and polite service. The place felt clean, and the overall meal experience was comfortable.`,
+          `Visited ${businessName}${loc} for a meal. Taste was good, portions felt fair, and service was smooth.`,
+          `Nice place for a casual meal. The food was fresh, seating was comfortable, and staff were helpful.`,
+          `Had food here with family. The taste was good and the place felt comfortable for a relaxed meal.`,
+          `Decent food, clean place, and quick service. A good option when you want a simple meal outside.`,
+        ]),
       ],
       salon: [
         `Got a haircut at ${businessName} yesterday. The stylist actually listened to what I wanted instead of doing their own thing. Really happy with how it turned out.`,
@@ -222,36 +240,68 @@ const ReviewLanding = () => {
         `Started going here after a friend recommended it. The trial session convinced me to sign up.`,
       ],
       pet: [
-        `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
-        `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
-        `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
-        `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
-        `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
-        `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+        ...(rating === 4 ? [
+          `Good pet care experience overall. The place felt safe and clean, though updates could be a little more frequent.`,
+          `My pet seemed comfortable here. Staff were polite, but the drop-off process could be slightly quicker.`,
+          `Nice daycare setup and caring staff. A little more communication during the stay would make it even better.`,
+          `Good option for boarding or daycare. The space looked maintained, though pickup timing could be smoother.`,
+          `Overall good care and a clean setup. I would just like slightly clearer updates during longer stays.`,
+        ] : [
+          `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
+          `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
+          `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
+          `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
+          `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
+          `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+        ]),
       ],
       dog: [
-        `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
-        `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
-        `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
-        `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
-        `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
-        `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+        ...(rating === 4 ? [
+          `Good pet care experience overall. The place felt safe and clean, though updates could be a little more frequent.`,
+          `My pet seemed comfortable here. Staff were polite, but the drop-off process could be slightly quicker.`,
+          `Nice daycare setup and caring staff. A little more communication during the stay would make it even better.`,
+          `Good option for boarding or daycare. The space looked maintained, though pickup timing could be smoother.`,
+          `Overall good care and a clean setup. I would just like slightly clearer updates during longer stays.`,
+        ] : [
+          `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
+          `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
+          `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
+          `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
+          `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
+          `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+        ]),
       ],
       daycare: [
-        `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
-        `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
-        `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
-        `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
-        `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
-        `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+        ...(rating === 4 ? [
+          `Good pet care experience overall. The place felt safe and clean, though updates could be a little more frequent.`,
+          `My pet seemed comfortable here. Staff were polite, but the drop-off process could be slightly quicker.`,
+          `Nice daycare setup and caring staff. A little more communication during the stay would make it even better.`,
+          `Good option for boarding or daycare. The space looked maintained, though pickup timing could be smoother.`,
+          `Overall good care and a clean setup. I would just like slightly clearer updates during longer stays.`,
+        ] : [
+          `Good place for pet care. The staff seemed attentive, and the space felt clean and safe.`,
+          `Left my pet here and the experience was smooth. The team handled things calmly and responsibly.`,
+          `${businessName} felt comfortable for pet daycare. Clean setup, polite staff, and good overall care.`,
+          `Nice experience with the pet boarding service. The place looked maintained and the staff were responsive.`,
+          `My pet seemed comfortable after the visit. The team was polite and the process was simple.`,
+          `Good option for daycare or boarding when you need someone reliable to look after your pet.`,
+        ]),
       ],
       garage: [
-        `Good service experience. The issue was explained clearly, and the work was handled properly.`,
-        `Visited ${businessName}${loc} for vehicle service. Staff were polite and the process was smooth.`,
-        `The repair work was done neatly, and the pricing felt fair for the service provided.`,
-        `Good garage experience overall. They checked the problem properly and explained what needed to be done.`,
-        `Service was completed on time, and the staff handled the vehicle carefully.`,
-        `Helpful team and clear communication. The visit felt straightforward without unnecessary confusion.`,
+        ...(rating === 4 ? [
+          `Good service overall. The repair work was handled properly, though the waiting time could be improved.`,
+          `The issue was explained clearly and the work was neat. A little faster delivery would make it better.`,
+          `Helpful team and fair service. The process was smooth, though updates during the job could improve.`,
+          `Good garage experience. Staff handled the vehicle carefully, but timing could be a bit more predictable.`,
+          `The service quality was good. A clearer estimate of completion time would make the experience smoother.`,
+        ] : [
+          `Good service experience. The issue was explained clearly, and the work was handled properly.`,
+          `Visited ${businessName}${loc} for vehicle service. Staff were polite and the process was smooth.`,
+          `The repair work was done neatly, and the pricing felt fair for the service provided.`,
+          `Good garage experience overall. They checked the problem properly and explained what needed to be done.`,
+          `Service was completed on time, and the staff handled the vehicle carefully.`,
+          `Helpful team and clear communication. The visit felt straightforward without unnecessary confusion.`,
+        ]),
       ],
       shop: [
         `Good selection and fair prices at ${businessName}${loc}. The owner helped me pick the right product for my budget.`,
@@ -423,7 +473,7 @@ const ReviewLanding = () => {
                     // Refresh suggestions when rating changes significantly
                     if (Math.abs(star - selectedRating) >= 1) {
                       const bName = location?.name || campaign?.name;
-                      if (bName) fetchSuggestions(bName);
+                      if (bName) fetchSuggestions(bName, star);
                     }
                   }}
                   className="transition-all duration-200 active:scale-90"

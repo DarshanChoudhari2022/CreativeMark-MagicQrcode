@@ -32,8 +32,18 @@ export async function generateReviewSuggestions(
     const toneContext = tone ? ` with a ${tone} tone` : '';
 
     const uniquenessSeed = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const ratingTone = rating >= 5
+        ? '5-star: clearly positive but not exaggerated.'
+        : rating === 4
+            ? '4-star: mostly positive with one small constructive caveat.'
+            : rating === 3
+                ? '3-star: mixed and fair, with one good point and one improvement.'
+                : rating === 2
+                    ? '2-star: disappointed but respectful and constructive.'
+                    : '1-star: negative but calm, factual, and respectful.';
     const systemPrompt = `Create 3 short editable Google Maps review ideas for a customer who genuinely visited "${businessName}"${businessContext}${toneContext}. The language must be ${languageMap[language] || 'English'}.
   Unique request seed: ${uniquenessSeed}.
+  Customer selected rating: ${rating}/5. Rating tone: ${ratingTone}
   Keep each idea between 12 and 35 words. Do not invent facts, staff names, menu items, prices, offers, or visit details. Do not ask for a specific rating or only positive content. Avoid SEO and exaggerated phrases like "highly recommended" or "must visit".
   Each idea must have a different opening, sentence structure, and topic angle. Do not output duplicate or closely paraphrased ideas.
   Return strictly a JSON array of strings. Do not include any explanation or markdown.`;
