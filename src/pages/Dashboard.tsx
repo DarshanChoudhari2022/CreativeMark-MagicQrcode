@@ -305,6 +305,72 @@ const Dashboard = () => {
           ))}
         </div>
 
+        {/* Smart Tap Rewards Guide */}
+        <Card className="border border-slate-100 shadow-sm bg-white rounded-2xl md:rounded-3xl overflow-hidden mb-10 md:mb-24">
+          <CardContent className="p-5 md:p-10">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 md:gap-10">
+              <div className="max-w-xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-red-50 border border-red-100 px-3 py-1.5 mb-4">
+                  <Gift className="h-3.5 w-3.5 text-red-600" />
+                  <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-red-600">New Add-On</span>
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-950 tracking-tight">Smart Tap Rewards Setup</h3>
+                <p className="text-xs md:text-sm text-slate-500 mt-2 leading-relaxed">
+                  Use the same protected QR code to run loyalty stamps, custom discounts, scratch rewards, menu links, branch check-in, and Google reviews.
+                </p>
+              </div>
+
+              <Button
+                onClick={() => navigate("/create-campaign")}
+                className="bg-red-600 hover:bg-red-700 text-white rounded-xl h-11 md:h-12 px-5 md:px-7 font-bold uppercase tracking-widest text-[10px] md:text-xs shadow-lg shadow-red-100 min-h-[44px] w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create With Services
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-6 md:mt-8">
+              {[
+                {
+                  icon: QrCode,
+                  title: "1. Create campaign",
+                  text: "Open New Campaign, select Smart Tap Rewards services, set reward text, stamps needed, and staff PIN.",
+                },
+                {
+                  icon: Shield,
+                  title: "2. Staff verifies",
+                  text: "Customer enters mobile number on the QR landing page. Staff enters the PIN only after confirming the visit.",
+                },
+                {
+                  icon: CheckCircle2,
+                  title: "3. Customer collects",
+                  text: "Verified stamps are saved to the customer card. The configured reward unlocks after the required stamp count.",
+                },
+              ].map((step) => (
+                <div key={step.title} className="rounded-xl md:rounded-2xl border border-slate-100 bg-slate-50/70 p-4 md:p-5">
+                  <div className="h-10 w-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mb-4">
+                    <step.icon className="h-5 w-5 text-red-600" />
+                  </div>
+                  <h4 className="text-sm md:text-base font-bold text-slate-950">{step.title}</h4>
+                  <p className="text-[11px] md:text-xs text-slate-500 mt-2 leading-relaxed">{step.text}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 md:mt-6 rounded-xl md:rounded-2xl bg-amber-50 border border-amber-100 p-4 md:p-5">
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs md:text-sm font-bold text-amber-800">QR code remains protected</p>
+                  <p className="text-[11px] md:text-xs text-amber-700 mt-1 leading-relaxed">
+                    Enabling or disabling services changes only the landing page experience. It does not regenerate or alter the printed Smart Tap AI QR code.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Global Stats - Responsive: 1 col mobile, 2 col tablet, 4 col desktop */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 mb-12 md:mb-32">
           {[
