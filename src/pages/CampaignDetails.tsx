@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, QrCode, TrendingUp, Eye, MousePointerClick, Sparkles, ExternalLink, Menu, X, Edit2, Save, Upload, Loader2, Trash2 } from "lucide-react";
 import { Input } from '@/components/ui/input';
 import { BrandedQRCard } from '@/components/BrandedQRCard';
 import { v4 as uuidv4 } from "uuid";
+import { COMBINED_SERVICES, normalizeCombinedServices, type CombinedServiceId } from "@/lib/combined-services";
+import { hashCampaignStaffPin } from "@/lib/security";
 
 
 const CampaignDetails = () => {
@@ -35,6 +38,10 @@ const CampaignDetails = () => {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [qrTheme, setQrTheme] = useState('google-classic');
   const [brandingType, setBrandingType] = useState<'creative-mark' | 'pramod' | 'none'>('creative-mark');
+  const [selectedServices, setSelectedServices] = useState<CombinedServiceId[]>([]);
+  const [rewardTitle, setRewardTitle] = useState("10% off on your next visit");
+  const [stampsRequired, setStampsRequired] = useState("10");
+  const [staffPin, setStaffPin] = useState("1234");
 
   useEffect(() => {
     const loadCampaignData = async () => {
@@ -50,6 +57,44 @@ const CampaignDetails = () => {
         setCampaign(campaignData);
         setNewName(campaignData.name);
         if (campaignData.theme_color) setQrTheme(campaignData.theme_color);
+        const publicRewardSettings = (campaignData as any).design_metadata?.smartTapRewards || {};
+        setRewardTitle(publicRewardSettings.rewardTitle || "10% off on your next visit");
+        setStampsRequired(String(publicRewardSettings.stampsRequired || 10));
+
+        try {
+          const { data: secureRewardSettings } = await (supabase as any)
+            .from('smart_tap_reward_settings')
+            .select('reward_title, stamps_required')
+            .eq('campaign_id', campaignId)
+            .single();
+
+          if (secureRewardSettings) {
+            setRewardTitle(secureRewardSettings.reward_title || "10% off on your next visit");
+            setStampsRequired(String(secureRewardSettings.stamps_required || 10));
+          }
+        } catch (settingsErr) {
+          console.warn('Smart Tap reward settings table unavailable, using campaign metadata.', settingsErr);
+        }
+        let activeServices = normalizeCombinedServices((campaignData as any).design_metadata?.combinedServices);
+
+        try {
+          const { data: bundleData, error: bundleError } = await (supabase as any)
+            .from('campaign_service_bundles')
+            .select('selected_services')
+            .eq('campaign_id', campaignId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (!bundleError && bundleData?.selected_services) {
+            const bundleServices = normalizeCombinedServices(bundleData.selected_services);
+            if (bundleServices.length > 0) activeServices = bundleServices;
+          }
+        } catch (bundleErr) {
+          console.warn('Combined services table unavailable, using campaign metadata only.', bundleErr);
+        }
+
+        setSelectedServices(activeServices);
 
         // Load location
         if (campaignData?.location_id) {
@@ -356,6 +401,128 @@ const CampaignDetails = () => {
     }
   };
 
+  const handleServiceToggle = async (serviceId: CombinedServiceId, checked: boolean) => {
+    const nextServices = checked
+      ? Array.from(new Set([...selectedServices, serviceId])) as CombinedServiceId[]
+      : selectedServices.filter((id) => id !== serviceId);
+
+    setSelectedServices(nextServices);
+
+    try {
+      const { error } = await (supabase as any)
+        .from('campaigns')
+        .update({
+          design_metadata: {
+            ...(campaign?.design_metadata || {}),
+            combinedServices: nextServices,
+            combinedServicesStatus: nextServices.length > 0 ? 'requested' : 'inactive',
+            smartTapRewards: {
+              ...((campaign as any)?.design_metadata?.smartTapRewards || {}),
+              programName: "Smart Tap Rewards",
+              rewardTitle,
+              stampsRequired: Math.max(1, Math.min(20, Number(stampsRequired) || 10)),
+            },
+          },
+        })
+        .eq('id', campaignId);
+
+      if (error) throw error;
+
+      if (nextServices.includes("digital_stamp_cards") && campaign?.owner_id) {
+        const { error: settingsError } = await (supabase as any)
+          .from('smart_tap_reward_settings')
+          .upsert([{
+            campaign_id: campaignId,
+            owner_id: campaign.owner_id,
+            reward_title: rewardTitle.trim() || "10% off on your next visit",
+            stamps_required: Math.max(1, Math.min(20, Number(stampsRequired) || 10)),
+            staff_pin_hash: await hashCampaignStaffPin(String(campaignId), staffPin || "1234"),
+          }], { onConflict: 'campaign_id' });
+
+        if (settingsError) throw settingsError;
+      }
+
+      setCampaign((prev: any) => prev ? {
+        ...prev,
+        design_metadata: {
+          ...(prev.design_metadata || {}),
+          combinedServices: nextServices,
+          combinedServicesStatus: nextServices.length > 0 ? 'requested' : 'inactive',
+          smartTapRewards: {
+            ...(prev.design_metadata?.smartTapRewards || {}),
+            programName: "Smart Tap Rewards",
+            rewardTitle,
+            stampsRequired: Math.max(1, Math.min(20, Number(stampsRequired) || 10)),
+          },
+        },
+      } : prev);
+
+      toast({
+        title: "Combined services updated",
+        description: "The same QR landing page will reflect this selection.",
+      });
+    } catch (error: any) {
+      console.error('Error updating combined services:', error);
+      setSelectedServices(selectedServices);
+      toast({
+        title: "Error",
+        description: "Failed to update combined services. Check the campaigns.design_metadata column.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRewardSettingsSave = async () => {
+    try {
+      const normalizedStamps = Math.max(1, Math.min(20, Number(stampsRequired) || 10));
+      const nextMetadata = {
+        ...(campaign?.design_metadata || {}),
+        combinedServices: selectedServices,
+        combinedServicesStatus: selectedServices.length > 0 ? 'requested' : 'inactive',
+        smartTapRewards: {
+          programName: "Smart Tap Rewards",
+          rewardTitle: rewardTitle.trim() || "10% off on your next visit",
+          stampsRequired: normalizedStamps,
+        },
+      };
+
+      const { error } = await (supabase as any)
+        .from('campaigns')
+        .update({ design_metadata: nextMetadata })
+        .eq('id', campaignId);
+
+      if (error) throw error;
+
+      if (campaign?.owner_id) {
+        const { error: settingsError } = await (supabase as any)
+          .from('smart_tap_reward_settings')
+          .upsert([{
+            campaign_id: campaignId,
+            owner_id: campaign.owner_id,
+            reward_title: rewardTitle.trim() || "10% off on your next visit",
+            stamps_required: normalizedStamps,
+            staff_pin_hash: await hashCampaignStaffPin(String(campaignId), staffPin || "1234"),
+          }], { onConflict: 'campaign_id' });
+
+        if (settingsError) throw settingsError;
+      }
+
+      setStampsRequired(String(normalizedStamps));
+      setCampaign((prev: any) => prev ? { ...prev, design_metadata: nextMetadata } : prev);
+      toast({
+        title: "Reward settings saved",
+        description: "Customers will see the updated Smart Tap Rewards flow.",
+      });
+    } catch (error) {
+      console.error('Error saving reward settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save reward settings.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const baseUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
   const reviewUrl = `${baseUrl}/review/${campaignId}`;
 
@@ -549,6 +716,100 @@ const CampaignDetails = () => {
                   <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2">Review Booster URL</h4>
                   <p className="text-xs md:text-sm font-bold text-slate-900 break-all">{reviewUrl}</p>
                 </div>
+
+                <div className="bg-slate-50 p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-100">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <h4 className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400">Combined Services</h4>
+                      <p className="text-[10px] md:text-xs text-slate-500 mt-1">These modules appear on the same QR landing page.</p>
+                    </div>
+                    <span className="rounded-full bg-white border border-slate-200 px-3 py-1 text-[9px] font-bold text-red-600">
+                      {selectedServices.length} Active
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {COMBINED_SERVICES.map((service) => {
+                      const Icon = service.icon;
+                      const checked = selectedServices.includes(service.id);
+
+                      return (
+                        <label
+                          key={service.id}
+                          htmlFor={`campaign-service-${service.id}`}
+                          className={`flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-all ${
+                            checked ? "bg-white border-red-200 shadow-sm" : "bg-white/60 border-slate-200 hover:border-red-100"
+                          }`}
+                        >
+                          <Checkbox
+                            id={`campaign-service-${service.id}`}
+                            checked={checked}
+                            onCheckedChange={(value) => handleServiceToggle(service.id, value === true)}
+                            className="mt-0.5 border-slate-300 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <Icon className={`h-4 w-4 ${checked ? "text-red-600" : "text-slate-400"}`} />
+                              <span className="text-xs md:text-sm font-bold text-slate-900">{service.name}</span>
+                            </div>
+                            <p className="text-[10px] md:text-xs text-slate-500 mt-1 leading-relaxed">{service.description}</p>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {selectedServices.includes("digital_stamp_cards") && (
+                    <div className="mt-4 rounded-xl bg-white border border-amber-200 p-3 md:p-4">
+                      <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-3">Smart Tap Rewards Setup</p>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Custom Discount / Reward</p>
+                          <Input
+                            value={rewardTitle}
+                            onChange={(e) => setRewardTitle(e.target.value)}
+                            placeholder="e.g., Free dessert after 8 visits"
+                            className="text-xs"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Stamps Needed</p>
+                            <Input
+                              type="number"
+                              min="1"
+                              max="20"
+                              value={stampsRequired}
+                              onChange={(e) => setStampsRequired(e.target.value)}
+                              className="text-xs"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Staff PIN</p>
+                            <Input
+                              value={staffPin}
+                              onChange={(e) => setStaffPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                              placeholder="1234"
+                              className="text-xs"
+                            />
+                          </div>
+                        </div>
+                        <div className="rounded-lg bg-amber-50 border border-amber-100 p-3">
+                          <p className="text-[10px] text-amber-700 leading-relaxed">
+                            Stamp authenticity: customer enters their mobile number, staff checks the visit, then staff enters this PIN to add a verified stamp.
+                          </p>
+                        </div>
+                        <Button
+                          onClick={handleRewardSettingsSave}
+                          className="w-full h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold uppercase tracking-widest text-[10px]"
+                        >
+                          <Save className="h-3.5 w-3.5 mr-2" />
+                          Save Reward Settings
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {location && (
                   <div className="bg-slate-50 p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-100 group relative">
                     <div className="flex justify-between items-start mb-2">

@@ -1,6 +1,9 @@
-project_id = "soovcksuuqgoxyvavsvx"
+project_id = "dgnqnpqokfsabxzqsqou"
 [functions.generate-review-suggestion]
 verify_jwt = false
 
 [functions.track-analytics]
+verify_jwt = false
+
+[functions.smart-tap-loyalty]
 verify_jwt = false

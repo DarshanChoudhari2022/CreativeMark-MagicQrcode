@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +12,8 @@ import { ArrowLeft, Sparkles, QrCode, Loader2, Upload } from "lucide-react";
 import { z } from "zod";
 import type { User } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
+import { COMBINED_SERVICES } from "@/lib/combined-services";
+import { hashCampaignStaffPin } from "@/lib/security";
 
 const CATEGORIES = [
   'Restaurant/Cafe',
@@ -55,6 +58,10 @@ const CreateCampaign = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [targetUserId, setTargetUserId] = useState<string>("");
+  const [selectedServices, setSelectedServices] = useState<string[]>(["digital_stamp_cards"]);
+  const [rewardTitle, setRewardTitle] = useState("10% off on your next visit");
+  const [stampsRequired, setStampsRequired] = useState("10");
+  const [staffPin, setStaffPin] = useState("1234");
 
   const generateAITheme = async () => {
     const cat = businessCategory === 'Other' ? customCategory : businessCategory;
@@ -182,6 +189,14 @@ const CreateCampaign = () => {
     }
   };
 
+  const toggleService = (serviceId: string, checked: boolean) => {
+    setSelectedServices((current) =>
+      checked
+        ? Array.from(new Set([...current, serviceId]))
+        : current.filter((id) => id !== serviceId)
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -235,6 +250,57 @@ const CreateCampaign = () => {
 
       if (campaignError) throw campaignError;
       if (!campaignData || !campaignData.id) throw new Error('Failed to create campaign');
+
+      if (selectedServices.length > 0) {
+        const { error: metadataError } = await (supabase as any)
+          .from('campaigns')
+          .update({
+            design_metadata: {
+              combinedServices: selectedServices,
+              combinedServicesStatus: 'requested',
+              smartTapRewards: {
+                programName: "Smart Tap Rewards",
+                rewardTitle,
+                stampsRequired: Math.max(1, Math.min(20, Number(stampsRequired) || 10)),
+              },
+            },
+          })
+          .eq('id', campaignData.id);
+
+        if (metadataError) {
+          console.warn('Combined services metadata could not be saved. Check that campaigns.design_metadata exists.', metadataError);
+        }
+
+        if (selectedServices.includes("digital_stamp_cards")) {
+          const { error: settingsError } = await (supabase as any)
+            .from('smart_tap_reward_settings')
+            .upsert([{
+              campaign_id: campaignData.id,
+              owner_id: targetUserId,
+              reward_title: rewardTitle.trim() || "10% off on your next visit",
+              stamps_required: Math.max(1, Math.min(20, Number(stampsRequired) || 10)),
+              staff_pin_hash: await hashCampaignStaffPin(campaignData.id, staffPin || "1234"),
+            }], { onConflict: 'campaign_id' });
+
+          if (settingsError) {
+            console.warn('Smart Tap Rewards settings could not be saved. Apply the reward settings migration.', settingsError);
+          }
+        }
+
+        const { error: servicesError } = await (supabase as any)
+          .from('campaign_service_bundles')
+          .insert([{
+            campaign_id: campaignData.id,
+            location_id: locationId,
+            owner_id: targetUserId,
+            selected_services: selectedServices,
+            status: 'requested',
+          }]);
+
+        if (servicesError) {
+          console.warn('Combined services could not be saved. Apply the campaign_service_bundles migration to persist them.', servicesError);
+        }
+      }
 
       toast({ title: "Success!", description: "Campaign created successfully." });
       setTimeout(() => { navigate(`/campaign/${campaignData.id}`); }, 1000);
@@ -464,6 +530,113 @@ const CreateCampaign = () => {
                   required
                   className="mt-1.5 h-11 md:h-12 rounded-xl border-slate-200 focus:border-red-500 focus:ring-red-500 text-sm md:text-base"
                 />
+              </div>
+
+              {/* Combined Services */}
+              <div className="rounded-xl md:rounded-2xl border border-slate-200 bg-slate-50/70 p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4 md:mb-5">
+                  <div>
+                    <Label className="font-bold text-slate-900 text-sm md:text-base">Smart Tap Rewards Services</Label>
+                    <p className="text-[10px] md:text-xs text-slate-500 mt-1 font-medium leading-relaxed">
+                      Add loyalty, menu, rewards, and branch tools to this same QR campaign.
+                    </p>
+                  </div>
+                  <div className="rounded-full bg-white border border-slate-200 px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-red-600 shadow-sm self-start">
+                    {selectedServices.length} Selected
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {COMBINED_SERVICES.map((service) => {
+                    const Icon = service.icon;
+                    const checked = selectedServices.includes(service.id);
+
+                    return (
+                      <label
+                        key={service.id}
+                        htmlFor={`service-${service.id}`}
+                        className={`flex gap-3 rounded-xl border p-3 md:p-4 cursor-pointer transition-all min-h-[112px] ${checked
+                          ? "border-red-300 bg-white shadow-sm"
+                          : "border-slate-200 bg-white/70 hover:border-red-200 hover:bg-white"
+                          }`}
+                      >
+                        <Checkbox
+                          id={`service-${service.id}`}
+                          checked={checked}
+                          onCheckedChange={(value) => toggleService(service.id, value === true)}
+                          className="mt-1 border-slate-300 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <Icon className={`h-4 w-4 shrink-0 ${checked ? "text-red-600" : "text-slate-400"}`} />
+                            <span className="text-sm font-bold text-slate-900 leading-tight">{service.name}</span>
+                          </div>
+                          <p className="text-[11px] md:text-xs text-slate-500 leading-relaxed">
+                            {service.description}
+                          </p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-4 rounded-xl bg-white border border-slate-200 p-3 md:p-4">
+                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Included in this QR setup</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-red-50 text-red-700 border border-red-100 px-3 py-1.5 text-[10px] md:text-xs font-bold">Google Review QR</span>
+                    {selectedServices.map((id) => {
+                      const service = COMBINED_SERVICES.find((item) => item.id === id);
+                      return service ? (
+                        <span key={id} className="rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1.5 text-[10px] md:text-xs font-bold">
+                          {service.name}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+
+                {selectedServices.includes("digital_stamp_cards") && (
+                  <div className="mt-4 rounded-xl bg-white border border-amber-200 p-3 md:p-4">
+                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-amber-600 mb-3">Stamp Reward Setup</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="sm:col-span-2">
+                        <Label htmlFor="rewardTitle" className="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wider">Custom Discount / Reward</Label>
+                        <Input
+                          id="rewardTitle"
+                          value={rewardTitle}
+                          onChange={(e) => setRewardTitle(e.target.value)}
+                          placeholder="e.g., Free coffee after 8 visits"
+                          className="mt-1 h-10 rounded-xl text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="stampsRequired" className="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wider">Stamps</Label>
+                        <Input
+                          id="stampsRequired"
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={stampsRequired}
+                          onChange={(e) => setStampsRequired(e.target.value)}
+                          className="mt-1 h-10 rounded-xl text-sm"
+                        />
+                      </div>
+                      <div className="sm:col-span-3">
+                        <Label htmlFor="staffPin" className="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wider">Staff PIN for Authentic Stamps</Label>
+                        <Input
+                          id="staffPin"
+                          value={staffPin}
+                          onChange={(e) => setStaffPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="1234"
+                          className="mt-1 h-10 rounded-xl text-sm"
+                        />
+                        <p className="text-[10px] md:text-xs text-slate-400 mt-1">
+                          Customers identify their card, then staff enters this PIN to add a valid stamp.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Custom Message */}

@@ -3,15 +3,17 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   Star, Loader2, ExternalLink, CheckCircle2,
   Sparkles, Copy, RefreshCw, ArrowRight,
   Award, ArrowLeft, HandMetal, Pencil, Check,
-  Camera, ImagePlus
+  Camera, ImagePlus, Gift, MapPin, Navigation, Trophy
 } from "lucide-react";
 import { generateReviewSuggestions } from "@/services/gemini";
 import { useTranslation } from "react-i18next";
+import { COMBINED_SERVICES, normalizeCombinedServices, type CombinedServiceId } from "@/lib/combined-services";
 
 
 interface Campaign {
@@ -23,6 +25,15 @@ interface Campaign {
   theme_color: string;
   google_review_url?: string;
   location_id?: string;
+  design_metadata?: {
+    combinedServices?: string[];
+    smartTapRewards?: {
+      programName?: string;
+      rewardTitle?: string;
+      stampsRequired?: number;
+      staffPin?: string;
+    };
+  } | null;
 }
 
 interface Location {
@@ -43,6 +54,14 @@ const ReviewLanding = () => {
   const [loading, setLoading] = useState(true);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
+  const [selectedServices, setSelectedServices] = useState<CombinedServiceId[]>([]);
+  const [stampCount, setStampCount] = useState(0);
+  const [scratchReward, setScratchReward] = useState<string | null>(null);
+  const [gpsStatus, setGpsStatus] = useState<string>("Ready to detect branch");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [staffPinInput, setStaffPinInput] = useState("");
+  const [stampStatus, setStampStatus] = useState("Enter your mobile number to load your stamp card.");
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
@@ -76,6 +95,28 @@ const ReviewLanding = () => {
         if (error) throw error;
         setCampaign(campaignData);
 
+        const metadataServices = normalizeCombinedServices(campaignData?.design_metadata?.combinedServices);
+        let activeServices = metadataServices;
+
+        try {
+          const { data: bundleData, error: bundleError } = await (supabase as any)
+            .from('campaign_service_bundles')
+            .select('selected_services')
+            .eq('campaign_id', campaignData.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (!bundleError && bundleData?.selected_services) {
+            const bundleServices = normalizeCombinedServices(bundleData.selected_services);
+            if (bundleServices.length > 0) activeServices = bundleServices;
+          }
+        } catch (bundleErr) {
+          console.warn('Combined services table unavailable, using campaign metadata only.', bundleErr);
+        }
+
+        setSelectedServices(activeServices);
+
         if (campaignData?.location_id) {
           const { data: locationData } = await (supabase as any)
             .from('locations')
@@ -94,6 +135,13 @@ const ReviewLanding = () => {
 
     load();
     recordEvent('scan');
+  }, [campaignId]);
+
+  useEffect(() => {
+    if (!campaignId) return;
+
+    const savedReward = window.localStorage.getItem(`scratch:${campaignId}`);
+    setScratchReward(savedReward);
   }, [campaignId]);
 
   // ─── Fetch AI Suggestions on data ready ─────────────────────
@@ -386,6 +434,132 @@ const ReviewLanding = () => {
     fetchSuggestions(businessName);
   };
 
+  const hasService = (serviceId: CombinedServiceId) => selectedServices.includes(serviceId);
+
+  const getRewardSettings = () => campaign?.design_metadata?.smartTapRewards || {};
+  const getRewardTitle = () => getRewardSettings().rewardTitle || "10% off on your next visit";
+  const getRequiredStamps = () => Math.max(1, Math.min(20, Number(getRewardSettings().stampsRequired) || 10));
+
+  const getCustomerKey = () => customerPhone.replace(/\D/g, "").slice(-10);
+
+  const loadCustomerStampCard = async () => {
+    if (!campaignId) return;
+    const customerKey = getCustomerKey();
+
+    if (customerKey.length < 6) {
+      setStampStatus("Enter a valid mobile number to load your card.");
+      return;
+    }
+
+    setLoyaltyLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('smart-tap-loyalty', {
+        body: {
+          action: 'load',
+          campaignId,
+          customerPhone,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setStampCount(Number(data?.stampCount || 0));
+      setStampStatus(data?.rewardClaimed ? "Reward already claimed for this card." : "Stamp card loaded from Smart Tap Rewards.");
+    } catch (error) {
+      setStampStatus(error instanceof Error ? error.message : "Secure stamp card service is unavailable.");
+    } finally {
+      setLoyaltyLoading(false);
+    }
+  };
+
+  const handleCollectStamp = async () => {
+    if (!campaignId) return;
+    const customerKey = getCustomerKey();
+    const requiredStamps = getRequiredStamps();
+
+    if (customerKey.length < 6) {
+      setStampStatus("Customer mobile number is required before adding a stamp.");
+      return;
+    }
+
+    setLoyaltyLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('smart-tap-loyalty', {
+        body: {
+          action: 'add_stamp',
+          campaignId,
+          customerPhone,
+          staffPin: staffPinInput,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const nextCount = Number(data?.stampCount || 0);
+      setStampCount(nextCount);
+      setStampStatus(nextCount >= requiredStamps ? `Reward unlocked: ${data?.rewardTitle || getRewardTitle()}` : `${requiredStamps - nextCount} stamps left for your reward.`);
+      setStaffPinInput("");
+      recordEvent('loyalty_stamp', { stamps: nextCount, customer_key_last4: customerKey.slice(-4) });
+      toast({
+        title: nextCount >= requiredStamps ? "Reward unlocked!" : "Verified stamp added",
+        description: nextCount >= requiredStamps ? (data?.rewardTitle || getRewardTitle()) : `${requiredStamps - nextCount} stamps left for your reward.`,
+      });
+    } catch (error) {
+      setStampStatus(error instanceof Error ? error.message : "Secure stamp verification failed.");
+    } finally {
+      setLoyaltyLoading(false);
+    }
+  };
+
+  const handleScratchReward = () => {
+    if (!campaignId) return;
+    const rewards = [
+      "5% off your next visit",
+      "Free add-on on your next purchase",
+      "Priority service on your next visit",
+      "Surprise staff-approved reward",
+    ];
+    const reward = scratchReward || rewards[Math.floor(Math.random() * rewards.length)];
+    setScratchReward(reward);
+    window.localStorage.setItem(`scratch:${campaignId}`, reward);
+    recordEvent('scratch_reward', { reward });
+  };
+
+  const handleDetectBranch = () => {
+    setGpsStatus("Detecting branch...");
+    if (!navigator.geolocation) {
+      setGpsStatus("GPS is not available on this device.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        setGpsStatus(location?.address ? `Checked in near ${location.address}` : "Nearest branch detected");
+        recordEvent('branch_detected', { location_id: location?.id });
+      },
+      () => setGpsStatus("Location permission was not granted. Staff can still confirm your branch."),
+      { enableHighAccuracy: false, timeout: 8000 }
+    );
+  };
+
+  const getMenuItems = () => {
+    const category = `${location?.category || campaign?.name || ""}`.toLowerCase();
+
+    if (category.includes("restaurant") || category.includes("cafe") || category.includes("food")) {
+      return ["Today special", "Popular starter", "Signature main", "Dessert pick"];
+    }
+    if (category.includes("salon") || category.includes("beauty") || category.includes("spa")) {
+      return ["Hair service", "Facial care", "Grooming package", "Membership offer"];
+    }
+    if (category.includes("fitness") || category.includes("gym")) {
+      return ["Day pass", "Personal training", "Monthly plan", "Body assessment"];
+    }
+    return ["Featured service", "Customer favorite", "New offer", "Membership plan"];
+  };
+
   // ─── Analytics Helper ───────────────────────────────────────
   const recordEvent = async (eventType: string, metadata: Record<string, any> = {}) => {
     if (!campaignId) return;
@@ -493,6 +667,207 @@ const ReviewLanding = () => {
             </p>
           </div>
         </div>
+
+        {selectedServices.length > 0 && (
+          <div className="space-y-4 mb-6" style={{ animation: 'fadeInUp 0.7s ease-out' }}>
+            <Card className="border border-slate-200 shadow-lg rounded-2xl overflow-hidden bg-white">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600">Smart Tap Rewards</p>
+                    <h2 className="text-lg font-bold text-slate-900">Choose what you need today</h2>
+                  </div>
+                  <div className="rounded-full bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 text-[10px] font-bold">
+                    {selectedServices.length} Active
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {selectedServices.map((serviceId) => {
+                    const service = COMBINED_SERVICES.find((item) => item.id === serviceId);
+                    if (!service) return null;
+                    const Icon = service.icon;
+
+                    return (
+                      <div key={service.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                        <Icon className="h-4 w-4 text-blue-600 mb-2" />
+                        <p className="text-xs font-bold text-slate-900 leading-tight">{service.name}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {hasService("digital_stamp_cards") && (
+              <Card className="border border-amber-200 shadow-lg rounded-2xl overflow-hidden bg-white">
+                <CardContent className="p-0">
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-4 flex items-center gap-3">
+                    <div className="bg-white/20 p-2 rounded-lg">
+                      <Gift className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold">Smart Tap Stamp Card</h3>
+                      <p className="text-amber-50 text-[11px]">Collect {getRequiredStamps()} verified stamps to unlock {getRewardTitle()}</p>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="rounded-xl bg-amber-50 border border-amber-100 p-3 mb-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-2">How to use</p>
+                      <div className="grid grid-cols-2 gap-2 text-[11px] text-amber-800">
+                        <p><strong>1.</strong> Scan this QR at the store.</p>
+                        <p><strong>2.</strong> Enter your mobile number.</p>
+                        <p><strong>3.</strong> Staff verifies your visit with PIN.</p>
+                        <p><strong>4.</strong> Collect stamps and claim reward.</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 mb-4">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Customer Mobile Number</p>
+                        <div className="flex gap-2">
+                          <Input
+                            value={customerPhone}
+                            onChange={(e) => setCustomerPhone(e.target.value.replace(/[^\d+\-\s]/g, ""))}
+                            placeholder="Enter mobile number"
+                            className="h-10 rounded-xl text-sm"
+                          />
+                          <Button
+                            onClick={loadCustomerStampCard}
+                            disabled={loyaltyLoading}
+                            variant="outline"
+                            className="h-10 rounded-xl border-amber-200 text-amber-700 font-bold"
+                          >
+                            Load
+                          </Button>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Staff PIN</p>
+                        <Input
+                          value={staffPinInput}
+                          onChange={(e) => setStaffPinInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="Staff enters PIN after visit"
+                          className="h-10 rounded-xl text-sm"
+                        />
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                        {stampStatus}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-2 mb-4">
+                      {Array.from({ length: getRequiredStamps() }).map((_, index) => (
+                        <div
+                          key={index}
+                          className={`aspect-square rounded-full flex items-center justify-center border-2 text-xs font-black ${
+                            index < stampCount
+                              ? "bg-amber-500 border-amber-500 text-white"
+                              : "bg-amber-50 border-amber-100 text-amber-200"
+                          }`}
+                        >
+                          {index < stampCount ? "✓" : index + 1}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="rounded-xl bg-white border border-amber-100 p-3 mb-3">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Reward</p>
+                      <p className="text-sm font-black text-slate-900 mt-1">{getRewardTitle()}</p>
+                    </div>
+                    <Button
+                      onClick={handleCollectStamp}
+                      disabled={loyaltyLoading}
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-xl h-11 font-bold"
+                    >
+                      {stampCount >= getRequiredStamps() ? "Reward Ready" : "Staff Verify & Add Stamp"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {hasService("ai_digital_menu") && (
+              <Card className="border border-emerald-200 shadow-lg rounded-2xl overflow-hidden bg-white">
+                <CardContent className="p-0">
+                  <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-4">
+                    <h3 className="text-sm font-bold">AI Digital Menu</h3>
+                    <p className="text-emerald-50 text-[11px]">Quick picks connected to this QR</p>
+                  </div>
+                  <div className="p-4 grid grid-cols-2 gap-3">
+                    {getMenuItems().map((item) => (
+                      <div key={item} className="rounded-xl bg-emerald-50 border border-emerald-100 p-3">
+                        <p className="text-sm font-bold text-emerald-900">{item}</p>
+                        <p className="text-[10px] text-emerald-700 mt-1">Ask staff for details</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {hasService("scratch_cards") && (
+              <Card className="border border-purple-200 shadow-lg rounded-2xl overflow-hidden bg-white">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-purple-100 p-2 rounded-lg">
+                      <Trophy className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900">Scratch Card</h3>
+                      <p className="text-[11px] text-slate-500">Reveal one surprise reward per QR</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleScratchReward}
+                    className="w-full rounded-xl border-2 border-dashed border-purple-200 bg-purple-50 p-5 text-center active:scale-[0.98] transition-all"
+                  >
+                    {scratchReward ? (
+                      <>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-1">You unlocked</p>
+                        <p className="text-lg font-black text-purple-900">{scratchReward}</p>
+                      </>
+                    ) : (
+                      <p className="text-sm font-bold text-purple-700">Tap to reveal reward</p>
+                    )}
+                  </button>
+                </CardContent>
+              </Card>
+            )}
+
+            {(hasService("multi_branch_gps") || hasService("branch_analytics") || hasService("qr_stand_request")) && (
+              <Card className="border border-slate-200 shadow-lg rounded-2xl overflow-hidden bg-white">
+                <CardContent className="p-4 space-y-3">
+                  {hasService("multi_branch_gps") && (
+                    <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin className="h-4 w-4 text-blue-600" />
+                        <p className="text-sm font-bold text-blue-900">Branch Check-In</p>
+                      </div>
+                      <p className="text-xs text-blue-700 mb-3">{gpsStatus}</p>
+                      <Button onClick={handleDetectBranch} variant="outline" className="w-full h-10 rounded-xl border-blue-200 text-blue-700">
+                        <Navigation className="h-4 w-4 mr-2" />
+                        Detect Branch
+                      </Button>
+                    </div>
+                  )}
+
+                  {hasService("branch_analytics") && (
+                    <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                      <p className="text-sm font-bold text-slate-900">Branch Analytics Active</p>
+                      <p className="text-xs text-slate-500 mt-1">This scan is counted for campaign performance and service engagement.</p>
+                    </div>
+                  )}
+
+                  {hasService("qr_stand_request") && (
+                    <div className="rounded-xl bg-red-50 border border-red-100 p-3">
+                      <p className="text-sm font-bold text-red-900">QR Stand Enabled</p>
+                      <p className="text-xs text-red-700 mt-1">Show this screen to staff if you need the counter QR stand or table card.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
 
         {/* ─── Main Card: Review Suggestions ───────────────── */}
         <Card className="border border-slate-200 shadow-xl rounded-2xl overflow-hidden bg-white" style={{ animation: 'fadeInUp 0.8s ease-out' }}>
