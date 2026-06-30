@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Star, Sparkles, TrendingUp, Zap, Users,
-  CheckCircle2, ArrowRight, Menu, X, Smartphone, MessageSquare, ArrowLeft
+  CheckCircle2, ArrowRight, Menu, X, Smartphone, MessageSquare, ArrowLeft,
+  Gift, ShieldCheck, BadgePercent, Utensils, MapPinned, Trophy, QrCode
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,6 +31,39 @@ const Index = () => {
     { rating: 5, text: t('landing.test3_text'), author: t('landing.client3_name'), location: t('landing.client3_loc') },
     { rating: 5, text: t('landing.test4_text'), author: t('landing.client4_name'), location: t('landing.client4_loc') },
     { rating: 5, text: t('landing.test5_text'), author: t('landing.client5_name'), location: t('landing.client5_loc') },
+  ];
+
+  const rewardFeatures = [
+    {
+      icon: Gift,
+      title: "Verified Stamp Cards",
+      description: "Customers collect stamps from the same QR. Staff PIN verification keeps every stamp authentic.",
+    },
+    {
+      icon: BadgePercent,
+      title: "Custom Discounts",
+      description: "Set rewards like 10% off, free dessert, free service, or any offer after your chosen stamp count.",
+    },
+    {
+      icon: Trophy,
+      title: "Scratch Rewards",
+      description: "Add instant surprise rewards after scans to create repeat visits and customer excitement.",
+    },
+    {
+      icon: Utensils,
+      title: "Digital Menu / Services",
+      description: "Show menu items, service options, or featured offers directly on the QR landing page.",
+    },
+    {
+      icon: MapPinned,
+      title: "Branch Check-In",
+      description: "Support multi-location campaigns with branch-aware scan and check-in experiences.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Secure Staff Flow",
+      description: "Customer enters mobile number, staff confirms the visit, then the system adds a verified stamp.",
+    },
   ];
 
   const scrollToSection = (id: string) => {
@@ -134,13 +168,13 @@ const Index = () => {
             <div className="inline-flex items-center gap-2 bg-red-50 border border-red-100 px-4 py-1.5 rounded-full mb-6 shadow-sm">
               <span className="text-[10px] font-bold text-red-600 tracking-widest uppercase">{t('landing.badge_new')}</span>
               <span className="text-gray-300">|</span>
-              <span className="text-[10px] font-bold text-gray-900 tracking-wider uppercase">{t('landing.badge_ai')}</span>
+              <span className="text-[10px] font-bold text-gray-900 tracking-wider uppercase">AI Reviews + Smart Tap Rewards</span>
             </div>
             <h1 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-slate-900 leading-tight">
-              {t('landing.what_is_reviewboost')}
+              Get More Reviews, Repeat Visits, and Loyal Customers from One QR
             </h1>
             <p className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed max-w-3xl mx-auto mb-8">
-              {t('landing.reviewboost_desc')}
+              Smart Tap AI now combines Google review collection with verified stamp cards, custom discounts, scratch rewards, digital menus, branch check-in, and secure staff PIN verification.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -157,6 +191,65 @@ const Index = () => {
               >
                 {t('landing.cta_secondary')}
               </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Smart Tap Rewards Feature Marketing */}
+      <section className="py-16 md:py-24 bg-white border-y border-gray-100">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full bg-red-50 border border-red-100 px-4 py-1.5 mb-5">
+              <QrCode className="h-3.5 w-3.5 text-red-600" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-red-600">Same QR. More Services.</span>
+            </div>
+            <h2 className="text-2xl md:text-4xl font-black tracking-tight text-slate-950">
+              Smart Tap Rewards turns every scan into a customer journey
+            </h2>
+            <p className="text-sm md:text-lg text-gray-500 font-medium leading-relaxed max-w-3xl mx-auto mt-4">
+              Keep your existing Smart Tap AI QR code. Enable loyalty and rewards only when you need them, without reprinting cards or changing the review QR.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
+            {rewardFeatures.map((feature) => (
+              <Card key={feature.title} className="border border-gray-100 shadow-sm hover:shadow-xl hover:border-red-100 transition-all rounded-2xl overflow-hidden">
+                <CardContent className="p-5 md:p-6">
+                  <div className="h-12 w-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
+                    <feature.icon className="h-6 w-6 text-red-600" />
+                  </div>
+                  <h3 className="text-base md:text-lg font-black text-slate-950 tracking-tight">{feature.title}</h3>
+                  <p className="text-xs md:text-sm text-gray-500 leading-relaxed mt-2 font-medium">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="max-w-5xl mx-auto mt-8 md:mt-12 rounded-3xl bg-slate-950 text-white overflow-hidden shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              <div className="p-6 md:p-10">
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-red-400 mb-4">Authentic Stamp Collection</p>
+                <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-4">No fake stamps. No loose paper cards.</h3>
+                <p className="text-sm md:text-base text-gray-300 leading-relaxed">
+                  Customer enters their mobile number, staff confirms the visit with a secure PIN, and the stamp is saved to the customer card. Rewards unlock only after the required verified stamps.
+                </p>
+              </div>
+              <div className="bg-white text-slate-950 p-6 md:p-10">
+                <div className="space-y-4">
+                  {[
+                    "Customer scans your Smart Tap AI QR",
+                    "Customer enters mobile number",
+                    "Staff enters PIN after real visit",
+                    "Stamp is verified and reward progress updates",
+                  ].map((step, index) => (
+                    <div key={step} className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-black shrink-0">{index + 1}</div>
+                      <p className="text-sm font-bold leading-relaxed pt-1">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
