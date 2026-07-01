@@ -46,7 +46,7 @@ interface Location {
 }
 
 const BHAIRAVEE_CAMPAIGN_ID = 'fa6c7c65-777c-4b11-8fb2-113452279fc1';
-const BHAIRAVEE_HEADER_LOGO_SRC = '/logo.jpg';
+const BHAIRAVEE_HEADER_LOGO_SRC = '/bhairavee-logo.png';
 
 const BHAIRAVEE_MENU_ITEMS = [
   'Patavadi Rassa', 'Fanas Bhaji', 'Kaju Usal', 'Masala Vange', 'Shev Bhaji',
@@ -673,10 +673,10 @@ const ReviewLanding = () => {
   const businessName = location?.name || campaign?.name || 'Business';
   const googleUrl = location?.google_review_url || campaign?.google_review_url;
   const headerLogoSrc = isBhairaveeCampaign
-    ? (location?.logo_url || BHAIRAVEE_HEADER_LOGO_SRC)
+    ? BHAIRAVEE_HEADER_LOGO_SRC
     : location?.logo_url;
   const headerLogoClassName = isBhairaveeCampaign
-    ? "w-44 h-20 object-contain rounded-xl shadow-lg border-2 border-white bg-white p-2"
+    ? "w-56 max-w-[82vw] h-24 object-contain rounded-xl shadow-lg border border-white bg-white px-3 py-2"
     : "w-20 h-20 object-contain rounded-2xl shadow-lg border-2 border-white bg-white";
 
   // ─── Render ─────────────────────────────────────────────────
@@ -967,7 +967,7 @@ const ReviewLanding = () => {
                   <span className="text-2xl">👇</span>
                 </div>
                 <p className="text-amber-800 text-sm font-medium">
-                  <strong>Step 1:</strong> Pick or edit an idea so it reflects your visit
+                  <strong>Step 1:</strong> {isBhairaveeCampaign ? "Pick an idea that reflects your visit" : "Pick or edit an idea so it reflects your visit"}
                 </p>
               </div>
             )}
@@ -1087,17 +1087,19 @@ const ReviewLanding = () => {
                             <CheckCircle2 className="h-5 w-5 text-green-600" />
                           ) : (
                             <div className="flex flex-col gap-2">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingIndex(index);
-                                  setEditText(text);
-                                }}
-                                className="p-1.5 bg-slate-100 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                title="Edit Review"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </button>
+                              {!isBhairaveeCampaign && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingIndex(index);
+                                    setEditText(text);
+                                  }}
+                                  className="p-1.5 bg-slate-100 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                  title="Edit Review"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </button>
+                              )}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
