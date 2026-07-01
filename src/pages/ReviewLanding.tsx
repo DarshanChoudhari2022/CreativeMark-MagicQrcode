@@ -45,11 +45,70 @@ interface Location {
   address: string;
 }
 
+const BHAIRAVEE_CAMPAIGN_ID = 'fa6c7c65-777c-4b11-8fb2-113452279fc1';
+const BHAIRAVEE_HEADER_LOGO_SRC = '/logo.jpg';
+
+const BHAIRAVEE_MENU_ITEMS = [
+  'Patavadi Rassa', 'Fanas Bhaji', 'Kaju Usal', 'Masala Vange', 'Shev Bhaji',
+  'Matki Usal', 'Lajit Paneer Biryani', 'Kothimbir Biryani', 'Chaap Biryani',
+  'Ambur Biryani', 'Sarangi Ghee Roast Chaap Biryani', 'Malika Dum Biryani',
+  'Lucknowi Dum Biryani', 'Bhairavee Special Platter', 'Tender Coconut Tikka',
+  'Lemon Paneer Tikka', 'Paneer Cheese Seekh Kebab', 'Paneer Multani',
+  'Chef Special Tikka Paneer', 'Paneer Shole Kebab', 'Paneer Rowdy Tikka',
+  'Bhairavee Special Veg', 'Tender Coconut and Broccoli Miloni',
+  'Veg Seekh Kebab Masala', 'Sag Buruta Masala', 'Cheese Palak Kofta',
+  'Paneer Ghee Roast Masala', 'Stuffed Palak Paneer', 'Vilayati Subzi Sagwala',
+  'Paneer Tikka', 'Veg Kolhapuri', 'Dal Tadka', 'Butter Roti', 'Jeera Rice'
+];
+
+const shuffleTake = <T,>(items: T[], count: number): T[] => {
+  return [...items].sort(() => Math.random() - 0.5).slice(0, count);
+};
+
+const generateBhairaveeReviewIdeas = (
+  businessName: string,
+  rating: number,
+  count = 8,
+  address?: string
+): string[] => {
+  const loc = address ? ` near ${address}` : "";
+  const picked = shuffleTake(BHAIRAVEE_MENU_ITEMS, 8);
+
+  const fourStarIdeas = [
+    `Good pure veg food overall. ${picked[0]} tasted nice, though service could be a little quicker during rush time.`,
+    `Liked the clean seating and family-friendly feel at ${businessName}. The ${picked[1]} was good, but parking can be a bit tight.`,
+    `Nice meal with family at ${businessName}. The taste was good and portions were fair, though the wait felt slightly long.`,
+    `${picked[2]} was tasty and fresh. Overall good visit, just wish the service was a little faster when crowded.`,
+    `Good vegetarian food and polite staff. The place was comfortable, though a bit crowded when we visited.`,
+    `The food quality was nice and the menu has good pure veg options. A little faster billing would make it even better.`,
+    `Visited for dinner and enjoyed the taste. ${picked[3]} stood out, while service speed can improve during peak hours.`,
+    `Good option for vegetarian food${loc}. The seating was clean, and the food was satisfying overall.`
+  ];
+
+  const fiveStarIdeas = [
+    `Had a lovely pure veg meal at ${businessName}. The ${picked[0]} was flavourful, fresh, and perfect for a family dinner.`,
+    `${businessName} has a warm family restaurant feel. I liked the clean seating, polite staff, and the taste of ${picked[1]}.`,
+    `Tried ${picked[2]} and ${picked[3]} here. Both were well prepared, and the overall dining experience felt comfortable.`,
+    `A good place for pure veg food${loc}. The food tasted fresh, service was smooth, and the ambience was relaxed.`,
+    `Enjoyed the variety on the menu at ${businessName}. ${picked[4]} had a nice flavour, and the staff handled the order well.`,
+    `The restaurant felt clean and welcoming. I liked the pure veg options, especially ${picked[5]}, and would visit again.`,
+    `Visited with family and had a satisfying meal. The food was tasty, portions were good, and the service was polite.`,
+    `${picked[6]} was served nicely and tasted fresh. ${businessName} is a good choice when you want a reliable veg meal.`,
+    `The starters and main course both tasted good. ${picked[7]} was memorable, and the restaurant felt comfortable for families.`,
+    `Great pure veg restaurant with decent ambience, clean tables, and a menu that has enough variety for everyone.`,
+    `Had a smooth dining experience at ${businessName}. The staff were helpful, food arrived properly, and everything tasted fresh.`,
+    `Liked the balance of taste and comfort here. It is a nice place for lunch or dinner with family and friends.`
+  ];
+
+  return shuffleTake(rating < 5 ? fourStarIdeas : fiveStarIdeas, count);
+};
+
 // ─── Component ────────────────────────────────────────────────
 const ReviewLanding = () => {
   const { campaignId } = useParams();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const isBhairaveeCampaign = campaignId === BHAIRAVEE_CAMPAIGN_ID;
 
   const [loading, setLoading] = useState(true);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
@@ -164,6 +223,21 @@ const ReviewLanding = () => {
     try {
       const category = location?.category || 'service';
 
+      if (isBhairaveeCampaign) {
+        const ideas = generateBhairaveeReviewIdeas(
+          businessName,
+          ratingForRequest,
+          8,
+          location?.address
+        );
+
+        if (id === fetchIdRef.current) {
+          setSuggestions(ideas);
+          recordEvent('ai_suggestion', { count: ideas.length, source: 'bhairavee_curated' });
+        }
+        return;
+      }
+
       const result = await Promise.race([
         generateReviewSuggestions(
           businessName,
@@ -199,7 +273,7 @@ const ReviewLanding = () => {
         setLoadingSuggestions(false);
       }
     }
-  }, [location, campaign]);
+  }, [location, campaign, isBhairaveeCampaign]);
 
   // ─── Local Fallback Generator (zero API, instant, category-aware) ───
   const generateLocalFallbacks = (businessName: string, rating = selectedRating): string[] => {
@@ -598,6 +672,12 @@ const ReviewLanding = () => {
 
   const businessName = location?.name || campaign?.name || 'Business';
   const googleUrl = location?.google_review_url || campaign?.google_review_url;
+  const headerLogoSrc = isBhairaveeCampaign
+    ? (location?.logo_url || BHAIRAVEE_HEADER_LOGO_SRC)
+    : location?.logo_url;
+  const headerLogoClassName = isBhairaveeCampaign
+    ? "w-44 h-20 object-contain rounded-xl shadow-lg border-2 border-white bg-white p-2"
+    : "w-20 h-20 object-contain rounded-2xl shadow-lg border-2 border-white bg-white";
 
   // ─── Render ─────────────────────────────────────────────────
   return (
@@ -618,11 +698,11 @@ const ReviewLanding = () => {
         {/* ─── Business Header ────────────────────────────── */}
         <div className="text-center mb-8" style={{ animation: 'fadeInUp 0.6s ease-out' }}>
           <div className="inline-block mb-4">
-            {location?.logo_url ? (
+            {headerLogoSrc ? (
               <img
-                src={location.logo_url}
+                src={headerLogoSrc}
                 alt={businessName}
-                className="w-20 h-20 object-contain rounded-2xl shadow-lg border-2 border-white bg-white"
+                className={headerLogoClassName}
               />
             ) : (
               <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-lg flex items-center justify-center">
@@ -1072,7 +1152,7 @@ const ReviewLanding = () => {
         </Card>
 
         {/* ─── Photo Tips Card ─────────────────────────────── */}
-        {!redirecting && (
+        {!redirecting && !isBhairaveeCampaign && (
           <Card className="border border-slate-200 shadow-lg rounded-2xl overflow-hidden bg-white mt-4" style={{ animation: 'fadeInUp 1s ease-out' }}>
             <CardContent className="p-0">
               <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-4 text-white flex items-center gap-3">
