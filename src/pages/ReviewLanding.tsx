@@ -211,11 +211,11 @@ const ReviewLanding = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const isBhairaveeCampaign = campaignId === BHAIRAVEE_CAMPAIGN_ID;
-  const isMathuraCampaign = isMathuraName(location?.name || campaign?.name || '');
 
   const [loading, setLoading] = useState(true);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
+  const isMathuraCampaign = isMathuraName(location?.name || campaign?.name || '');
   const [selectedServices, setSelectedServices] = useState<CombinedServiceId[]>([]);
   const [stampCount, setStampCount] = useState(0);
   const [scratchReward, setScratchReward] = useState<string | null>(null);
