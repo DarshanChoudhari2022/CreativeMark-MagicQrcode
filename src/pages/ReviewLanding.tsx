@@ -103,12 +103,115 @@ const generateBhairaveeReviewIdeas = (
   return shuffleTake(rating < 5 ? fourStarIdeas : fiveStarIdeas, count);
 };
 
+// ─── Mathura Pure Veg Menu & Review Generator ───────────────────
+const MATHURA_MENU_ITEMS = [
+  // South Indian
+  'Masala Dosa', 'Ghee Podi Dosa', 'Mysore Cheese Masala Dosa', 'Paper Masala Dosa',
+  'Cheese Rawa Masala Dosa', 'Set Dosa', 'Cheese Onion Uttappam', 'Medu Vada',
+  'Dahi Vada', 'Sabudana Vada', 'Idli Vada', 'Sada Dosa', 'Cut Dosa',
+  // Starters Continental
+  'Cheese Corn Ball', 'Mexicana Nachos', 'Falafel Bowl', 'Broccoli Popcorn',
+  'Peri Peri Cottage Cheese Skewers', 'Exotic Pesto Finger', 'Spicy Quinoa Tikki',
+  'Baby Potato Cheese Fondue', 'Hummus with Pita Bread',
+  // Starters Tandoor
+  'Peri Peri Paneer Tikka', 'Basil Pesto Paneer Tikka', 'Prunes Paneer Tikka',
+  'Stuffed Tandoori Mushroom', 'Rim Jhim Seekh Kabab', 'Tandoori Veg Platter',
+  'Paneer Pahadi Roll', 'Cholle Kulche Tacos', 'Naan Chilli Bomb',
+  // Soup
+  'Broccoli Burnt Garlic Soup', 'Manchow Soup', 'Tomato & Basil Soup',
+  'Mexican Tortilla Soup', 'Zhol Momo Soup',
+  // Baos & Sushi
+  'Chilli Paneer Bao', 'Vegetable Kung Pao Bao', 'Dragon Fruit Roll',
+  'Flamin Hot Crunchy Sushi', 'Makizushi Sushi',
+  // Pizza & Pasta
+  'Paneer Tikka Pizza', 'Margherita', 'Quattro Formaggi',
+  'Truffle Butter Mushroom Spaghetti', 'Mac and Cheese', 'Saffron Risotto',
+  'Mushroom Risotto', 'Quesadilla', 'Mexican Enchiladas',
+  // Ramen
+  'Spicy Sriracha Katsu', 'Yasai Miso Ramen',
+  // Oriental
+  'Thai Curry', 'Burmese Khow Suey', 'Pan Fried Noodles', 'Hakka Noodles',
+  // Indian Main Course
+  'Mathura Chef Special', 'Paneer Butter Masala', 'Paneer Tikka Masala',
+  'Paneer Kadhai', 'Malai Kofta', 'Paneer Lababdar', 'Dal Makhni',
+  'Veg Kolhapuri', 'Shaam Savera', 'Paneer Pasanda', 'Methi Muttar Malai',
+  // Pav Bhaji & Sandwiches
+  'Cheese Pav Bhaji', 'Pav Bhaji', 'Paneer Grilled Sandwich', 'Club Sandwich',
+  // Rice & Breads
+  'Paneer Tikka Biryani', 'Dum Ka Biryani', 'Kashmiri Pulao',
+  'Garlic Butter Naan', 'Cheese Butter Garlic Naan', 'Laccha Paratha',
+  // Desserts
+  'Pull Me Up', 'Sizzling Brownie', 'Biscoff Cheese Cake',
+  'Gulab Jamun With Ice Cream', 'Gajar Halwa',
+  // Beverages
+  'Oreo Milkshake', 'Chocolate Badami Milkshake', 'Cold Coffee With Ice Cream',
+  'Virgin Mojito', 'Mango Milkshake', 'Masala Buttermilk', 'Fresh Lime Soda',
+  // Maharashtrian
+  'Poha', 'Upma', 'Sheera',
+  // Salads
+  'Alchemized Caesar Salad', 'Feta Cheese & Melon Club',
+];
+
+const isMathuraName = (name: string): boolean => {
+  const lower = name.toLowerCase();
+  return lower.includes('mathura');
+};
+
+const generateMathuraReviewIdeas = (
+  businessName: string,
+  rating: number,
+  count = 8,
+  address?: string
+): string[] => {
+  const loc = address ? ` near ${address}` : '';
+  const picked = shuffleTake(MATHURA_MENU_ITEMS, 12);
+
+  const threeStarIdeas = [
+    `The food was decent at ${businessName}. I liked the ${picked[0]}, but the ${picked[1]} was a bit average. Service could be quicker.`,
+    `Mixed experience. The ${picked[2]} was good but ${picked[3]} could use better seasoning. The place is clean though.`,
+    `Visited ${businessName} and tried ${picked[4]}. Taste was okay, nothing extraordinary. The ambience is nice but waiting time needs improvement.`,
+    `Average visit. ${picked[5]} was fine, but I expected better flavour from ${picked[6]}. Staff were polite at least.`,
+    `The menu variety is impressive at ${businessName}. ${picked[7]} was good but some dishes felt inconsistent in seasoning.`,
+  ];
+
+  const fourStarIdeas = [
+    `Good food at ${businessName}. The ${picked[0]} was well made, though the wait was a bit long during peak hours.`,
+    `Tried ${picked[1]} and ${picked[2]} — both tasted great. Only wish the service was slightly faster when crowded.`,
+    `Nice ambience and clean place. The ${picked[3]} was a highlight, but ${picked[4]} could have been served warmer.`,
+    `Good experience overall at ${businessName}${loc}. The ${picked[5]} had a nice flavour. Parking could be better though.`,
+    `Visited with family and enjoyed ${picked[6]}. The menu variety is impressive. A little faster billing would make it perfect.`,
+    `${picked[7]} was excellent and the ${picked[8]} was satisfying too. Good value for money, just slightly crowded on weekends.`,
+    `Great pure veg options at ${businessName}. The ${picked[9]} was fresh and tasty. Minor improvement in service speed would help.`,
+    `Liked the warm ambience and clean dining area. ${picked[10]} was well prepared. Would be better with a slightly bigger seating area.`,
+  ];
+
+  const fiveStarIdeas = [
+    `Loved the ${picked[0]} at ${businessName}. Fresh, flavourful, and served nicely. The ambience is warm and inviting.`,
+    `${businessName} has an incredible menu. Tried the ${picked[1]} and ${picked[2]} — both were outstanding.`,
+    `The ${picked[3]} here is one of the best I've had. Clean restaurant, polite staff, and the food was genuinely delicious.`,
+    `Visited with family and everyone enjoyed their food. The ${picked[4]} and ${picked[5]} were the highlights of our meal.`,
+    `Great pure veg restaurant${loc}. The ${picked[6]} was perfectly prepared and the ${picked[7]} was equally impressive.`,
+    `${businessName} is our new favourite spot. The ${picked[8]} was served fresh and the overall experience was very comfortable.`,
+    `Tried ${picked[9]} and it was delicious. The staff were attentive and the place was spotless. Worth every rupee.`,
+    `A wonderful dining experience at ${businessName}. The ${picked[10]} was rich and flavourful, and the ambience is elegant.`,
+    `The menu variety at ${businessName} is amazing — from ${picked[0]} to ${picked[11]}. Everything we tried was well prepared.`,
+    `Food quality at ${businessName} is consistently good. The ${picked[1]} and ${picked[5]} are must-tries. Clean and comfortable place.`,
+    `Had a lovely meal here. The ${picked[3]} was my favourite, and the ${picked[7]} was a close second. Very good service.`,
+    `${businessName} offers something for everyone. The ${picked[4]} was fresh and tasty, and dessert ${picked[10]} was a great ending.`,
+  ];
+
+  if (rating <= 3) return shuffleTake(threeStarIdeas, count);
+  if (rating === 4) return shuffleTake(fourStarIdeas, count);
+  return shuffleTake(fiveStarIdeas, count);
+};
+
 // ─── Component ────────────────────────────────────────────────
 const ReviewLanding = () => {
   const { campaignId } = useParams();
   const { toast } = useToast();
   const { t } = useTranslation();
   const isBhairaveeCampaign = campaignId === BHAIRAVEE_CAMPAIGN_ID;
+  const isMathuraCampaign = isMathuraName(location?.name || campaign?.name || '');
 
   const [loading, setLoading] = useState(true);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
@@ -238,6 +341,10 @@ const ReviewLanding = () => {
         return;
       }
 
+      // Mathura Pure Veg — always use AI API for fresh reviews every time.
+      // The gemini.ts prompt includes the full Mathura menu, so AI only references real items.
+      // If AI fails, the catch block below will use Mathura-specific local fallbacks.
+
       const result = await Promise.race([
         generateReviewSuggestions(
           businessName,
@@ -264,16 +371,28 @@ const ReviewLanding = () => {
 
       // Smart fallback — category-specific, no invented claims
       if (id === fetchIdRef.current) {
-        const fallbacks = generateLocalFallbacks(businessName, ratingForRequest);
-        setSuggestions(fallbacks);
-        recordEvent('ai_suggestion', { count: fallbacks.length, source: 'fallback' });
+        // Use Mathura-specific fallback if detected
+        if (isMathuraCampaign) {
+          const ideas = generateMathuraReviewIdeas(
+            businessName,
+            ratingForRequest,
+            8,
+            location?.address
+          );
+          setSuggestions(ideas);
+          recordEvent('ai_suggestion', { count: ideas.length, source: 'mathura_fallback' });
+        } else {
+          const fallbacks = generateLocalFallbacks(businessName, ratingForRequest);
+          setSuggestions(fallbacks);
+          recordEvent('ai_suggestion', { count: fallbacks.length, source: 'fallback' });
+        }
       }
     } finally {
       if (id === fetchIdRef.current) {
         setLoadingSuggestions(false);
       }
     }
-  }, [location, campaign, isBhairaveeCampaign]);
+  }, [location, campaign, isBhairaveeCampaign, isMathuraCampaign]);
 
   // ─── Local Fallback Generator (zero API, instant, category-aware) ───
   const generateLocalFallbacks = (businessName: string, rating = selectedRating): string[] => {
@@ -316,6 +435,11 @@ const ReviewLanding = () => {
         `Good pure veg restaurant with decent service. I liked the food quality and overall cleanliness.`,
         `Visited for a quick meal and had a smooth experience. Food came nicely prepared and tasted good.`,
       ].sort(() => Math.random() - 0.5).slice(0, 5);
+    }
+
+    // Mathura Pure Veg — use dedicated Mathura fallback with real menu items
+    if (isMathuraName(businessName) || isMathuraName(cat)) {
+      return generateMathuraReviewIdeas(businessName, rating, 5, location?.address || undefined);
     }
 
     // Category-specific review ideas. Customers should edit these in their own words.

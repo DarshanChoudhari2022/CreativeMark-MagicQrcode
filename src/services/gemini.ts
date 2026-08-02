@@ -45,6 +45,110 @@ const BHAIRAVEE_MENU_ITEMS = [
   "Vilayati Subzi Sagwala",
 ];
 
+const MATHURA_MENU_ITEMS = [
+  // Maharashtrian Snacks & Extras
+  "Poha", "Upma", "Pineapple Sheera", "Sheera",
+  // Dosa (All made in pure ghee, served with sambar & chutney)
+  "Rawa Sada Dosa", "Rawa Masala Dosa", "Cheese Rawa Masala Dosa", "Sada Dosa",
+  "Masala Dosa", "Cheese Masala Dosa", "Ghee Podi Dosa", "Ghee Podi Masala Dosa",
+  "Cut Dosa", "Cheese Cut Dosa", "Mysore Sada Dosa", "Mysore Masala Dosa",
+  "Mysore Cheese Masala Dosa", "Set Dosa", "Paper Sada Dosa", "Paper Masala Dosa",
+  // Uttappam
+  "Plain Uttappam", "Onion Uttappam", "Tomato Uttappam", "Coconut Uttappam",
+  "Tomato Onion Uttappam", "Masala Uttappam", "Cheese Onion Uttappam",
+  // Vada
+  "Medu Vada", "Idli Vada", "Dahi Vada", "Sabudana Vada",
+  // Sandwiches
+  "Veg Sandwich", "Veg Grilled Sandwich", "Veg Cheese Sandwich",
+  "Veg Cheese Grilled Sandwich", "Cheese Sandwich", "Cheese Chilly Toast",
+  "Paneer Grilled Sandwich", "Club Sandwich", "Jam Sandwich", "Jam Toast Sandwich",
+  // Pav Bhaji
+  "Pav Bhaji", "Cheese Pav Bhaji", "Masala Pav",
+  // Hot Beverages
+  "Tea", "Lemon Tea", "Green Tea", "Hot Milk", "Regular Coffee", "Hot Chocolate", "Bournvita",
+  // Cold Beverages
+  "Buttermilk", "Masala Buttermilk", "Lassi", "Mango Lassi",
+  "Fresh Lime Water", "Fresh Lime Soda", "Jaljira Water", "Jaljira Soda",
+  // Fresh Juices
+  "Mosambi Juice", "Orange Juice", "Pineapple Juice", "Watermelon Juice",
+  "Mix Fruit Juice", "Apple Juice", "Papaya Juice", "Pomegranate Juice",
+  // Milkshakes
+  "Cold Coffee With Ice Cream", "Vanilla Milkshake", "Strawberry Milkshake",
+  "Mango Milkshake", "Banana Milkshake", "Chocolate Milkshake",
+  "Chocolate Badami Milkshake", "Oreo Milkshake", "Dry Fruit Milkshake",
+  // Mocktails
+  "Virgin Mojito", "Pink Lady", "Pomegranate Spritzer", "Singapore Sling",
+  "Cranberry Ginger", "Khus Dose", "Shirley Temple", "Black Pacific",
+  // Small Plates
+  "French Fries", "Masala Papad", "Cheese Garlic Bread", "Garlic Bread",
+  "Mushroom Toast",
+  // Ramen
+  "Spicy Sriracha Katsu", "Yasai Miso Ramen", "Kare Ramen",
+  // Soup
+  "Tandoori Mushroom Soup", "Mexican Tortilla Soup", "Spinach & Asparagus Soup",
+  "Tomato & Basil Soup", "Broccoli Burnt Garlic Soup", "Zhol Momo Soup",
+  "Manchow Soup", "Tibetan Thukpa Soup", "Lemon Chilli Coriander Soup",
+  // Salads
+  "Alchemized Caesar Salad", "Feta Cheese & Melon Club", "Mix Sprouts Salad",
+  "Walnuts Salad", "Fruit Salad", "Green Salad",
+  // Starters Continental
+  "Cheese Corn Ball", "Avocado on Toast", "Hummus with Pita Bread & Olive Oil",
+  "Falafel Bowl", "Duplex Mushroom", "Peri Peri Onion Rings",
+  "Peri Peri Cottage Cheese Skewers", "Broccoli Popcorn", "Exotic Pesto Finger",
+  "Mexicana Nachos", "Spicy Quinoa Tikki", "Baby Potato Cheese Fondue", "Cigar Roll",
+  // Starters Tandoor
+  "Peri Peri Paneer Tikka", "Basil Pesto Paneer Tikka", "Paneer Pahadi Roll",
+  "Paneer Laziz", "Prunes Paneer Tikka", "Stuffed Tandoori Mushroom",
+  "Wild Mushroom Tikka", "Tandoori Soya Tikka", "Naan Chilli Bomb",
+  "Bharwan Aloo", "Rim Jhim Seekh Kabab", "Cholle Kulche Tacos",
+  "Almond Corn & Palak ki Tikki", "Tandoori Broccoli", "Tandoori Veg Platter",
+  // Baos
+  "Vegetable Kung Pao Bao", "Chilli Mushroom Bao", "Chilli Garlic Tofu Bao", "Chilli Paneer Bao",
+  // Sushi
+  "Asparagus Tempura Blue Rice Sushi", "Makizushi Sushi", "Dragon Fruit Roll",
+  "Flamin Hot Crunchy Sushi",
+  // Pizza
+  "Margherita", "Pizza Mexicana", "Ultimate Pizza", "Barbeque Mushroom Pizza",
+  "Paneer Tikka Pizza", "Pesto Parmesan", "Quattro Formaggi", "Genovese",
+  // World Cuisine / Pasta
+  "Alfredo Pasta", "Arrabbiata Pasta", "Mama-Rosa Pasta", "Spaghetti Aglio Olio",
+  "Mac and Cheese", "Truffle Butter Mushroom Spaghetti",
+  "Risotto Primavera", "Saffron Risotto", "Mushroom Risotto",
+  "Quesadilla", "Mexican Enchiladas",
+  // Oriental Mains
+  "Thai Curry", "Clay Pot Rice", "Burmese Khow Suey",
+  "Black Bean Cottage Cheese Sauce", "Pan Fried Noodles",
+  "Udon Noodle in Teriyaki Sauce", "Hakka Noodles", "Fried Rice",
+  // Indian Main Course
+  "Mathura Chef Special", "Paneer Butter Masala", "Paneer Tikka Masala",
+  "Paneer Kadhai", "Paneer Lahori", "Lahori Paneer Malhi", "Paneer Chatpata",
+  "Paneer Amritsari", "Teesin Mirch ka Paneer", "Paneer Pasanda",
+  "Paneer Hanjera Masala", "Paneer Lababdar", "Classic Palak Paneer",
+  "Mattar Paneer", "Paneer Bhurji", "Kumbh Muttar Hara Pyaza",
+  "Veg Diwani Handi", "Exotic Veg Masala", "Veg Maratha",
+  "Mushroom Takaatak", "Malai Kofta", "Banarasi Kofta", "Kaju Masala",
+  "Bhindi Kurkure", "Soya Masala", "Dum Aloo Kalimirich",
+  "Haryali Pindi Chana Masala", "Methi Muttar Malai",
+  "Mushroom Baby Corn Masala", "Veg Kolhapuri", "Veg Keema", "Veg Kadhai",
+  "Lasoni Palak", "Shaam Savera", "Veg Patiyala", "Veg Tawa",
+  "Aloo Gobhi", "Aloo Jeera",
+  // Dal
+  "Dal Tadka", "Dal Fry", "Smoked Dal Makhni", "Dal Khichdi",
+  // Rice
+  "Paneer Tikka Biryani", "Dum Ka Biryani", "Jeera Rice", "Steam Rice",
+  "Veg Pulao", "Kashmiri Pulao", "Paneer Pulao", "Curd Rice",
+  // Indian Breads
+  "Roti", "Butter Roti", "Naan", "Butter Naan", "Garlic Naan",
+  "Garlic Butter Naan", "Cheese Garlic Naan", "Cheese Butter Garlic Naan",
+  "Kulcha", "Butter Kulcha", "Laccha Paratha", "Paneer Paratha", "Aloo Paratha",
+  // Desserts
+  "Pull Me Up", "Sizzling Brownie", "Biscoff Cheese Cake",
+  "Hazelnut Chocolate Mousse", "Gajar Halwa", "Gulab Jamun",
+  "Gulab Jamun With Ice Cream", "Gajar Halwa With Ice Cream", "Ice Cream",
+  // Raita
+  "Veg Raita", "Pineapple Raita", "Plain Curd",
+];
+
 const GENERIC_RESTAURANT_DETAILS = [
   "taste",
   "freshness",
@@ -88,11 +192,26 @@ function isBhairaveeRestaurant(businessName: string, businessContext: string): b
   return haystack.includes("bhairavee") || haystack.includes("bhairavi");
 }
 
+function isMathuraRestaurant(businessName: string, businessContext: string): boolean {
+  const haystack = `${businessName} ${businessContext}`.toLowerCase();
+  return haystack.includes("mathura") && (haystack.includes("veg") || haystack.includes("restaurant") || haystack.includes("pure"));
+}
+
+function hasSpecificMenu(businessName: string, businessContext: string): boolean {
+  return isBhairaveeRestaurant(businessName, businessContext) || isMathuraRestaurant(businessName, businessContext);
+}
+
 function getAllowedDetails(businessName: string, businessContext: string): string[] {
   const context = businessContext.toLowerCase();
 
   if (isBhairaveeRestaurant(businessName, businessContext)) {
     return BHAIRAVEE_MENU_ITEMS;
+  }
+
+  if (isMathuraRestaurant(businessName, businessContext)) {
+    // Return a shuffled subset of 30 items so the AI prompt isn't too long
+    // but still has enough variety for fresh reviews each time
+    return shuffleArray(MATHURA_MENU_ITEMS).slice(0, 30);
   }
 
   if (context.includes("restaurant") || context.includes("hotel") || context.includes("veg")) {
@@ -229,7 +348,7 @@ export async function generateReviewSuggestions(
   _tone: string = "Natural"
 ): Promise<ReviewSuggestion[]> {
   const allowedDetails = getAllowedDetails(businessName, businessContext);
-  const isSpecificMenu = isBhairaveeRestaurant(businessName, businessContext);
+  const isSpecificMenu = hasSpecificMenu(businessName, businessContext);
   const prompt = buildPrompt(
     businessName,
     rating,
