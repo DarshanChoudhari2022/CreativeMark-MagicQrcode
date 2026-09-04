@@ -1,10 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  buildGroqReviewRequest,
+  getGeminiReviewModel,
+  getGroqReviewModel,
+} from "./aiProviderConfig";
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+const GEMINI_REVIEW_MODEL = getGeminiReviewModel(import.meta.env);
+const GROQ_REVIEW_MODEL = getGroqReviewModel(import.meta.env);
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const geminiModel = genAI.getGenerativeModel({ model: GEMINI_REVIEW_MODEL });
 
 export interface ReviewSuggestion {
   text: string;
@@ -247,7 +254,7 @@ function getAllowedDetails(businessName: string, businessContext: string): strin
 
 function sanitizeSuggestion(text: string, allowedDetails: string[], isSpecificMenu: boolean): string {
   let cleaned = text
-    .replace(/^\d+[\.)]\s*/, "")
+    .replace(/^\d+[.)]\s*/, "")
     .replace(/^[-*]\s*/, "")
     .replace(/^["']|["']$/g, "")
     .replace(/\s+/g, " ")
@@ -338,6 +345,11 @@ Compliance rules:
 Output exactly 5 lines. No numbering, bullets, quotes, labels, or extra explanation.`;
 }
 
+async function getApiErrorMessage(provider: string, response: Response): Promise<string> {
+  const text = await response.text().catch(() => "");
+  return `${provider} Error: ${response.status}${text ? ` - ${text.slice(0, 300)}` : ""}`;
+}
+
 export async function generateReviewSuggestions(
   businessName: string,
   rating: number,
@@ -368,22 +380,10 @@ export async function generateReviewSuggestions(
         Authorization: `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You help customers draft honest, editable Google review ideas based only on their real experience. Never invent menu items, incentives, employee names, or promotional claims. Avoid repetitive wording and produce unique phrasing for every request.",
-          },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.75,
-        max_tokens: 350,
-      }),
+      body: JSON.stringify(buildGroqReviewRequest({ model: GROQ_REVIEW_MODEL, prompt })),
     });
 
-    if (!response.ok) throw new Error(`Groq Error: ${response.status}`);
+    if (!response.ok) throw new Error(await getApiErrorMessage("Groq", response));
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
