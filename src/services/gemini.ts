@@ -1,17 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import {
-  buildGroqReviewRequest,
-  getGeminiReviewModel,
-  getGroqReviewModel,
-} from "./aiProviderConfig";
-
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
-const GEMINI_REVIEW_MODEL = getGeminiReviewModel(import.meta.env);
-const GROQ_REVIEW_MODEL = getGroqReviewModel(import.meta.env);
-
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const geminiModel = genAI.getGenerativeModel({ model: GEMINI_REVIEW_MODEL });
+import { REVIEW_API_ENDPOINT } from "./aiProviderConfig";
 
 export interface ReviewSuggestion {
   text: string;
@@ -345,11 +332,6 @@ Compliance rules:
 Output exactly 5 lines. No numbering, bullets, quotes, labels, or extra explanation.`;
 }
 
-async function getApiErrorMessage(provider: string, response: Response): Promise<string> {
-  const text = await response.text().catch(() => "");
-  return `${provider} Error: ${response.status}${text ? ` - ${text.slice(0, 300)}` : ""}`;
-}
-
 export async function generateReviewSuggestions(
   businessName: string,
   rating: number,
@@ -372,41 +354,28 @@ export async function generateReviewSuggestions(
   );
 
   try {
-    if (!GROQ_API_KEY) throw new Error("No Groq key");
-
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetch(REVIEW_API_ENDPOINT, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(buildGroqReviewRequest({ model: GROQ_REVIEW_MODEL, prompt })),
+      body: JSON.stringify({ prompt }),
     });
 
-    if (!response.ok) throw new Error(await getApiErrorMessage("Groq", response));
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || `Review API Error: ${response.status}`);
+    }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    const content = data.content || "";
     const lines = parseSuggestions(content, allowedDetails, isSpecificMenu);
 
     if (lines.length >= 3) {
       return lines.map((text) => ({ text, rating, talkingPoints: allowedDetails.slice(0, 6), source: "ai" }));
     }
-  } catch (groqError) {
-    console.warn("Groq review helper failed, trying Gemini:", groqError);
-  }
-
-  try {
-    if (!GEMINI_API_KEY) throw new Error("No Gemini key");
-
-    const result = await geminiModel.generateContent(prompt);
-    const lines = parseSuggestions(result.response.text(), allowedDetails, isSpecificMenu);
-
-    if (lines.length >= 3) {
-      return lines.map((text) => ({ text, rating, talkingPoints: allowedDetails.slice(0, 6), source: "ai" }));
-    }
-  } catch (geminiError) {
-    console.warn("Gemini review helper failed, using local review ideas:", geminiError);
+  } catch (reviewApiError) {
+    console.warn("Review API helper failed, using local review ideas:", reviewApiError);
   }
 
   return generateCompliantFallbacks(businessName, businessContext, businessLocation, rating);

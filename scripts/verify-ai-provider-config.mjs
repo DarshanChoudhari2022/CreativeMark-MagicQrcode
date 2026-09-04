@@ -13,6 +13,7 @@ execFileSync(
   [
     "node_modules/typescript/bin/tsc",
     "src/services/aiProviderConfig.ts",
+    "api/generate-review-suggestions.ts",
     "--target",
     "ES2022",
     "--module",
@@ -26,21 +27,22 @@ execFileSync(
   { stdio: "inherit" }
 );
 
-const config = await import(pathToFileURL(`${process.cwd()}/${outDir}/aiProviderConfig.js`).href);
+const config = await import(pathToFileURL(`${process.cwd()}/${outDir}/src/services/aiProviderConfig.js`).href);
 
+assert.equal(config.REVIEW_API_ENDPOINT, "/api/generate-review-suggestions");
 assert.equal(config.getGeminiReviewModel({}), "gemini-3.7-flash");
 assert.equal(
   config.getGeminiReviewModel({ VITE_GEMINI_MODEL: "gemini-3.8-flash" }),
   "gemini-3.8-flash"
 );
-assert.equal(config.getGroqReviewModel({}), "llama-3.1-8b-instant");
+assert.equal(config.getGroqReviewModel({}), "openai/gpt-oss-20b");
 
 const request = config.buildGroqReviewRequest({
-  model: "llama-3.1-8b-instant",
+  model: "openai/gpt-oss-20b",
   prompt: "Create review ideas",
 });
 
-assert.equal(request.model, "llama-3.1-8b-instant");
+assert.equal(request.model, "openai/gpt-oss-20b");
 assert.equal(request.messages.length, 2);
 assert.equal(request.messages[0].role, "system");
 assert.equal(request.messages[1].content, "Create review ideas");
