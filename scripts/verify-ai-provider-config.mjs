@@ -1,9 +1,16 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, rmSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 const outDir = ".tmp-ai-provider-config";
+const apiSource = readFileSync("api/generate-review-suggestions.ts", "utf8");
+
+assert.equal(
+  apiSource.includes("../src/"),
+  false,
+  "Vercel API routes must be self-contained and must not import frontend src modules"
+);
 
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
@@ -36,6 +43,7 @@ assert.equal(
   "gemini-3.8-flash"
 );
 assert.equal(config.getGroqReviewModel({}), "openai/gpt-oss-20b");
+assert.equal(config.getHuggingFaceReviewModel({}), "mistralai/Mistral-7B-Instruct-v0.3");
 
 const request = config.buildGroqReviewRequest({
   model: "openai/gpt-oss-20b",

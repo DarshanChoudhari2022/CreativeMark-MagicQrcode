@@ -2,6 +2,7 @@ type EnvLike = Record<string, string | boolean | undefined>;
 
 export const DEFAULT_GEMINI_REVIEW_MODEL = "gemini-3.7-flash";
 export const DEFAULT_GROQ_REVIEW_MODEL = "openai/gpt-oss-20b";
+export const DEFAULT_HUGGINGFACE_REVIEW_MODEL = "mistralai/Mistral-7B-Instruct-v0.3";
 export const REVIEW_API_ENDPOINT = "/api/generate-review-suggestions";
 
 export function getGeminiReviewModel(env: EnvLike): string {
@@ -10,6 +11,10 @@ export function getGeminiReviewModel(env: EnvLike): string {
 
 export function getGroqReviewModel(env: EnvLike): string {
   return String(env.GROQ_MODEL || env.VITE_GROQ_MODEL || DEFAULT_GROQ_REVIEW_MODEL);
+}
+
+export function getHuggingFaceReviewModel(env: EnvLike): string {
+  return String(env.HF_MODEL || env.HUGGINGFACE_MODEL || env.VITE_HUGGINGFACE_MODEL || DEFAULT_HUGGINGFACE_REVIEW_MODEL);
 }
 
 interface GroqReviewRequestOptions {
