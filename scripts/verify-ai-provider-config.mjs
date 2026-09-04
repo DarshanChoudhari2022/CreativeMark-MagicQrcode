@@ -43,7 +43,7 @@ assert.equal(
   "gemini-3.8-flash"
 );
 assert.equal(config.getGroqReviewModel({}), "openai/gpt-oss-20b");
-assert.equal(config.getHuggingFaceReviewModel({}), "mistralai/Mistral-7B-Instruct-v0.3");
+assert.equal(config.getHuggingFaceReviewModel({}), "openai/gpt-oss-120b:fastest");
 
 const request = config.buildGroqReviewRequest({
   model: "openai/gpt-oss-20b",

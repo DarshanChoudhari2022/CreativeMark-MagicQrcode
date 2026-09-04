@@ -3,7 +3,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 const MAX_PROMPT_LENGTH = 8000;
 const DEFAULT_GROQ_REVIEW_MODEL = "openai/gpt-oss-20b";
 const DEFAULT_GEMINI_REVIEW_MODEL = "gemini-3.7-flash";
-const DEFAULT_HUGGINGFACE_REVIEW_MODEL = "mistralai/Mistral-7B-Instruct-v0.3";
+const DEFAULT_HUGGINGFACE_REVIEW_MODEL = "openai/gpt-oss-120b:fastest";
 
 async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   const chunks: Buffer[] = [];
@@ -20,6 +20,7 @@ async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknow
 function sendJson(res: ServerResponse, status: number, payload: unknown) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-store, max-age=0");
   res.end(JSON.stringify(payload));
 }
 
@@ -94,8 +95,7 @@ async function generateWithHuggingFace(prompt: string): Promise<string> {
   if (!apiKey) throw new Error("HF_TOKEN is not configured");
 
   const model = process.env.HF_MODEL || process.env.HUGGINGFACE_MODEL || DEFAULT_HUGGINGFACE_REVIEW_MODEL;
-  const modelPath = model.split("/").map(encodeURIComponent).join("/");
-  const response = await fetch(`https://api-inference.huggingface.co/models/${modelPath}/v1/chat/completions`, {
+  const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -141,6 +141,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   try {
     const body = await readJsonBody(req);
     const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
+    const requestId = typeof body.requestId === "string" ? body.requestId.trim() : crypto.randomUUID();
 
     if (!prompt) {
       sendJson(res, 400, { error: "Prompt is required" });
@@ -161,8 +162,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     for (const provider of providers) {
       try {
-        const content = await provider.run(prompt);
-        sendJson(res, 200, { content, provider: provider.name });
+        const content = await provider.run(`${prompt}\nFresh request id: ${requestId}`);
+        sendJson(res, 200, { content, provider: provider.name, requestId });
         return;
       } catch (error) {
         const message = error instanceof Error ? error.message : `${provider.name} failed`;

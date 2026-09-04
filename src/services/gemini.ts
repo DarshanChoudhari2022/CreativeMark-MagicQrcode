@@ -356,10 +356,12 @@ export async function generateReviewSuggestions(
   try {
     const response = await fetch(REVIEW_API_ENDPOINT, {
       method: "POST",
+      cache: "no-store",
       headers: {
         "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
       },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt, requestId: createUniquenessSeed() }),
     });
 
     if (!response.ok) {
