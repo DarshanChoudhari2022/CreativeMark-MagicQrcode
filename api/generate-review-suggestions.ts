@@ -1,9 +1,16 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 const MAX_PROMPT_LENGTH = 8000;
-const DEFAULT_GROQ_REVIEW_MODEL = "openai/gpt-oss-20b";
-const DEFAULT_GEMINI_REVIEW_MODEL = "gemini-3.7-flash";
+const DEFAULT_GROQ_REVIEW_MODEL = "qwen/qwen3.8-27b";
+const DEFAULT_GEMINI_REVIEW_MODEL = "gemini-3.6-flash";
 const DEFAULT_HUGGINGFACE_REVIEW_MODEL = "openai/gpt-oss-120b:fastest";
+
+function uniqueSeed(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 12)}-${crypto.randomUUID()}`;
+}
+
+const UNIQUENESS_INSTRUCTION =
+  "\n\nIMPORTANT: This is a brand-new request. You MUST produce completely original text that has never appeared in any previous response. Vary your vocabulary, sentence structure, opening words, and topic angle. Do NOT reuse any phrasing from prior outputs.";
 
 async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   const chunks: Buffer[] = [];
@@ -36,18 +43,19 @@ function groqRequest(prompt: string) {
       {
         role: "system",
         content:
-          "You help customers draft honest, editable Google review ideas based only on their real experience. Never invent menu items, incentives, employee names, or promotional claims. Avoid repetitive wording and produce unique phrasing for every request.",
+          "You help customers draft honest, editable Google review ideas based only on their real experience. Never invent menu items, incentives, employee names, or promotional claims. Every response must use completely fresh wording — never repeat phrases from earlier outputs.",
       },
-      { role: "user", content: prompt },
+      { role: "user", content: prompt + UNIQUENESS_INSTRUCTION },
     ],
-    temperature: 0.75,
-    max_tokens: 350,
+    temperature: 0.95,
+    max_tokens: 450,
+    top_p: 0.95,
   };
 }
 
 async function generateWithGroq(prompt: string): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) throw new Error("GROQ_API_KEY is not configured");
+  if (!apiKey) throw new Error("GROQ_API_KEY is not configured — skipping");
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -61,24 +69,29 @@ async function generateWithGroq(prompt: string): Promise<string> {
   if (!response.ok) throw await providerError("Groq", response);
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
+  const content = (data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning || "").trim();
+  if (!content) throw new Error("Groq returned empty content");
+  return content;
 }
 
 async function generateWithGemini(prompt: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not configured — skipping");
 
   const model = process.env.GEMINI_MODEL || DEFAULT_GEMINI_REVIEW_MODEL;
+  const enrichedPrompt = `${prompt}\nUniqueness token: ${uniqueSeed()}${UNIQUENESS_INSTRUCTION}`;
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{ parts: [{ text: enrichedPrompt }] }],
         generationConfig: {
-          temperature: 0.75,
-          maxOutputTokens: 350,
+          temperature: 0.95,
+          topP: 0.95,
+          topK: 50,
+          maxOutputTokens: 450,
         },
       }),
     }
@@ -87,14 +100,17 @@ async function generateWithGemini(prompt: string): Promise<string> {
   if (!response.ok) throw await providerError("Gemini", response);
 
   const data = await response.json();
-  return data.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text || "").join("") || "";
+  const content = data.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text || "").join("") || "";
+  if (!content.trim()) throw new Error("Gemini returned empty content");
+  return content;
 }
 
 async function generateWithHuggingFace(prompt: string): Promise<string> {
   const apiKey = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
-  if (!apiKey) throw new Error("HF_TOKEN is not configured");
+  if (!apiKey) throw new Error("HF_TOKEN is not configured — skipping");
 
   const model = process.env.HF_MODEL || process.env.HUGGINGFACE_MODEL || DEFAULT_HUGGINGFACE_REVIEW_MODEL;
+  const enrichedPrompt = `${prompt}\nUniqueness token: ${uniqueSeed()}${UNIQUENESS_INSTRUCTION}`;
   const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -107,19 +123,22 @@ async function generateWithHuggingFace(prompt: string): Promise<string> {
         {
           role: "system",
           content:
-            "Create honest, editable Google review ideas. Do not invent facts, staff names, offers, prices, or promotional claims. Output only the requested review lines.",
+            "Create honest, editable Google review ideas. Do not invent facts, staff names, offers, prices, or promotional claims. Every response must use completely fresh, never-before-used wording. Output only the requested review lines.",
         },
-        { role: "user", content: prompt },
+        { role: "user", content: enrichedPrompt },
       ],
-      temperature: 0.75,
-      max_tokens: 350,
+      temperature: 0.95,
+      max_tokens: 800,
+      top_p: 0.95,
     }),
   });
 
   if (!response.ok) throw await providerError("Hugging Face", response);
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
+  const content = (data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning || "").trim();
+  if (!content) throw new Error("Hugging Face returned empty content");
+  return content;
 }
 
 function localReviewIdeas(): string {
@@ -162,7 +181,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     for (const provider of providers) {
       try {
-        const content = await provider.run(`${prompt}\nFresh request id: ${requestId}`);
+        const content = await provider.run(`${prompt}\nFresh request id: ${requestId}\nTimestamp: ${Date.now()}`);
         sendJson(res, 200, { content, provider: provider.name, requestId });
         return;
       } catch (error) {

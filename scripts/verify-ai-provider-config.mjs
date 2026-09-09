@@ -37,24 +37,25 @@ execFileSync(
 const config = await import(pathToFileURL(`${process.cwd()}/${outDir}/src/services/aiProviderConfig.js`).href);
 
 assert.equal(config.REVIEW_API_ENDPOINT, "/api/generate-review-suggestions");
-assert.equal(config.getGeminiReviewModel({}), "gemini-3.7-flash");
+assert.equal(config.getGeminiReviewModel({}), "gemini-3.6-flash");
 assert.equal(
   config.getGeminiReviewModel({ VITE_GEMINI_MODEL: "gemini-3.8-flash" }),
   "gemini-3.8-flash"
 );
-assert.equal(config.getGroqReviewModel({}), "openai/gpt-oss-20b");
+assert.equal(config.getGroqReviewModel({}), "qwen/qwen3.8-27b");
 assert.equal(config.getHuggingFaceReviewModel({}), "openai/gpt-oss-120b:fastest");
 
 const request = config.buildGroqReviewRequest({
-  model: "openai/gpt-oss-20b",
+  model: "qwen/qwen3.8-27b",
   prompt: "Create review ideas",
 });
 
-assert.equal(request.model, "openai/gpt-oss-20b");
+assert.equal(request.model, "qwen/qwen3.8-27b");
 assert.equal(request.messages.length, 2);
 assert.equal(request.messages[0].role, "system");
 assert.equal(request.messages[1].content, "Create review ideas");
-assert.equal(request.temperature, 0.75);
-assert.equal(request.max_tokens, 350);
+assert.equal(request.temperature, 0.95);
+assert.equal(request.max_tokens, 450);
 
 rmSync(outDir, { recursive: true, force: true });
+console.log("✅ All AI provider config assertions passed!");

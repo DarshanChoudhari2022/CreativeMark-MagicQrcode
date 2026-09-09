@@ -1,7 +1,7 @@
 type EnvLike = Record<string, string | boolean | undefined>;
 
-export const DEFAULT_GEMINI_REVIEW_MODEL = "gemini-3.7-flash";
-export const DEFAULT_GROQ_REVIEW_MODEL = "openai/gpt-oss-20b";
+export const DEFAULT_GEMINI_REVIEW_MODEL = "gemini-3.6-flash";
+export const DEFAULT_GROQ_REVIEW_MODEL = "qwen/qwen3.8-27b";
 export const DEFAULT_HUGGINGFACE_REVIEW_MODEL = "openai/gpt-oss-120b:fastest";
 export const REVIEW_API_ENDPOINT = "/api/generate-review-suggestions";
 
@@ -29,11 +29,12 @@ export function buildGroqReviewRequest({ model, prompt }: GroqReviewRequestOptio
       {
         role: "system",
         content:
-          "You help customers draft honest, editable Google review ideas based only on their real experience. Never invent menu items, incentives, employee names, or promotional claims. Avoid repetitive wording and produce unique phrasing for every request.",
+          "You help customers draft honest, editable Google review ideas based only on their real experience. Never invent menu items, incentives, employee names, or promotional claims. Every response must use completely fresh wording — never repeat phrases from earlier outputs.",
       },
       { role: "user", content: prompt },
     ],
-    temperature: 0.75,
-    max_tokens: 350,
+    temperature: 0.95,
+    max_tokens: 450,
+    top_p: 0.95,
   };
 }

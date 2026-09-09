@@ -178,7 +178,10 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 function createUniquenessSeed(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const ts = Date.now();
+  const r1 = Math.random().toString(36).slice(2, 12);
+  const r2 = Math.random().toString(36).slice(2, 12);
+  return `${ts}-${r1}-${r2}`;
 }
 
 function isBhairaveeRestaurant(businessName: string, businessContext: string): boolean {
@@ -329,6 +332,8 @@ Compliance rules:
 - Prefer varied human review patterns: short direct comment, family/friend visit, specific item/detail, service/cleanliness note, balanced minor caveat.
 - ${detailRule}
 
+IMPORTANT: This is a brand-new, unique request (seed: ${uniquenessSeed}). You MUST produce completely original text. Vary vocabulary, sentence structure, opening words, and topic angle. NEVER reuse phrasing from any prior output.
+
 Output exactly 5 lines. No numbering, bullets, quotes, labels, or extra explanation.`;
 }
 
@@ -381,6 +386,38 @@ export async function generateReviewSuggestions(
   }
 
   return generateCompliantFallbacks(businessName, businessContext, businessLocation, rating);
+}
+
+export async function generateAutoReply(
+  reviewText: string,
+  rating: number,
+  businessName: string,
+  language: string = "en"
+): Promise<string> {
+  try {
+    const prompt = `Write a short, professional, and warm reply to this customer review for "${businessName}". The rating was ${rating}/5 stars. Keep it under 50 words. Review: "${reviewText}"`;
+
+    const response = await fetch(REVIEW_API_ENDPOINT, {
+      method: "POST",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+      },
+      body: JSON.stringify({ prompt, requestId: createUniquenessSeed() }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Auto-reply API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = (data.content || "").trim().replace(/^"|"$/g, "");
+    return content || "Thank you for your feedback!";
+  } catch (error) {
+    console.error("Auto-reply error:", error);
+    return "Thank you for your feedback!";
+  }
 }
 
 function generateCompliantFallbacks(
