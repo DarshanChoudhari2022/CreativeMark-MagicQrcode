@@ -840,36 +840,38 @@ const ReviewLanding = () => {
           </p>
 
           {/* ─── Star Rating Picker ────────────────────────── */}
-          <div className="mt-5 flex flex-col items-center gap-2">
-            <p className="text-slate-400 text-xs font-medium">Your rating</p>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => {
-                    setSelectedRating(star);
-                    // Refresh suggestions when rating changes significantly
-                    if (Math.abs(star - selectedRating) >= 1) {
-                      const bName = location?.name || campaign?.name;
-                      if (bName) fetchSuggestions(bName, star);
-                    }
-                  }}
-                  className="transition-all duration-200 active:scale-90"
-                >
-                  <Star
-                    className={`h-8 w-8 transition-colors ${
-                      star <= selectedRating
-                        ? 'text-amber-400 fill-amber-400 drop-shadow-sm'
-                        : 'text-slate-200'
-                    }`}
-                  />
-                </button>
-              ))}
+          {!isBhairaveeCampaign && (
+            <div className="mt-5 flex flex-col items-center gap-2">
+              <p className="text-slate-400 text-xs font-medium">Your rating</p>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => {
+                      setSelectedRating(star);
+                      // Refresh suggestions when rating changes significantly
+                      if (Math.abs(star - selectedRating) >= 1) {
+                        const bName = location?.name || campaign?.name;
+                        if (bName) fetchSuggestions(bName, star);
+                      }
+                    }}
+                    className="transition-all duration-200 active:scale-90"
+                  >
+                    <Star
+                      className={`h-8 w-8 transition-colors ${
+                        star <= selectedRating
+                          ? 'text-amber-400 fill-amber-400 drop-shadow-sm'
+                          : 'text-slate-200'
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              <p className="text-slate-400 text-[11px]">
+                {selectedRating === 5 ? 'Excellent!' : selectedRating === 4 ? 'Great!' : selectedRating === 3 ? 'Good' : selectedRating === 2 ? 'Fair' : 'Poor'}
+              </p>
             </div>
-            <p className="text-slate-400 text-[11px]">
-              {selectedRating === 5 ? 'Excellent!' : selectedRating === 4 ? 'Great!' : selectedRating === 3 ? 'Good' : selectedRating === 2 ? 'Fair' : 'Poor'}
-            </p>
-          </div>
+          )}
         </div>
 
         {selectedServices.length > 0 && (
